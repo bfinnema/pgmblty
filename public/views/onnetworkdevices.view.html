@@ -1,0 +1,27 @@
+<div ng-include="'nav-opennet.html'"></div>
+
+<h1>Network Devices</h1>
+<p>List of Network Devices</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th width="20%">Name</th>
+            <th width="15%">IP Address</th>
+            <th width="15%">Type</th>
+            <th width="15%">Admin port</th>
+            <th width="15%">Authgroup</th>
+            <th width="20%">AOB</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="device in devices">
+            <td>{{ device.name }}</td>
+            <td>{{ device.address }}</td>
+            <td>{{ device.type }}</td>
+            <td>{{ device.port }}</td>
+            <td>{{ device.authgroup }}</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<hr>
