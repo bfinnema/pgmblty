@@ -23,6 +23,18 @@ pgmblty.config(['$routeProvider', function($routeProvider){
             templateUrl: 'views/onserviceproviders.view.html',
             controller: 'onserviceprovidersCtrl'
         }).
+        when('/onpoiareas', {
+            templateUrl: 'views/onpoiareas.view.html',
+            controller: 'onpoiareasCtrl'
+        }).
+        when('/onaccessareas', {
+            templateUrl: 'views/onaccessareas.view.html',
+            controller: 'onaccessareasCtrl'
+        }).
+        when('/oncustomers', {
+            templateUrl: 'views/oncustomers.view.html',
+            controller: 'oncustomersCtrl'
+        }).
         when('/onservices', {
             templateUrl: 'views/onservices.view.html',
             controller: 'onservicesCtrl'
@@ -30,6 +42,26 @@ pgmblty.config(['$routeProvider', function($routeProvider){
         when('/onnetworkdevices', {
             templateUrl: 'views/onnetworkdevices.view.html',
             controller: 'onnetworkdevicesCtrl'
+        }).
+        when('/onoperations', {
+            templateUrl: 'views/onoperations.view.html',
+            controller: 'onoperationsCtrl'
+        }).
+        when('/onsplashscreen', {
+            templateUrl: 'views/onsplashscreen.view.html',
+            controller: 'onsplashscreenCtrl'
+        }).
+        when('/newcupyaccess', {
+            templateUrl: 'views/newcupyaccess.view.html',
+            controller: 'newcupyaccessCtrl'
+        }).
+        when('/newcupype', {
+            templateUrl: 'views/newcupype.view.html',
+            controller: 'newcupypeCtrl'
+        }).
+        when('/newcupypoi', {
+            templateUrl: 'views/newcupypoi.view.html',
+            controller: 'newcupypoiCtrl'
         }).
 		otherwise({redirectTo: '/'})
 }]);

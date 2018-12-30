@@ -1,0 +1,166 @@
+<div ng-include="'nav-opennet.html'"></div>
+
+<h1>Customers, Access Switch</h1>
+<div ng-show="!newEntry && !editEntry">
+    <h2>List of entries</h2>
+    <hr>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th width="15%">Customer-ID</th>
+                <th width="10%">Device</th>
+                <th width="10%">Interface</th>
+                <th width="10%">mvr vlan</th>
+                <th width="10%">mvr rec. vlan</th>
+                <th width="30%">VLAN mappings</th>
+                <th width="15%">Change / Rollback</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="customer in customers">
+                <td>{{ customer.Customer_ID }}</td>
+                <td>{{ customer.device }}</td>
+                <td>{{ customer.access_interface }}</td>
+                <td>{{ customer.mvr_vlan }}</td>
+                <td>{{ customer.mvr_receiver_vlan }}</td>
+                <td><span ng-repeat="vlan_mapping in customer.vlan_mappings">{{vlan_mapping.inner_vlan}}/{{vlan_mapping.outer_vlan}}, </span></td>
+                <td>
+                    <a class="btn btn-primary" ng-click="editCustomer(customer)">
+                        <i class="glyphicon glyphicon-edit"></i>
+                    </a>
+                    <a class="btn btn-primary" ng-click="deleteCustomer(customer._id, customer.Customer_ID)">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div ng-if="customers == false">
+    <tr>
+        <td></td><td>There are no entries</td>
+    </tr>
+</div>
+<hr>
+<div ng-show="newEntry">
+    <form name="formCust" ng-submit="generateAccessCustomer()" novalidate>
+        <h2 class="form-signin-heading">New Customer Form</h2>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="cuid">Customer ID</label>
+                <input type="text" id="cuid" class="form-control" ng-model="cuid" placeholder="Customer ID" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="device">Device</label>
+                <input type="text" id="device" class="form-control" ng-model="device" placeholder="Device" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="interface">Interface</label>
+                <input type="text" id="interface" class="form-control" ng-model="interface" placeholder="Interface. e.g. 2/45" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="mvr_vlan">MVR VLAN</label>
+                <input type="number" id="mvr_vlan" class="form-control" ng-model="mvr_vlan" placeholder="MVR VLAN" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="mvr_receiver_vlan">MVR Receiver VLAN</label>
+                <input type="number" id="mvr_receiver_vlan" class="form-control" ng-model="mvr_receiver_vlan" placeholder="MVR Receiver VLAN" required>
+            </div>
+        </div>
+        <h3 class="form-signin-heading">VLAN Mappings, Max 8</h3>
+        <div class="row">
+            <div ng-repeat="z in VMArray">
+                <div class="form-group col-md-3" ng-show="vlanMappingShow[z]">
+                    <div class="col-md-10">
+                        <label for="headline">Inner VLAN {{z+1}}</label>
+                        <input type="number" class="form-control" ng-model="vlanMappings[z].inner_vlan" placeholder="Inner VLAN">
+                    </div>
+                    <div class="col-md-10">
+                        <label for="headline">Outer VLAN {{z+1}}</label>
+                        <input type="number" class="form-control" ng-model="vlanMappings[z].outer_vlan" placeholder="Outer VLAN">
+                    </div>
+                    <div ng-show="numVMLines > 0" class="col-md-2">
+                        <label for="headline" style="color:white;">.</label>
+                        <a class="btn btn-danger" ng-click="removeVlanMapping(z)">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[1]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[2]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[3]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[4]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[5]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[6]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[7]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+        </div>
+        <br>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row actions" ng-show="!newEntry && !editEntry">
+    <div class="col-md-4">
+        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New Access Customer</a>
+    </div>
+</div>
+
+<div ng-show="editEntry">
+    <form name="formEditGame" ng-submit="editGameSubmit()" novalidate>
+        <h2 class="form-signin-heading">Ændre en leg</h2>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label for="name">Navn</label>
+                <input type="text" class="form-control" ng-model="editedgame.name" name="editedgame.name" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-8">
+                <label>Beskrivelse</label>
+                <textarea class="form-control" ng-model="editedgame.description" name="editedgame.description" rows="15" placeholder="Beskrivelse af legen. Du kan også indsætte en link til et sted på nettet, hvor der er mere information om denne leg."></textarea>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <button ng-disabled="formEditGame.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="editToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div ng-show="viewGameDetails">
+    <hr>
+    <div class="blog-header">
+        <h2 class="blog-title">Navn: {{detailedGame.name}}</h2>
+    </div>
+    <div class="row">
+        <div class="col-sm-8 blog-main">
+            <div class="blog-post">
+                <p class="blog-post-meta">Oprettet / ændret af: <a href="#">{{detailedGame.createdBy}}</a></p>
+                <h4>Beskrivelse:</h4>
+                <p>{{detailedGame.description}}</p>
+            </div><!-- /.blog-post -->
+        </div><!-- /.blog-main -->
+    </div><!-- /.row -->
+    <div class="row">
+        <div class="col-md-4">
+            <a class="btn btn-warning btn-lg btn-block" ng-click="gameDetails(detailedGame)">Luk</a>
+        </div>
+    </div>
+</div>
