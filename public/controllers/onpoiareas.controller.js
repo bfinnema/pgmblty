@@ -1,0 +1,186 @@
+angular.module('pgmblty')
+
+.controller('onpoiareasCtrl', ['$scope', '$http', '$window', '$route', '$location', function($scope, $http, $window, $route, $location) {
+    // console.log(`You are in OpenNET PE Areas section.`);
+
+    $scope.newEntry = false;
+    $scope.editEntry = false;
+    
+    var username = "admin";
+    var password = "admin"
+    var host = "10.101.1.211";
+    var hostport = "8080";
+    var path = "/api/running/open-net-access/inventory/poi_areas/poi_area?deep";
+    var url = "http://"+host+":"+hostport+path;
+    // console.log(`url: ${url}`);
+    var method = "GET";
+    var auth = $window.btoa(username+":"+password);
+    // console.log(`Encoded Authentication: ${auth}`);
+
+    $http({
+        method: method,
+        url: url,
+        headers: {
+            'Content-Type': 'application/vnd.yang.data+json',
+            'Accept': 'application/vnd.yang.collection+json',
+            'Authorization': 'Basic '+auth
+        }
+    }).then(function(response) {
+        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:poi_area", "poi_area")).collection.poi_area;
+        // console.log(`SP's: ${JSON.stringify($scope.collection)}`);
+        // console.log(`SP: ${$scope.collection[0].poi_area_id}`);
+        
+    }, function errorCallback(response) {
+        console.log(`Status: ${response.status}`);
+    });
+
+    $scope.VMArray = [0,1,2,3,4,5,6,7];
+    $scope.vlans = [];
+    for (var i=0; i<8; i++) {
+        $scope.vlans.push({vlan: null});
+    };
+    $scope.vlanBtnShow = [false,true,false,false,false,false,false,false];
+    $scope.vlanShow = [true,false,false,false,false,false,false,false];
+    var numVMLines = 0;
+
+    $scope.showVMLine = function() {
+        // console.log("Entering showVMline. numVMLines: "+numVMLines);
+        if ($scope.vlans[numVMLines]) {
+            console.log("numVMLines: "+numVMLines+", vlan: "+$scope.vlans[numVMLines].inner_vlan+", "+$scope.vlans[numVMLines].outer_vlan);
+            numVMLines = numVMLines + 1;
+            $scope.numVMLines = numVMLines;
+            $scope.vlanShow[numVMLines] = true;
+            $scope.vlanBtnShow[numVMLines] = false;
+            $scope.vlanBtnShow[numVMLines+1] = true;
+        }
+        else {
+            $window.alert("You must fill in the previous field");
+        };
+    };
+    
+    $scope.removeVlan = function(orgNum) {
+        // console.log("Entering removevlan. numVMLines: "+numVMLines);
+        for (var i=orgNum; i<numVMLines; i++) {
+            $scope.vlans[i] = $scope.vlans[i+1];
+        };
+        $scope.vlans[numVMLines] = "";
+        $scope.vlanShow[numVMLines] = false;
+        $scope.vlanBtnShow[numVMLines] = true;
+        $scope.vlanBtnShow[numVMLines+1] = false;
+        numVMLines -= 1;
+        $scope.numVMLines = numVMLines;
+    };
+
+    $scope.newEntryToggle = function() {
+        if ($scope.newEntry) {
+            $scope.newEntry = false;
+            $scope.name = null;
+            $scope.poi_node_id = null;
+            $scope.poi_if = null;
+            $scope.poi_area_description = null;
+/* 
+            $scope.vlans = [];
+            for (var i=0; i<8; i++) {
+                $scope.vlans.push({vlan: null});
+            };
+            $scope.vlanBtnShow = [false,true,false,false,false,false,false,false];
+            $scope.vlanShow = [true,false,false,false,false,false,false,false];
+            numVMLines = 0;
+ */            
+        } else {
+            $scope.newEntry = true;
+        };
+    };
+
+    $scope.generateItem = function() {
+/* 
+        var vlans = [];
+        for (var n=0; n<$scope.vlans.length; n++) {
+            if ($scope.vlans[n].vlan > 10) {
+                vlans.push($scope.vlans[n]);
+            };
+        };
+ */        
+        console.log(`vlans: ${JSON.stringify(vlans)}`);
+
+        var data = {
+            "open-net-access:inventory": {
+                "poi_areas": {
+                    "poi_area": [
+                        {
+                            "poi_area_id": $scope.poi_area_id,
+                            "poi_area_description": $scope.description,
+                            "node": {
+                                "poi_node_id": $scope.poi_node_id,
+                                "poi_if": $scope.poi_if
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+        // console.log(`DATA: ${JSON.stringify(data)}`);
+
+        var path = "/api/config/open-net-access/inventory";
+        var url = "http://"+host+":"+hostport+path;
+        // console.log(`url: ${url}`);
+        var method = "PATCH";
+        var auth = $window.btoa("admin:admin");
+        // console.log(`Encoded Authentication: ${auth}`);
+
+        $http({
+            method: method,
+            url: url,
+            headers: {
+                'Content-Type': 'application/vnd.yang.data+json',
+                'Accept': 'application/vnd.yang.data+json',
+                'Authorization': 'Basic '+auth
+            },
+            data: data
+        }).then(function(response) {
+            // console.log(`DATA: ${response.data}`);
+            $location.path('/onservices');
+            $route.reload();
+        }, function errorCallback(response) {
+            console.log(`Status: ${response.status}`);
+        });
+
+    };
+
+    $scope.editItem = function(item) {
+        $scope.editEntry = true;
+        $scope.editedItem = item;
+    };
+
+    $scope.editToggle = function() {
+        $scope.editEntry = false;
+    };
+
+    $scope.deleteItem = function(item) {
+
+        if ($window.confirm('Please confirm that you want to delete the subscription '+item.sp_id)) {
+            var path = "/api/running/open-net-access/inventory/services/service/"+item.id;
+            var url = "http://"+host+":"+hostport+path;
+            // console.log(`url: ${url}`);
+            var method = "DELETE";
+            var auth = $window.btoa("admin:admin");
+
+            $http({
+                method: method,
+                url: url,
+                headers: {
+                    'Content-Type': 'application/vnd.yang.data+json',
+                    'Accept': 'application/vnd.yang.data+json',
+                    'Authorization': 'Basic '+auth
+                }
+            }).then(function(response) {
+                $location.path('/onservices');
+                $route.reload();
+            }, function errorCallback(response) {
+                console.log(`Status: ${response.status}`);
+            });
+        };
+
+    };
+
+}])

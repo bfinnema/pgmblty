@@ -1,0 +1,115 @@
+<div ng-include="'nav-opennet.html'"></div>
+
+<h1>POI Areas</h1>
+<div ng-show="!newEntry && !editEntry">
+    <h2>List of entries ({{ collection.length }}) </h2>
+    <hr>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th width="10%">POI Area ID</th>
+                <th width="20%">POI Area Description</th>
+                <th width="10%">POI Node</th>
+                <th width="10%">PW Sub-interface</th>
+                <th width="15%">Operations</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="item in collection">
+                <td>{{ item.poi_area_id }}</td>
+                <td>{{ item.poi_area_description }}</td>
+                <td>{{ item.node.poi_node_id }}</td>
+                <td>{{ item.node.poi_if }}</td>
+                <td>
+                    <a class="btn btn-primary" ng-click="editItem(item)">
+                        <i class="glyphicon glyphicon-edit"></i>
+                    </a>
+                    <a class="btn btn-primary" ng-click="deleteItem(item)">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            <tr ng-if="collection == null">
+                <td>There are no entries</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="row" ng-show="collection != null && !newEntry && !editEntry">
+    <p><strong> Operations:   </strong>
+        <span class="glyphicon glyphicon-edit"> </span> Edit the area (not implemented yet).
+        <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the area.
+    </p>
+</div>
+<hr>
+<div ng-show="newEntry">
+    <form name="formNewItem" ng-submit="generateItem()" novalidate>
+        <h2 class="form-signin-heading">New POI Area Form</h2>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="name">POI Area ID</label>
+                <input type="text" id="name" class="form-control" ng-model="name" placeholder="POI Area ID" required>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="description">POI Area Description</label>
+                <input type="text" id="description" class="form-control" ng-model="description" placeholder="POI Area Description" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="poi_node_id">POI Node</label>
+                <input type="text" id="poi_node_id" class="form-control" ng-model="poi_node_id" placeholder="POI Node" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="poi_if">Interface</label>
+                <input type="text" id="poi_if" class="form-control" ng-model="poi_if" placeholder="POI Node Interface" required>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row actions" ng-show="!newEntry && !editEntry">
+    <div class="col-md-4">
+        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New Service</a>
+    </div>
+</div>
+
+<div ng-show="editEntry">
+    <form name="formEditItem" ng-submit="editItem()" novalidate>
+        <h2 class="form-signin-heading">Edit Service Form</h2>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="name">POI Area ID</label>
+                <input type="text" id="name" class="form-control" ng-model="name" placeholder="POI Area ID" required>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="name">POI Area Description</label>
+                <input type="text" id="description" class="form-control" ng-model="description" placeholder="POI Area Description" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="poi_node_id">POI Node</label>
+                <input type="text" id="poi_node_id" class="form-control" ng-model="poi_node_id" placeholder="POI Node" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="poi_if">Interface</label>
+                <input type="text" id="poi_if" class="form-control" ng-model="poi_if" placeholder="POI Node Interface" required>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>

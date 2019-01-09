@@ -27,6 +27,10 @@ pgmblty.config(['$routeProvider', function($routeProvider){
             templateUrl: 'views/onpoiareas.view.html',
             controller: 'onpoiareasCtrl'
         }).
+        when('/onpeareas', {
+            templateUrl: 'views/onpeareas.view.html',
+            controller: 'onpeareasCtrl'
+        }).
         when('/onaccessareas', {
             templateUrl: 'views/onaccessareas.view.html',
             controller: 'onaccessareasCtrl'
@@ -62,6 +66,14 @@ pgmblty.config(['$routeProvider', function($routeProvider){
         when('/newcupypoi', {
             templateUrl: 'views/newcupypoi.view.html',
             controller: 'newcupypoiCtrl'
+        }).
+        when('/vlanpools', {
+            templateUrl: 'views/vlanpools.view.html',
+            controller: 'vlanpoolCtrl'
+        }).
+        when('/pseudowires', {
+            templateUrl: 'views/pseudowires.view.html',
+            controller: 'pseudowireCtrl'
         }).
 		otherwise({redirectTo: '/'})
 }]);

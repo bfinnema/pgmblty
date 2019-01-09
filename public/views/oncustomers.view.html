@@ -1,6 +1,6 @@
 <div ng-include="'nav-opennet.html'"></div>
 
-<h1>Customers</h1>
+<h1>Subscriptions</h1>
 <div ng-show="!newEntry && !editEntry">
     <h2>List of entries</h2>
     <hr>
@@ -11,16 +11,16 @@
                 <th width="16%">Access</th>
                 <th width="16%">PE </th>
                 <th width="16%">POI</th>
-                <th width="16%">Status</th>
-                <th width="16%">Change / Rollback</th>
+                <th width="10%">Status</th>
+                <th width="22%">Operations</th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="subscription in subscriptions" ng-mouseover="hoverIn(subscription.index)" ng-mouseleave="hoverOut(subscription.index)">
+            <tr ng-repeat="subscription in subscriptions">
                 <td>
                     {{ subscription.subscription_id }}
                     <span ng-show="showSubDetails[subscription.index]">
-                        <p>-------------</p>
+                        <hr>
                         <p>SP: {{subscription.sp_id}}</p>
                         <p>Subscriber: {{subscription.subscriber_id}}</p>
                         <p>Service: {{subscription.service_id}}</p>
@@ -29,9 +29,9 @@
                 <td>
                     {{ subscription.access_area_id }}
                     <span ng-show="showSubDetails[subscription.index]">
-                        <p>-------------</p>
-                        <p>Node: {{subscription.access_area.node.access_node_id}}</p>
-                        <p>Interface: {{subscription.access_area.node.access_if}}</p>
+                        <hr>
+                        <p>Node: {{subscription.newSubAccess.device}}</p>
+                        <p>Interface: {{subscription.newSubAccess.access_interface}}</p>
                         <p>MVR: {{subscription.newSubAccess.mvr_vlan}} / {{subscription.newSubAccess.mvr_receiver_vlan}}</p>
                         <p>VLAN mappings: <span ng-repeat="vlan_mapping in subscription.vlan_mappings.vlan_mapping">{{vlan_mapping.inner_vlan}}/{{vlan_mapping.outer_vlan}}, </span></p>
                     </span>
@@ -39,38 +39,56 @@
                 <td>
                     {{ subscription.pe_area_id }}
                     <span ng-show="showSubDetails[subscription.index]">
-                        <p>-------------</p>
+                        <hr>
                         <p>Node: {{subscription.pe_area.node.pe_node_id}}</p>
-                        <p>Interface: {{subscription.pe_area.node.pe_if}}</p>
+                        <p>Interface: {{subscription.newSubPE.pe_interface}}</p>
                         <p>VLAN's: <span ng-repeat="vlan in subscription.newSubPE.vlan">{{vlan.vlan_id}}, </span></p>
                     </span>
                 </td>
                 <td>
                     {{ subscription.poi_area_id }}
                     <span ng-show="showSubDetails[subscription.index]">
-                        <p>-------------</p>
+                        <hr>
                         <p>Node: {{subscription.poi_area.node.poi_node_id}}</p>
-                        <p>Interface: {{subscription.poi_area.node.poi_if}}</p>
+                        <p>Interface: {{subscription.newSubPOI.PWESubInt}}</p>
                         <p>VLAN's: <span ng-repeat="c_vlan in subscription.newSubPOI.c_vlan">{{c_vlan.c_vlan_id}}, </span></p>
                     </span>
                 </td>
-                <td></td>
+                <td>
+                    Sync Status: {{subscription.sync_status.in_sync}}
+                </td>
                 <td>
                     <a class="btn btn-primary" ng-click="editSubscription(subscription)">
                         <i class="glyphicon glyphicon-edit"></i>
                     </a>
-                    <a class="btn btn-primary" ng-click="deleteSubscription(subscription._id)">
+                    <a class="btn btn-primary" ng-click="deleteSubscription(subscription)">
                         <i class="glyphicon glyphicon-trash"></i>
                     </a>
+                    <a class="btn btn-primary" ng-click="unDeploySubscription(subscription)">
+                        <i class="glyphicon glyphicon-stop"></i>
+                    </a>
+                    <a class="btn btn-primary" ng-click="reDeploySubscription(subscription)">
+                        <i class="glyphicon glyphicon-play"></i>
+                    </a>
+                    <a class="btn btn-primary" ng-mouseover="hoverIn(subscription.index)" ng-mouseleave="hoverOut(subscription.index)">
+                        <i class="glyphicon glyphicon-zoom-in"></i>
+                    </a>
                 </td>
+            </tr>
+            <tr ng-show="subscriptions == null">
+                <td>There are no entries</td>
             </tr>
         </tbody>
     </table>
 </div>
-<div ng-if="subscriptions == false">
-    <tr>
-        <td></td><td>There are no entries</td>
-    </tr>
+<div class="row" ng-show="!newEntry && !editEntry && subscriptions != null">
+    <p><strong> Operations:   </strong>
+        <span class="glyphicon glyphicon-edit"> </span> Edit the subscription (not implemented yet).
+        <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the subscription.
+        <span class="glyphicon glyphicon-stop"> </span> Un-deploy. 
+        <span class="glyphicon glyphicon-play"> </span> Re-deploy. 
+        <span class="glyphicon glyphicon-zoom-in"> </span> Details.
+    </p>
 </div>
 <hr>
 <div ng-show="newEntry">
@@ -78,7 +96,123 @@
         <h2 class="form-signin-heading">New Subscription Form</h2>
         <div class="row">
             <div class="form-group col-md-3">
-                <label for="cuid">NAME / Subscription</label>
+                <label for="name">Name / Subscription</label>
+                <input type="text" id="name" class="form-control" ng-model="name" placeholder="Name" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="subscriber_id">Subscriber ID</label>
+                <input type="text" id="subscriber_id" class="form-control" ng-model="subscriber_id" placeholder="Subscriber ID" required>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Service Provider</label>
+                <select class="form-control" ng-model="sp_id" name="sp_id" required>
+                    <option ng-repeat="sp in inventory.sps.sp" value="{{sp.sp_id}}">{{sp.sp_id}}</option>
+                </select>
+                <i ng-show="formSubscription.sp_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Service</label>
+                <select class="form-control" ng-model="service_id" name="service_id" required>
+                    <option ng-repeat="service in inventory.services.service" value="{{service.id}}">{{service.id}}</option>
+                </select>
+                <i ng-show="formSubscription.service_id.$error.required">*Must be filled in</i>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label>Access Area</label>
+                <select class="form-control" ng-model="access_area_id" name="access_area_id" ng-change="listAccessNodes()" required>
+                    <option ng-repeat="access_area in inventory.access_areas.access_area" value="{{access_area.access_area_id}}">{{access_area.access_area_id}}</option>
+                </select>
+                <i ng-show="formSubscription.access_area_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3" ng-show="showAccessNodes">
+                <label>Access Node</label>
+                <select class="form-control" ng-model="access_node_id" name="access_node_id" ng-change="listAccessInterfaces()" required>
+                    <option ng-repeat="access_node in access_nodes" value="{{access_node.access_node_id}}">{{access_node.access_node_id}}</option>
+                </select>
+                <i ng-show="formSubscription.access_node_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3" ng-show="showAccessInterface">
+                <label>Interface</label>
+                <select class="form-control" ng-model="access_if" name="access_if" required>
+                    <option ng-repeat="access_interface in access_interfaces" value="{{access_interface.access_if}}">{{access_interface.access_if}}</option>
+                </select>
+                <i ng-show="formSubscription.access_if.$error.required">*Must be filled in</i>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label>PE Area</label>
+                <select class="form-control" ng-model="pe_area_id" name="pe_area_id" required>
+                    <option ng-repeat="pe_area in inventory.pe_areas.pe_area" value="{{pe_area.pe_area_id}}">{{pe_area.pe_area_id}}</option>
+                </select>
+                <i ng-show="formSubscription.pe_area_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3">
+                <label>POI Area</label>
+                <select class="form-control" ng-model="poi_area_id" name="poi_area_id" required>
+                    <option ng-repeat="poi_area in inventory.poi_areas.poi_area" value="{{poi_area.poi_area_id}}">{{poi_area.poi_area_id}}</option>
+                </select>
+                <i ng-show="formSubscription.poi_area_id.$error.required">*Must be filled in</i>
+            </div>
+        </div>
+<!-- 
+        <h3 class="form-signin-heading">VLAN Mappings, Max 8</h3>
+        <div class="row">
+            <div ng-repeat="z in VMArray">
+                <div class="form-group col-md-3" ng-show="vlanMappingShow[z]">
+                    <div class="col-md-10">
+                        <label for="headline">Inner VLAN {{z+1}}</label>
+                        <input type="number" class="form-control" ng-model="vlanMappings[z].inner_vlan" placeholder="Inner VLAN">
+                    </div>
+                    <div class="col-md-10">
+                        <label for="headline">Outer VLAN {{z+1}}</label>
+                        <input type="number" class="form-control" ng-model="vlanMappings[z].outer_vlan" placeholder="Outer VLAN">
+                    </div>
+                    <div ng-show="numVMLines > 0" class="col-md-2">
+                        <label for="headline" style="color:white;">.</label>
+                        <a class="btn btn-danger" ng-click="removeVlanMapping(z)">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[1]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[2]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[3]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[4]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[5]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[6]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+            <a class="btn btn-info" ng-show="vlanMappingBtnShow[7]" ng-click="showVMLine()">Add a VLAN Mapping</a>
+        </div>
+        <br>
+ -->        
+        <div class="row">
+            <div class="form-group col-md-4">
+                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row actions" ng-show="!newEntry && !editEntry">
+    <div class="col-md-4">
+        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New Subscription</a>
+    </div>
+</div>
+
+<div ng-show="editEntry">
+    <form name="formEditSubscription" ng-submit="editSubscription()" novalidate>
+        <h2 class="form-signin-heading">Edit Subscription Form</h2>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="cuid">Name / Subscription</label>
                 <input type="text" id="name" class="form-control" ng-model="name" placeholder="Name" required>
             </div>
             <div class="form-group col-md-3">
@@ -123,6 +257,7 @@
                 <i ng-show="formSubscription.poi_area_id.$error.required">*Must be filled in</i>
             </div>
         </div>
+<!-- 
         <h3 class="form-signin-heading">VLAN Mappings, Max 8</h3>
         <div class="row">
             <div ng-repeat="z in VMArray">
@@ -153,6 +288,7 @@
             <a class="btn btn-info" ng-show="vlanMappingBtnShow[6]" ng-click="showVMLine()">Add a VLAN Mapping</a>
             <a class="btn btn-info" ng-show="vlanMappingBtnShow[7]" ng-click="showVMLine()">Add a VLAN Mapping</a>
         </div>
+ -->        
         <br>
         <div class="row">
             <div class="form-group col-md-4">
@@ -160,39 +296,6 @@
             </div>
             <div class="col-md-4">
                 <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
-            </div>
-        </div>
-    </form>
-</div>
-
-<div class="row actions" ng-show="!newEntry && !editEntry">
-    <div class="col-md-4">
-        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New Subscription</a>
-    </div>
-</div>
-
-<div ng-show="editEntry">
-    <form name="formEditGame" ng-submit="editGameSubmit()" novalidate>
-        <h2 class="form-signin-heading">Changes to Customer</h2>
-        <div class="row">
-            <div class="form-group col-md-4">
-                <label for="name">Customer ID</label>
-                <input type="text" class="form-control" ng-model="editedgame.name" name="editedgame.name" required>
-            </div>
-        </div>
-        <div class="row">
-            <div class="form-group col-md-8">
-                <label>Beskrivelse</label>
-                <textarea class="form-control" ng-model="editedgame.description" name="editedgame.description" rows="15" placeholder="Beskrivelse af legen. Du kan også indsætte en link til et sted på nettet, hvor der er mere information om denne leg."></textarea>
-            </div>
-        </div>
-        <br>
-        <div class="row">
-            <div class="form-group col-md-4">
-                <button ng-disabled="formEditGame.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-danger btn-lg btn-block" ng-click="editToggle()">Cancel</a>
             </div>
         </div>
     </form>

@@ -1,0 +1,212 @@
+<div ng-include="'nav-opennet.html'"></div>
+
+<h1>Pseudowire sets ({{ pseudowires.length }})</h1>
+<div ng-show="!newEntry && !editEntry">
+    <div ng-repeat="pseudowire in pseudowires" class="row">
+        <h2>VLAN Pool: {{ pseudowire.pseudowire_id }} </h2>
+        <div class="col-md-6">
+            <table class="table table-striped">
+                <tr>
+                    <td>Description</td><td>{{ pseudowire.pseudowire_description }}</td>
+                </tr>
+                <tr>
+                    <td>Access Node</td><td>{{ pseudowire.access_node_id }}</td>
+                </tr>
+                <tr>
+                    <td>PE Node</td><td>{{ pseudowire.pe_node_id }}</td>
+                </tr>
+                <tr>
+                    <td>POI Node</td><td>{{ pseudowire.poi_node_id }}</td>
+                </tr>
+                <tr>
+                    <td>Service Provider</td><td>{{ pseudowire.sp_id }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <div class="col-md-6">
+                <a class="btn btn-warning btn-lg btn-block" ng-click="deleteItem(pseudowire)">Delete Pseudowire Set</a>
+            </div>
+        </div>
+        <br>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th width="10%">Sub-interface</th>
+                    <th width="15%">Status</th>
+                    <th width="30%">Timestamp</th>
+                    <th width="15%">Subscriber</th>
+                    <th width="30%">Subscription</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="subinterface in pseudowire.subinterfaces">
+                    <td>{{ subinterface.subinterface_id }}</td>
+                    <td>{{ subinterface.status }}</td>
+                    <td>{{ subinterface.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}</td>
+                    <td>{{ subinterface.subscriber_id }}</td>
+                    <td>{{ subinterface.subscription_id }}</td>
+                </tr>
+                <tr ng-if="pseudowire.subinterfaces == null">
+                    <td>There are no entries</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<hr>
+<div ng-show="newEntry" class="row">
+    <form name="formNewItem" ng-submit="generateItem()" novalidate>
+        <h2 class="form-signin-heading">New Pseudowire Set Form</h2>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="pseudowire_id">PW ID</label>
+                <input type="text" id="pseudowire_id" class="form-control" ng-model="pseudowire_id" placeholder="PW ID" required>
+                <i ng-show="formNewItem.pseudowire_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="description">PW Description</label>
+                <input type="text" id="description" class="form-control" ng-model="description" placeholder="VLAN Pool Description" required>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Service Provider</label>
+                <select class="form-control" ng-model="sp_id" name="sp_id" required>
+                    <option ng-repeat="sp in inventory.sps.sp" value="{{sp.sp_id}}">{{sp.sp_id}}</option>
+                </select>
+                <i ng-show="formSubscription.sp_id.$error.required">*Must be filled in</i>
+            </div>
+        <div class="row">
+        </div>
+            <div class="form-group col-md-3">
+                <label>Access Area</label>
+                <select class="form-control" ng-model="access_area_id" name="access_area_id" ng-change="listAccessNodes()" required>
+                    <option ng-repeat="access_area in inventory.access_areas.access_area" value="{{access_area.access_area_id}}">{{access_area.access_area_id}}</option>
+                </select>
+                <i ng-show="formNewItem.access_area_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3" ng-show="showAccessNodes">
+                <label>Access Node</label>
+                <select class="form-control" ng-model="access_node_id" name="access_node_id" required>
+                    <option ng-repeat="access_node in access_nodes" value="{{access_node.access_node_id}}">{{access_node.access_node_id}}</option>
+                </select>
+                <i ng-show="formNewItem.access_node_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3" ng-show="showAccessNodes">
+                <label>PE Node</label>
+                <select class="form-control" ng-model="pe_node_id" name="pe_node_id" required>
+                    <option ng-repeat="pe_node in pe_nodes" value="{{pe_node.pe_node_id}}">{{pe_node.pe_node_id}}</option>
+                </select>
+                <i ng-show="formNewItem.pe_node_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3" ng-show="showAccessNodes">
+                <label>POI Node</label>
+                <select class="form-control" ng-model="poi_node_id" name="poi_node_id" required>
+                    <option ng-repeat="poi_node in poi_nodes" value="{{poi_node.poi_node_id}}">{{poi_node.poi_node_id}}</option>
+                </select>
+                <i ng-show="formNewItem.poi_node_id.$error.required">*Must be filled in</i>
+            </div>
+        <div class="row">
+        </div>
+            <div class="form-group col-md-3">
+                <label for="subint_start">PW Subinterface Number Start</label>
+                <input type="number" id="subint_start" class="form-control" ng-model="subint_start" placeholder="PW Subinterface Number Start" required>
+                <i ng-show="formNewItem.subint_start.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="subint_stop">PW Subinterface Number Stop</label>
+                <input type="text" id="subint_stop" class="form-control" ng-model="subint_stop" placeholder="PW Subinterface Number Stop" required>
+                <i ng-show="formNewItem.subint_stop.$error.required">*Must be filled in</i>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row actions" ng-show="!newEntry && !editEntry">
+    <div class="col-md-4">
+        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New Pseudowire Set</a>
+    </div>
+</div>
+
+<div ng-show="editEntry">
+    <form name="formEditItem" ng-submit="editItem()" novalidate>
+        <h2 class="form-signin-heading">Edit Service Form</h2>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="pseudowire_id">PW ID</label>
+                <input type="text" id="pseudowire_id" class="form-control" ng-model="pseudowire_id" placeholder="PW ID" required>
+                <i ng-show="formNewItem.pseudowire_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="description">PW Description</label>
+                <input type="text" id="description" class="form-control" ng-model="description" placeholder="VLAN Pool Description" required>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Service Provider</label>
+                <select class="form-control" ng-model="sp_id" name="sp_id" required>
+                    <option ng-repeat="sp in inventory.sps.sp" value="{{sp.sp_id}}">{{sp.sp_id}}</option>
+                </select>
+                <i ng-show="formSubscription.sp_id.$error.required">*Must be filled in</i>
+            </div>
+        <div class="row">
+        </div>
+            <div class="form-group col-md-3">
+                <label>Access Area</label>
+                <select class="form-control" ng-model="access_area_id" name="access_area_id" ng-change="listAccessNodes()" required>
+                    <option ng-repeat="access_area in inventory.access_areas.access_area" value="{{access_area.access_area_id}}">{{access_area.access_area_id}}</option>
+                </select>
+                <i ng-show="formNewItem.access_area_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3" ng-show="showAccessNodes">
+                <label>Access Node</label>
+                <select class="form-control" ng-model="access_node_id" name="access_node_id" required>
+                    <option ng-repeat="access_node in access_nodes" value="{{access_node.access_node_id}}">{{access_node.access_node_id}}</option>
+                </select>
+                <i ng-show="formNewItem.access_node_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3" ng-show="showAccessNodes">
+                <label>PE Node</label>
+                <select class="form-control" ng-model="pe_node_id" name="pe_node_id" required>
+                    <option ng-repeat="pe_node in pe_nodes" value="{{pe_node.pe_node_id}}">{{pe_node.pe_node_id}}</option>
+                </select>
+                <i ng-show="formNewItem.pe_node_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3" ng-show="showAccessNodes">
+                <label>POI Node</label>
+                <select class="form-control" ng-model="poi_node_id" name="poi_node_id" required>
+                    <option ng-repeat="poi_node in poi_nodes" value="{{poi_node.poi_node_id}}">{{poi_node.poi_node_id}}</option>
+                </select>
+                <i ng-show="formNewItem.poi_node_id.$error.required">*Must be filled in</i>
+            </div>
+        <div class="row">
+        </div>
+            <div class="form-group col-md-3">
+                <label for="pw_start">PW Subinterface Number Start</label>
+                <input type="number" id="pw_start" class="form-control" ng-model="pw_start" placeholder="PW Subinterface Number Start" required>
+                <i ng-show="formNewItem.pw_start.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="pw_stop">PW Subinterface Number Stop</label>
+                <input type="text" id="pw_stop" class="form-control" ng-model="pw_stop" placeholder="PW Subinterface Number Stop" required>
+                <i ng-show="formNewItem.pw_stop.$error.required">*Must be filled in</i>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>

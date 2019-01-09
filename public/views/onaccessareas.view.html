@@ -1,33 +1,33 @@
 <div ng-include="'nav-opennet.html'"></div>
 
-<h1>Service Providers</h1>
+<h1>Access Areas</h1>
 <div ng-show="!newEntry && !editEntry">
     <h2>List of entries ({{ collection.length }}) </h2>
     <hr>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th width="14%">SP ID</th>
-                <th width="12%">SP VLAN offset</th>
-                <th width="12%">MVR VLAN </th>
-                <th width="12%">MVR Receiver VLAN</th>
-                <th width="16%">VLAN Pool</th>
-                <th width="14%">Status</th>
-                <th width="20%">Operations</th>
+                <th width="15%">Access Area ID</th>
+                <th width="20%">Description</th>
+                <th width="50%">Nodes, Interfaces and SP VLAN Number</th>
+                <th width="15%">Operations</th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="item in collection">
-                <td>{{ item.sp_id }}</td>
-                <td>{{ item.s_vlan_offset }}</td>
-                <td>{{ item.mvr_vlan }}</td>
-                <td>{{ item.mvr_receiver_vlan }}</td>
-                <td>{{ item.vlan_pool.start }} - {{ item.vlan_pool.end }}</td>
+                <td>{{ item.access_area_id }}</td>
+                <td>{{ item.access_area_description }}</td>
                 <td>
-                    <a class="btn btn-primary" ng-click="checkSync(item)">
-                        <i class="glyphicon glyphicon-repeat"></i>
-                    </a>
-                    {{ item.sync_status.in_sync }}
+                    <span ng-repeat="node in item.nodes.node">
+                        <p>
+                            Node: <strong>{{ node.access_node_id }}</strong> with Interfaces: 
+                            <span ng-repeat="interface in node.interfaces.interface">
+                                <strong>{{interface.access_if}}</strong>, 
+                            </span>
+                        </p>
+                        <p>SP VLAN Number: <strong>{{ node.s_vlan_num }}</strong> </p>
+                        <hr>
+                    </span>
                 </td>
                 <td>
                     <a class="btn btn-primary" ng-click="editItem(item)">
@@ -35,12 +35,6 @@
                     </a>
                     <a class="btn btn-primary" ng-click="deleteItem(item)">
                         <i class="glyphicon glyphicon-trash"></i>
-                    </a>
-                    <a class="btn btn-primary" ng-click="unDeployItem(item)">
-                        <i class="glyphicon glyphicon-stop"></i>
-                    </a>
-                    <a class="btn btn-primary" ng-click="reDeployItem(item)">
-                        <i class="glyphicon glyphicon-play"></i>
                     </a>
                 </td>
             </tr>
@@ -52,11 +46,8 @@
 </div>
 <div class="row" ng-show="collection != null">
     <p><strong> Operations:   </strong>
-        <span class="glyphicon glyphicon-edit"> </span> Edit the SP (not implemented yet).
-        <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the SP (not implemented yet).
-        <span class="glyphicon glyphicon-stop"> </span> Un-deploy. 
-        <span class="glyphicon glyphicon-play"> </span> Re-deploy. 
-        <span class="glyphicon glyphicon-repeat"> </span> Check Sync. 
+        <span class="glyphicon glyphicon-edit"> </span> Edit the Access Area (not implemented yet).
+        <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the Access Area.
     </p>
 </div>
 <hr>
@@ -67,6 +58,10 @@
             <div class="form-group col-md-3">
                 <label for="name">SP ID</label>
                 <input type="text" id="name" class="form-control" ng-model="name" placeholder="SP ID" required>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="description">Access Area Description</label>
+                <input type="text" id="description" class="form-control" ng-model="description" placeholder="Access Area Description" required>
             </div>
             <div class="form-group col-md-3">
                 <label for="s_vlan_offset">SP VLAN offset</label>
@@ -135,7 +130,7 @@
 
 <div class="row actions" ng-show="!newEntry && !editEntry">
     <div class="col-md-4">
-        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New SP</a>
+        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New Access Area</a>
     </div>
 </div>
 

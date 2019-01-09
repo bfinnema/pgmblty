@@ -7,17 +7,32 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">OpenNET</a>
+            <a class="navbar-brand" href="#!opennet">OpenNET</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
+                <li class="active"><a href="#!opennet">Home</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Resource Management<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#!vlanpools">VLAN Pools</a></li>
+                        <li><a href="#!accessareas">Access Areas with nodes and ports</a></li>
+                        <li><a href="#!pseudowires">Pseudowires</a></li>
+                        <!-- <li><a href="#!pwsubinterfaces">PW Sub Interfaces</a></li> -->
+                    </ul>
+                </li>
                 <li><a href="#!onserviceproviders">Service Providers</a></li>
-                <li><a href="#!onpoiareas">PoI Areas</a></li>
-                <li><a href="#!onaccessareas">Access Areas</a></li>
-                <li><a href="#!oncustomers">Customers</a></li>
                 <li><a href="#!onservices">Services</a></li>
-                <li><a href="#!onnetworkdevices">Network Devices</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Infrastructure<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#!onaccessareas">Access Areas</a></li>
+                        <li><a href="#!onpeareas">PE Areas</a></li>
+                        <li><a href="#!onpoiareas">PoI Areas</a></li>
+                        <li><a href="#!onnetworkdevices">Network Devices</a></li>
+                    </ul>
+                </li>
+                <li><a href="#!oncustomers">Subscriptions</a></li>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Operations<span class="caret"></span></a>
                     <ul class="dropdown-menu">
