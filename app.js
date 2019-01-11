@@ -11,7 +11,6 @@ var {mongoose} = require('./db/mongoose');
 
 var accessareas = require('./routes/accessareas');
 var pseudowires = require('./routes/pseudowires');
-var pwsubinterfaces = require('./routes/pwsubinterfaces');
 var vlanpools = require('./routes/vlanpools');
 
 var app = express();
@@ -32,7 +31,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/users', users);
 app.use('/accessareas', accessareas);
 app.use('/pseudowires', pseudowires);
-app.use('/pwsubinterfaces', pwsubinterfaces);
 app.use('/vlanpools', vlanpools);
 
 // catch 404 and forward to error handler

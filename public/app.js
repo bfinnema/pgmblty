@@ -75,5 +75,9 @@ pgmblty.config(['$routeProvider', function($routeProvider){
             templateUrl: 'views/pseudowires.view.html',
             controller: 'pseudowireCtrl'
         }).
+        when('/accessareas', {
+            templateUrl: 'views/accessareas.view.html',
+            controller: 'accessareaCtrl'
+        }).
 		otherwise({redirectTo: '/'})
 }]);

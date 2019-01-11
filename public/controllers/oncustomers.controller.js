@@ -506,6 +506,7 @@ angular.module('pgmblty')
 
     $scope.unDeploySubscription = function(subscription) {
 
+        var now = new Date();
         var path = JSON.parse(JSON.stringify(subscription).replace('"un-deploy":', '"un_deploy":')).operations.un_deploy;
         // var path = newSubsciption.operations.un_deploy;
         var url = "http://"+host+":"+hostport+path;
@@ -553,7 +554,7 @@ angular.module('pgmblty')
                     // console.log(`Found VLAN Pool: ${JSON.stringify(vp)}`);
                 };
             };
-            var now = new Date();
+            // var now = new Date();
             for (var n=0; n<vp.vlans.length; n++) {
                 if (vp.vlans[n].subscription_id == subscription.subscription_id && vp.vlans[n].status == "Active") {
                     vp.vlans[n].status = "Inactive";
@@ -572,29 +573,27 @@ angular.module('pgmblty')
             for (var l=0; l<$scope.pseudowires.length; l++) {
                 if (subscription.sp_id == $scope.pseudowires[l].sp_id && subscription.access_node_id == $scope.pseudowires[l].access_node_id) {
                     var pw = $scope.pseudowires[l];
-                    console.log(`Found PW: ${JSON.stringify(pw)}`);
+                    // console.log(`Found PW: ${JSON.stringify(pw)}`);
                 };
             };
             // console.log(`PW Subinterfaces length: ${pw.subinterfaces.length}`);
             for (var z=0; z<pw.subinterfaces.length; z++) {
                 // console.log(`subinterface_id: ${subscription.pwsubinterface_id}, ${pw.subinterfaces[z].subinterface_id}`);
                 if (subscription.pwsubinterface_id == pw.subinterfaces[z].subinterface_id) {
-                    console.log(`Found subinterface_id: ${subscription.pwsubinterface_id}`);
+                    // console.log(`Found subinterface_id: ${subscription.pwsubinterface_id}, ${pw.subinterfaces[z].subinterface_id}, ${pw.subinterfaces[z].status}, ${pw.subinterfaces[z].timestamp}`);
                     pw.subinterfaces[z].status = "Inactive";
                     pw.subinterfaces[z].timestamp = now;
                 };
             };
-
+            
             return $http({
                 method: "PATCH",
                 url: "/pseudowires/"+pw._id,
                 data: pw
             });
         }).then(function(response) {
-            console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
+            // console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
 
-            // $location.path('/oncustomers');
-            // $route.reload();
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
         });
@@ -603,6 +602,7 @@ angular.module('pgmblty')
 
     $scope.reDeploySubscription = function(subscription) {
 
+        var now = new Date();
         var path = JSON.parse(JSON.stringify(subscription).replace('"re-deploy":', '"re_deploy":')).operations.re_deploy;
         // var path = newSubsciption.operations.re_deploy;
         var url = "http://"+host+":"+hostport+path;
@@ -650,7 +650,7 @@ angular.module('pgmblty')
                     // console.log(`Found VLAN Pool: ${JSON.stringify(vp)}`);
                 };
             };
-            var now = new Date();
+            // var now = new Date();
             for (var n=0; n<vp.vlans.length; n++) {
                 if (vp.vlans[n].subscription_id == subscription.subscription_id && vp.vlans[n].status == "Inactive") {
                     vp.vlans[n].status = "Active";
@@ -669,14 +669,14 @@ angular.module('pgmblty')
             for (var l=0; l<$scope.pseudowires.length; l++) {
                 if (subscription.sp_id == $scope.pseudowires[l].sp_id && subscription.access_node_id == $scope.pseudowires[l].access_node_id) {
                     var pw = $scope.pseudowires[l];
-                    console.log(`Found PW: ${JSON.stringify(pw)}`);
+                    // console.log(`Found PW: ${JSON.stringify(pw)}`);
                 };
             };
             // console.log(`PW Subinterfaces length: ${pw.subinterfaces.length}`);
             for (var z=0; z<pw.subinterfaces.length; z++) {
                 // console.log(`subinterface_id: ${subscription.pwsubinterface_id}, ${pw.subinterfaces[z].subinterface_id}`);
                 if (subscription.pwsubinterface_id == pw.subinterfaces[z].subinterface_id) {
-                    console.log(`Found subinterface_id: ${subscription.pwsubinterface_id}`);
+                    // console.log(`Found subinterface_id: ${subscription.pwsubinterface_id}, ${pw.subinterfaces[z].subinterface_id}, ${pw.subinterfaces[z].status}, ${pw.subinterfaces[z].timestamp}`);
                     pw.subinterfaces[z].status = "Active";
                     pw.subinterfaces[z].timestamp = now;
                 };
@@ -688,10 +688,8 @@ angular.module('pgmblty')
                 data: pw
             });
         }).then(function(response) {
-            // console.log(`Status: ${response.status}`);
+            // console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
 
-            // $location.path('/oncustomers');
-            // $route.reload();
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
         });

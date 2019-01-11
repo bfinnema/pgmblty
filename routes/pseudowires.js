@@ -74,10 +74,10 @@ router.delete('/:id', (req, res) => {
 });
 
 router.patch('/:id', (req, res) => {
-  console.log(`In PW Set PATCH, id: ${req.body.pseudowire_id}`);
+  // console.log(`In PW Set PATCH, id: ${req.body.pseudowire_id}`);
   var id = req.params.id;
   var body = _.pick(req.body, ['subinterfaces']);
-  console.log(`Patching PW Set, pw Sub interface id's: ${JSON.stringify(body.subinterfaces)}`);
+  // console.log(`Patching PW Set, pw Sub interface id's: ${JSON.stringify(body.subinterfaces)}`);
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
