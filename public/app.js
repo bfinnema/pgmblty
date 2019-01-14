@@ -8,8 +8,12 @@ pgmblty.config(function($httpProvider) {
 pgmblty.config(['$routeProvider', function($routeProvider){
     $routeProvider.
         when('/', {
-            templateUrl: 'views/index.view.html',
+            templateUrl: 'views/opennet.view.html',
             controller: 'indexCtrl'
+        }).
+        when('/about', {
+            templateUrl: 'views/about.view.html',
+            controller: 'aboutCtrl'
         }).
         when('/apic', {
             templateUrl: 'views/apic.view.html',

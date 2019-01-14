@@ -9,9 +9,9 @@
             <tr>
                 <th width="20%">Subscription</th>
                 <th width="16%">Access</th>
-                <th width="16%">PE </th>
-                <th width="16%">POI</th>
-                <th width="10%">Status</th>
+                <th width="13%">PE </th>
+                <th width="13%">POI</th>
+                <th width="16%">Status</th>
                 <th width="22%">Operations</th>
             </tr>
         </thead>
@@ -93,7 +93,11 @@
 <hr>
 <div ng-show="newEntry">
     <form name="formSubscription" ng-submit="generateSubscription()" novalidate>
-        <h2 class="form-signin-heading">New Subscription Form</h2>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <h2 class="form-signin-heading">New Subscription Form</h2>
+            </div>
+        </div>
         <div class="row">
             <div class="form-group col-md-3">
                 <label for="name">Name / Subscription</label>
@@ -119,21 +123,21 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-3">
+            <div class="form-group col-md-2">
                 <label>Access Area</label>
                 <select class="form-control" ng-model="access_area_id" name="access_area_id" ng-change="listAccessNodes()" required>
                     <option ng-repeat="access_area in inventory.access_areas.access_area" value="{{access_area.access_area_id}}">{{access_area.access_area_id}}</option>
                 </select>
                 <i ng-show="formSubscription.access_area_id.$error.required">*Must be filled in</i>
             </div>
-            <div class="form-group col-md-3" ng-show="showAccessNodes">
+            <div class="form-group col-md-2" ng-show="showAccessNodes">
                 <label>Access Node</label>
                 <select class="form-control" ng-model="access_node_id" name="access_node_id" ng-change="listAccessInterfaces()" required>
                     <option ng-repeat="access_node in access_nodes" value="{{access_node.access_node_id}}">{{access_node.access_node_id}}</option>
                 </select>
                 <i ng-show="formSubscription.access_node_id.$error.required">*Must be filled in</i>
             </div>
-            <div class="form-group col-md-3" ng-show="showAccessInterface">
+            <div class="form-group col-md-2" ng-show="showAccessInterface">
                 <label>Interface</label>
                 <select class="form-control" ng-model="access_if" name="access_if" required>
                     <option ng-repeat="access_interface in access_interfaces" value="{{access_interface.access_if}}">{{access_interface.access_if}}</option>
@@ -142,14 +146,14 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-3">
+            <div class="form-group col-md-2">
                 <label>PE Area</label>
                 <select class="form-control" ng-model="pe_area_id" name="pe_area_id" required>
                     <option ng-repeat="pe_area in inventory.pe_areas.pe_area" value="{{pe_area.pe_area_id}}">{{pe_area.pe_area_id}}</option>
                 </select>
                 <i ng-show="formSubscription.pe_area_id.$error.required">*Must be filled in</i>
             </div>
-            <div class="form-group col-md-3">
+            <div class="form-group col-md-2">
                 <label>POI Area</label>
                 <select class="form-control" ng-model="poi_area_id" name="poi_area_id" required>
                     <option ng-repeat="poi_area in inventory.poi_areas.poi_area" value="{{poi_area.poi_area_id}}">{{poi_area.poi_area_id}}</option>
@@ -191,19 +195,34 @@
         <br>
  -->        
         <div class="row">
-            <div class="form-group col-md-4">
-                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            <div class="form-group col-md-8">
+                <div class="form-group col-md-6">
+                    <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+                </div>
+                <div class="col-md-6">
+                    <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+                </div>
             </div>
-            <div class="col-md-4">
-                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+            <div class="form-group col-md-4">
+                <div class="rgb_loader" ng-show="spinnerStatus"></div>
             </div>
         </div>
     </form>
 </div>
 
+<div class="row" ng-show="errorMessage">
+    <hr>
+    <div>
+        <p>An error happened. {{ errorDetails }} </p>
+    </div>
+</div>
+
 <div class="row actions" ng-show="!newEntry && !editEntry">
     <div class="col-md-4">
         <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New Subscription</a>
+    </div>
+    <div>
+        <div class="rgb_loader" ng-show="spinnerStatusDelete"></div>
     </div>
 </div>
 
@@ -295,7 +314,7 @@
                 <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
             </div>
             <div class="col-md-4">
-                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
+                <a class="btn btn-danger btn-lg btn-block" ng-click="editToggle()">Cancel</a>
             </div>
         </div>
     </form>

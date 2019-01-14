@@ -148,8 +148,9 @@ angular.module('pgmblty')
     };
 
     $scope.editItem = function(item) {
-        $scope.editEntry = true;
-        $scope.editedItem = item;
+        $window.alert("This function is not implemented yet.");
+        // $scope.editEntry = true;
+        // $scope.editedItem = item;
     };
 
     $scope.editToggle = function() {

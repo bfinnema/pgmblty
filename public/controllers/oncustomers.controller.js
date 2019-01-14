@@ -7,6 +7,9 @@ angular.module('pgmblty')
     $scope.editEntry = false;
     $scope.showAccessNodes = false;
     $scope.showAccessInterface = false;
+    $scope.spinnerStatus = false;
+    $scope.spinnerStatusDelete = false;
+    $scope.errorMessage = false;
     
     var username = "admin";
     var password = "admin"
@@ -367,6 +370,7 @@ angular.module('pgmblty')
             };
         };
  */
+        $scope.spinnerStatus = true;
         var subscription_id = $scope.sp_id+"-"+$scope.subscriber_id+"-"+$scope.service_id;
 
         for (var l=0; l<$scope.vlanpools.length; l++) {
@@ -490,14 +494,24 @@ angular.module('pgmblty')
             $location.path('/oncustomers');
             $route.reload();
         }, function errorCallback(response) {
+            $scope.spinnerStatus = false;
+            $scope.errorMessage = true;
+            if (response.status == 500) {$scope.errorDetails = response.status +", Internal Server Error"};
+            if (response.status == 400) {$scope.errorDetails = response.status +", Bad Request"};
+            if (response.status == 403) {$scope.errorDetails = response.status +", Forbidden"};
+            if (response.status == 404) {$scope.errorDetails = response.status +", Not Found"};
+            if (response.status == 501) {$scope.errorDetails = response.status +", Not Implemented"};
+            if (response.status == 502) {$scope.errorDetails = response.status +", Bad Gateway"};
+            if (response.status == 503) {$scope.errorDetails = response.status +", Service Unavailable"};
             console.log(`Status: ${response.status}`);
         });
 
     };
 
     $scope.editSubscription = function(subscription) {
-        $scope.editEntry = true;
-        $scope.editedSubscription = subscription;
+        $window.alert("This function is not implemented yet.");
+        // $scope.editEntry = true;
+        // $scope.editedSubscription = subscription;
     };
 
     $scope.editToggle = function() {
@@ -505,7 +519,7 @@ angular.module('pgmblty')
     };
 
     $scope.unDeploySubscription = function(subscription) {
-
+        $scope.spinnerStatusDelete = true;
         var now = new Date();
         var path = JSON.parse(JSON.stringify(subscription).replace('"un-deploy":', '"un_deploy":')).operations.un_deploy;
         // var path = newSubsciption.operations.un_deploy;
@@ -593,7 +607,7 @@ angular.module('pgmblty')
             });
         }).then(function(response) {
             // console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
-
+            $scope.spinnerStatusDelete = false;
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
         });
@@ -601,7 +615,7 @@ angular.module('pgmblty')
     };
 
     $scope.reDeploySubscription = function(subscription) {
-
+        $scope.spinnerStatusDelete = true;
         var now = new Date();
         var path = JSON.parse(JSON.stringify(subscription).replace('"re-deploy":', '"re_deploy":')).operations.re_deploy;
         // var path = newSubsciption.operations.re_deploy;
@@ -689,7 +703,7 @@ angular.module('pgmblty')
             });
         }).then(function(response) {
             // console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
-
+            $scope.spinnerStatusDelete = false;
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
         });
@@ -699,6 +713,7 @@ angular.module('pgmblty')
     $scope.deleteSubscription = function(subscription) {
 
         if ($window.confirm('Please confirm that you want to delete the subscription '+subscription.subscription_id)) {
+            $scope.spinnerStatusDelete = true;
             var now = new Date();
             var path = "/api/running/open-net-access/open-net-core:open-net-core/"+subscription.name;
             var url = "http://"+host+":"+hostport+path;
