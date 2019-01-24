@@ -2,13 +2,13 @@
     "test": {
       "PORT": 3000,
       "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
-      "NSO_ADDRESS": "10.101.1.211",
+      "NSO_ADDRESS": "10.101.1.102",
       "NSO_PORT": 8080
     },
     "development": {
       "PORT": 3000,
       "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
-      "NSO_ADDRESS": "10.101.1.211",
+      "NSO_ADDRESS": "10.101.1.102",
       "NSO_PORT": 8080
     }
   }

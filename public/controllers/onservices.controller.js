@@ -1,20 +1,19 @@
 angular.module('pgmblty')
 
-.controller('onservicesCtrl', ['$scope', '$http', '$window', '$route', '$location', function($scope, $http, $window, $route, $location) {
+.controller('onservicesCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
+function($scope, $http, $window, $route, $location, NSOServer) {
     // console.log(`You are in OpenNET Services section.`);
 
     $scope.newEntry = false;
     $scope.editEntry = false;
     
-    var username = "admin";
-    var password = "admin"
-    var host = "10.101.1.211";
-    var hostport = "8080";
+    var host = NSOServer.host;
+    var hostport = NSOServer.port;
     var path = "/api/running/open-net-access/inventory/services/service?deep";
     var url = "http://"+host+":"+hostport+path;
     // console.log(`url: ${url}`);
     var method = "GET";
-    var auth = $window.btoa(username+":"+password);
+    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
     // console.log(`Encoded Authentication: ${auth}`);
 
     $http({

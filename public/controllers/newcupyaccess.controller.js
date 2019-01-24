@@ -1,20 +1,19 @@
 angular.module('pgmblty')
 
-.controller('newcupyaccessCtrl', ['$scope', '$http', '$window', '$route', '$location', function($scope, $http, $window, $route, $location) {
+.controller('newcupyaccessCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
+function($scope, $http, $window, $route, $location, NSOServer) {
     // console.log(`You are in OpenNET New Customer in Access Section.`);
 
     $scope.newEntry = false;
     $scope.editEntry = false;
     
-    $scope.username = "admin";
-    $scope.password = "admin"
-    $scope.host = "10.101.1.211";
-    $scope.hostport = "8080";
+    $scope.host = NSOServer.host;
+    $scope.hostport = NSOServer.port;
     $scope.path = "/api/running/newCuPy-access?deep";
     $scope.url = "http://"+$scope.host+":"+$scope.hostport+$scope.path;
     // console.log(`url: ${$scope.url}`);
     var method = "GET";
-    var auth = $window.btoa("admin:admin");
+    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
     // console.log(`Encoded Authentication: ${auth}`);
 
     $http({
@@ -117,7 +116,7 @@ angular.module('pgmblty')
         $scope.url = "http://"+$scope.host+":"+$scope.hostport+$scope.path;
         console.log(`url: ${$scope.url}`);
         var method = "POST";
-        var auth = $window.btoa("admin:admin");
+        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
         console.log(`Encoded Authentication: ${auth}`);
 
         $http({

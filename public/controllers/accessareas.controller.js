@@ -1,6 +1,7 @@
 angular.module('pgmblty')
 
-.controller('accessareaCtrl', ['$scope', '$http', '$window', '$route', '$location', function($scope, $http, $window, $route, $location) {
+.controller('accessareaCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
+function($scope, $http, $window, $route, $location, NSOServer) {
     // console.log(`You are in Pseudowire Set Resource Management Screen.`);
 
     $scope.newEntry = false;
@@ -8,16 +9,14 @@ angular.module('pgmblty')
     $scope.showAccessNodes = false;
     $scope.showAccessInterface = false;
     
-    var username = "admin";
-    var password = "admin"
-    var host = "10.101.1.211";
-    var hostport = "8080";
+    var host = NSOServer.host;
+    var hostport = NSOServer.port;
     var inventory_path = "/api/running/open-net-access/inventory?deep";
     var inventory_url = "http://"+host+":"+hostport+inventory_path;
     // console.log(`Core url: ${core_url}`);
     // console.log(`Inventory url: ${inventory_url}`);
     var method = "GET";
-    var auth = $window.btoa("admin:admin");
+    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
     // console.log(`Encoded Authentication: ${auth}`);
 
     $http({

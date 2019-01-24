@@ -1,17 +1,16 @@
 angular.module('pgmblty')
 
-.controller('onnetworkdevicesCtrl', ['$scope', '$http', '$window', '$route', function($scope, $http, $window, $route) {
+.controller('onnetworkdevicesCtrl', ['$scope', '$http', '$window', '$route', 'NSOServer', 
+function($scope, $http, $window, $route, NSOServer) {
     // console.log(`You are in OpenNET Network Devices Section.`);
 
-    $scope.username = "admin";
-    $scope.password = "admin"
-    $scope.host = "10.101.1.211";
-    $scope.hostport = "8080";
+    $scope.host = NSOServer.host;
+    $scope.hostport = NSOServer.port;
     $scope.path = "/api/running/devices";
     $scope.url = "http://"+$scope.host+":"+$scope.hostport+$scope.path;
     // console.log(`url: ${$scope.url}`);
     var method = "GET";
-    var auth = $window.btoa("admin:admin");
+    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
     // console.log(`Encoded Authentication: ${auth}`);
 
     $http({
@@ -55,7 +54,7 @@ angular.module('pgmblty')
             $scope.url = "http://"+$scope.host+":"+$scope.hostport+$scope.path;
             // console.log(`url: ${$scope.url}`);
             var method = "GET";
-            var auth = $window.btoa("admin:admin");
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
             // console.log(`Encoded Authentication: ${auth}`);
 
             $http({

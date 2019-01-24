@@ -1,20 +1,19 @@
 angular.module('pgmblty')
 
-.controller('onpoiareasCtrl', ['$scope', '$http', '$window', '$route', '$location', function($scope, $http, $window, $route, $location) {
+.controller('onpoiareasCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
+function($scope, $http, $window, $route, $location, NSOServer) {
     // console.log(`You are in OpenNET PE Areas section.`);
 
     $scope.newEntry = false;
     $scope.editEntry = false;
     
-    var username = "admin";
-    var password = "admin"
-    var host = "10.101.1.211";
-    var hostport = "8080";
+    var host = NSOServer.host;
+    var hostport = NSOServer.port;
     var path = "/api/running/open-net-access/inventory/poi_areas/poi_area?deep";
     var url = "http://"+host+":"+hostport+path;
     // console.log(`url: ${url}`);
     var method = "GET";
-    var auth = $window.btoa(username+":"+password);
+    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
     // console.log(`Encoded Authentication: ${auth}`);
 
     $http({
@@ -125,7 +124,7 @@ angular.module('pgmblty')
         var url = "http://"+host+":"+hostport+path;
         // console.log(`url: ${url}`);
         var method = "PATCH";
-        var auth = $window.btoa("admin:admin");
+        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
         // console.log(`Encoded Authentication: ${auth}`);
 
         $http({
@@ -164,7 +163,7 @@ angular.module('pgmblty')
             var url = "http://"+host+":"+hostport+path;
             // console.log(`url: ${url}`);
             var method = "DELETE";
-            var auth = $window.btoa("admin:admin");
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
             $http({
                 method: method,

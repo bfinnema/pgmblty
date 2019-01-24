@@ -1,6 +1,7 @@
 angular.module('pgmblty')
 
-.controller('oncustomersCtrl', ['$scope', '$http', '$window', '$route', '$location', function($scope, $http, $window, $route, $location) {
+.controller('oncustomersCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
+function($scope, $http, $window, $route, $location, NSOServer) {
     // console.log(`You are in OpenNET Subscription Splash Screen.`);
 
     $scope.newEntry = false;
@@ -11,10 +12,8 @@ angular.module('pgmblty')
     $scope.spinnerStatusDelete = false;
     $scope.errorMessage = false;
     
-    var username = "admin";
-    var password = "admin"
-    var host = "10.101.1.211";
-    var hostport = "8080";
+    var host = NSOServer.host;
+    var hostport = NSOServer.port;
     var core_path = "/api/running/open-net-access/open-net-core?deep";
     var inventory_path = "/api/running/open-net-access/inventory?deep";
     var core_url = "http://"+host+":"+hostport+core_path;
@@ -22,7 +21,7 @@ angular.module('pgmblty')
     // console.log(`Core url: ${core_url}`);
     // console.log(`Inventory url: ${inventory_url}`);
     var method = "GET";
-    var auth = $window.btoa("admin:admin");
+    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
     // console.log(`Encoded Authentication: ${auth}`);
 
     $http({
@@ -34,12 +33,25 @@ angular.module('pgmblty')
             'Authorization': 'Basic '+auth
         }
     }).then(function(inventory) {
-        var strInventory = JSON.stringify(inventory.data);
-        var modInventory = strInventory.replace("open-net-access:inventory", "inventory");
-        var newInventory = JSON.parse(modInventory);
-        $scope.inventory = newInventory.inventory;
+        $scope.inventory = JSON.parse(JSON.stringify(inventory.data).replace("open-net-access:inventory", "inventory")).inventory;
         // console.log(`INVENTORY: ${JSON.stringify($scope.inventory)}`);
         // console.log(`SP: ${JSON.stringify($scope.inventory.sps.sp[0].sp_id)}`);
+        return $http({
+            method: "GET",
+            url: "/vlanpools"
+        });
+    }).then(function(response) {
+        $scope.vlanpools = response.data;
+        // console.log(`VLAN Pools: ${JSON.stringify($scope.vlanpools)}`);
+        // console.log(`VLAN Pools Status: ${response.status}`);
+        return $http({
+            method: "GET",
+            url: "/pseudowires"
+        });
+    }).then(function(response) {
+        // console.log(`PW Sets Status: ${response.status}`);
+        // console.log(`PW Sets: ${JSON.stringify($scope.pseudowires)}`);
+        $scope.pseudowires = response.data;
         return $http({
             method: method,
             url: core_url,
@@ -50,16 +62,7 @@ angular.module('pgmblty')
             }
         });
     }).then(function(collection) {
-        var strCollection = JSON.stringify(collection.data);
-        var modCollection = strCollection.replace("open-net-core:open-net-core", "openNetCore");
-        var newCollection = JSON.parse(modCollection);
-        $scope.subscriptions = newCollection.collection.openNetCore;
-        // console.log($scope.subscriptions);
-        // console.log(`NAME: ${$scope.subscriptions[0].name}`);
-        // console.log(`Access Area: ${$scope.subscriptions[0].access_area_id}`);
-        // console.log(`PE Area: ${$scope.subscriptions[0].pe_area_id}`);
-        // console.log(`POI Area: ${$scope.subscriptions[0].poi_area_id}`);
-        // console.log(`SP: ${$scope.subscriptions[0].sp_id}`);
+        $scope.subscriptions = JSON.parse(JSON.stringify(collection.data).replace("open-net-core:open-net-core", "openNetCore")).collection.openNetCore;
         
         $scope.showSubDetails = [];
         for (var i=0; i<$scope.subscriptions.length; i++) {
@@ -104,7 +107,7 @@ angular.module('pgmblty')
             var url = "http://"+host+":"+hostport+path;
             // console.log(`url: ${url}`);
             var method = "POST";
-            var auth = $window.btoa("admin:admin");
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
             $http({
                 method: method,
@@ -140,7 +143,7 @@ angular.module('pgmblty')
             };
             $scope.$digest();
         };
-
+/* 
         $http({
             method: "GET",
             url: "/vlanpools"
@@ -159,7 +162,7 @@ angular.module('pgmblty')
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
         });
-
+ */
     }, 3000);
 
     $scope.hoverIn = function(index) {
@@ -339,6 +342,7 @@ angular.module('pgmblty')
 
         } else {
             $scope.newEntry = true;
+/*             
             $http({
                 method: "GET",
                 url: "/vlanpools"
@@ -357,7 +361,7 @@ angular.module('pgmblty')
             }, function errorCallback(response) {
                 console.log(`Status: ${response.status}`);
             });
-
+ */
         };
     };
 
@@ -463,7 +467,7 @@ angular.module('pgmblty')
         var url = "http://"+host+":"+hostport+path;
         // console.log(`url: ${url}`);
         var method = "POST";
-        var auth = $window.btoa("admin:admin");
+        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
         // console.log(`Encoded Authentication: ${auth}`);
 
         $http({
@@ -526,7 +530,7 @@ angular.module('pgmblty')
         var url = "http://"+host+":"+hostport+path;
         // console.log(`url: ${url}`);
         var method = "POST";
-        var auth = $window.btoa("admin:admin");
+        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
         $http({
             method: method,
@@ -541,7 +545,7 @@ angular.module('pgmblty')
             var url = "http://"+host+":"+hostport+path;
             // console.log(`url: ${url}`);
             var method = "POST";
-            var auth = $window.btoa("admin:admin");
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
             return $http({
                 method: method,
                 url: url,
@@ -622,7 +626,7 @@ angular.module('pgmblty')
         var url = "http://"+host+":"+hostport+path;
         // console.log(`url: ${url}`);
         var method = "POST";
-        var auth = $window.btoa("admin:admin");
+        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
         $http({
             method: method,
@@ -637,7 +641,7 @@ angular.module('pgmblty')
             var url = "http://"+host+":"+hostport+path;
             // console.log(`url: ${url}`);
             var method = "POST";
-            var auth = $window.btoa("admin:admin");
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
             return $http({
                 method: method,
                 url: url,
@@ -719,7 +723,7 @@ angular.module('pgmblty')
             var url = "http://"+host+":"+hostport+path;
             // console.log(`url: ${url}`);
             var method = "DELETE";
-            var auth = $window.btoa("admin:admin");
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
             $http({
                 method: method,
