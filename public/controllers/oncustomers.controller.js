@@ -143,26 +143,6 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             };
             $scope.$digest();
         };
-/* 
-        $http({
-            method: "GET",
-            url: "/vlanpools"
-        }).then(function(response) {
-            // console.log(`VLAN Pools Status: ${response.status}`);
-            $scope.vlanpools = response.data;
-            // console.log(`VLAN Pools: ${JSON.stringify($scope.vlanpools)}`);
-            return $http({
-                method: "GET",
-                url: "/pseudowires"
-            });
-        }).then(function(response) {
-            // console.log(`PW Sets Status: ${response.status}`);
-            $scope.pseudowires = response.data;
-            // console.log(`PW Sets: ${JSON.stringify($scope.pseudowires)}`);
-        }, function errorCallback(response) {
-            console.log(`Status: ${response.status}`);
-        });
- */
     }, 3000);
 
     $scope.hoverIn = function(index) {
@@ -342,26 +322,6 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
         } else {
             $scope.newEntry = true;
-/*             
-            $http({
-                method: "GET",
-                url: "/vlanpools"
-            }).then(function(response) {
-                // console.log(`VLAN Pools Status: ${response.status}`);
-                $scope.vlanpools = response.data;
-                // console.log(`VLAN Pools: ${JSON.stringify($scope.vlanpools)}`);
-                return $http({
-                    method: "GET",
-                    url: "/pseudowires"
-                });
-            }).then(function(response) {
-                // console.log(`PW Sets Status: ${response.status}`);
-                $scope.pseudowires = response.data;
-                // console.log(`PW Sets: ${JSON.stringify($scope.pseudowires)}`);
-            }, function errorCallback(response) {
-                console.log(`Status: ${response.status}`);
-            });
- */
         };
     };
 
