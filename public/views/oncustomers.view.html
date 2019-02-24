@@ -23,6 +23,7 @@
                         <hr>
                         <p>SP: {{subscription.sp_id}}</p>
                         <p>Subscriber: {{subscription.subscriber_id}}</p>
+                        <p>CPE: {{subscription.cpe_name}}</p>
                         <p>Service: {{subscription.service_id}}</p>
                     </span>
                 </td>
@@ -101,23 +102,30 @@
         <div class="row">
             <div class="form-group col-md-3">
                 <label for="name">Name / Subscription</label>
-                <input type="text" id="name" class="form-control" ng-model="name" placeholder="Name" required>
+                <input type="text" id="name" class="form-control" ng-model="name" placeholder="Name" required disabled>
             </div>
-            <div class="form-group col-md-3">
+            <div class="form-group col-md-2">
                 <label for="subscriber_id">Subscriber ID</label>
-                <input type="text" id="subscriber_id" class="form-control" ng-model="subscriber_id" placeholder="Subscriber ID" required>
+                <input type="number" id="subscriber_id" class="form-control" ng-model="subscriber_id" ng-change="makeSubscriptionID()" placeholder="Subscriber ID" required>
+            </div>
+            <div class="form-group col-md-2">
+                <label>CPE</label>
+                <select class="form-control" ng-model="cpe_name" name="cpe_name" ng-change="makeSubscriptionID()" required>
+                    <option ng-repeat="cpe in inventory.cpes.cpe" value="{{cpe.cpe_name}}">{{cpe.cpe_name}}</option>
+                </select>
+                <i ng-show="formSubscription.cpe_name.$error.required">*Must be filled in</i>
             </div>
             <div class="form-group col-md-2">
                 <label>Service Provider</label>
-                <select class="form-control" ng-model="sp_id" name="sp_id" required>
+                <select class="form-control" ng-model="sp_id" name="sp_id" ng-change="listServices()" required>
                     <option ng-repeat="sp in inventory.sps.sp" value="{{sp.sp_id}}">{{sp.sp_id}}</option>
                 </select>
                 <i ng-show="formSubscription.sp_id.$error.required">*Must be filled in</i>
             </div>
-            <div class="form-group col-md-2">
+            <div class="form-group col-md-2" ng-show="showServices">
                 <label>Service</label>
-                <select class="form-control" ng-model="service_id" name="service_id" required>
-                    <option ng-repeat="service in inventory.services.service" value="{{service.id}}">{{service.id}}</option>
+                <select class="form-control" ng-model="service_id" name="service_id" ng-change="makeSubscriptionID()" required>
+                    <option ng-repeat="service in services" value="{{service.id}}">{{service.id}}</option>
                 </select>
                 <i ng-show="formSubscription.service_id.$error.required">*Must be filled in</i>
             </div>

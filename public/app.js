@@ -83,5 +83,9 @@ pgmblty.config(['$routeProvider', function($routeProvider){
             templateUrl: 'views/accessareas.view.html',
             controller: 'accessareaCtrl'
         }).
+        when('/inventory', {
+            templateUrl: 'views/inventory.view.html',
+            controller: 'inventoryCtrl'
+        }).
 		otherwise({redirectTo: '/'})
 }]);

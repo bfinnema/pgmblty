@@ -1,17 +1,33 @@
 angular.module('pgmblty')
 
-.controller('onserviceprovidersCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
+.controller('onservicesCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
 function($scope, $http, $window, $route, $location, NSOServer) {
-    // console.log(`You are in OpenNET Service Provider section.`);
+    // console.log(`You are in OpenNET Services section.`);
 
     $scope.newEntry = false;
     $scope.editEntry = false;
     
+    var host = NSOServer.host;
+    var hostport = NSOServer.port;
+    var path = "/api/running/open-net-access/inventory/sps/sp?deep";
+    // var path = "/api/running/open-net-access/inventory/services/service?deep";
+    var url = "http://"+host+":"+hostport+path;
+    // console.log(`url: ${url}`);
+    var method = "GET";
+    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+    // console.log(`Encoded Authentication: ${auth}`);
+
     $http({
-        method: "GET",
-        url: "/inventory/sps"
+        method: method,
+        url: url,
+        headers: {
+            'Content-Type': 'application/vnd.yang.data+json',
+            'Accept': 'application/vnd.yang.collection+json',
+            'Authorization': 'Basic '+auth
+        }
     }).then(function(response) {
         $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:sp", "sp")).collection.sp;
+        // $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:service", "service")).collection.service;
         // console.log(`SP's: ${JSON.stringify($scope.collection)}`);
         // console.log(`SP: ${$scope.collection[0].sp_id}`);
         
@@ -19,15 +35,61 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         console.log(`Status: ${response.status}`);
     });
 
+    $scope.VMArray = [0,1,2,3,4,5,6,7];
+    $scope.vlans = [];
+    for (var i=0; i<8; i++) {
+        $scope.vlans.push({vlan: null});
+    };
+    $scope.vlanBtnShow = [false,true,false,false,false,false,false,false];
+    $scope.vlanShow = [true,false,false,false,false,false,false,false];
+    var numVMLines = 0;
+
+    $scope.showVMLine = function() {
+        // console.log("Entering showVMline. numVMLines: "+numVMLines);
+        if ($scope.vlans[numVMLines]) {
+            console.log("numVMLines: "+numVMLines+", vlan: "+$scope.vlans[numVMLines].inner_vlan+", "+$scope.vlans[numVMLines].outer_vlan);
+            numVMLines = numVMLines + 1;
+            $scope.numVMLines = numVMLines;
+            $scope.vlanShow[numVMLines] = true;
+            $scope.vlanBtnShow[numVMLines] = false;
+            $scope.vlanBtnShow[numVMLines+1] = true;
+        }
+        else {
+            $window.alert("You must fill in the previous field");
+        };
+    };
+    
+    $scope.removeVlan = function(orgNum) {
+        // console.log("Entering removevlan. numVMLines: "+numVMLines);
+        for (var i=orgNum; i<numVMLines; i++) {
+            $scope.vlans[i] = $scope.vlans[i+1];
+        };
+        $scope.vlans[numVMLines] = "";
+        $scope.vlanShow[numVMLines] = false;
+        $scope.vlanBtnShow[numVMLines] = true;
+        $scope.vlanBtnShow[numVMLines+1] = false;
+        numVMLines -= 1;
+        $scope.numVMLines = numVMLines;
+    };
+
     $scope.newEntryToggle = function() {
         if ($scope.newEntry) {
             $scope.newEntry = false;
             $scope.name = null;
-            $scope.s_vlan_offset = null;
-            $scope.mvr_vlan = null;
+            $scope.qos_profile_in = null;
+            $scope.qos_profile_out = null;
             $scope.mvr_receiver_vlan = null;
             $scope.vlan_pool_start = null;
             $scope.vlan_pool_end = null;
+
+            $scope.vlans = [];
+            for (var i=0; i<8; i++) {
+                $scope.vlans.push({vlan: null});
+            };
+            $scope.vlanBtnShow = [false,true,false,false,false,false,false,false];
+            $scope.vlanShow = [true,false,false,false,false,false,false,false];
+            numVMLines = 0;
+            
         } else {
             $scope.newEntry = true;
         };
@@ -35,19 +97,24 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
     $scope.generateItem = function() {
 
+        var vlans = [];
+        for (var n=0; n<$scope.vlans.length; n++) {
+            if ($scope.vlans[n].vlan > 10) {
+                vlans.push($scope.vlans[n]);
+            };
+        };
+        
+        console.log(`vlans: ${JSON.stringify(vlans)}`);
+
         var data = {
             "open-net-access:inventory": {
-                "sps": {
-                    "sp": [
+                "services": {
+                    "service": [
                         {
-                            "sp_id": $scope.name,
-                            "s_vlan_offset": $scope.s_vlan_offset,
-                            "mvr_vlan": $scope.mvr_vlan,
-                            "mvr_receiver_vlan": $scope.mvr_receiver_vlan,
-                            "vlan_pool": {
-                                "start": $scope.vlan_pool_start,
-                                "end": $scope.vlan_pool_end
-                            }
+                            "id": $scope.name,
+                            "qos_profile_in": $scope.qos_profile_in,
+                            "qos_profile_out": $scope.qos_profile_out,
+                            "vlans": vlans
                         }
                     ]
                 }
@@ -59,7 +126,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         var url = "http://"+host+":"+hostport+path;
         // console.log(`url: ${url}`);
         var method = "PATCH";
-        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+        var auth = $window.btoa("admin:admin");
         // console.log(`Encoded Authentication: ${auth}`);
 
         $http({
@@ -73,8 +140,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             data: data
         }).then(function(response) {
             // console.log(`DATA: ${response.data}`);
-            // console.log(`HEADERS: ${response.headers}`);
-            $location.path('/onserviceproviders');
+            $location.path('/onservices');
             $route.reload();
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
@@ -97,7 +163,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         var url = "http://"+host+":"+hostport+path;
         // console.log(`url: ${url}`);
         var method = "POST";
-        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+        var auth = $window.btoa("admin:admin");
 
         $http({
             method: method,
@@ -112,7 +178,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             var url = "http://"+host+":"+hostport+path;
             // console.log(`url: ${url}`);
             var method = "POST";
-            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+            var auth = $window.btoa("admin:admin");
             return $http({
                 method: method,
                 url: url,
@@ -143,7 +209,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         var url = "http://"+host+":"+hostport+path;
         // console.log(`url: ${url}`);
         var method = "POST";
-        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+        var auth = $window.btoa("admin:admin");
 
         $http({
             method: method,
@@ -158,7 +224,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             var url = "http://"+host+":"+hostport+path;
             // console.log(`url: ${url}`);
             var method = "POST";
-            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+            var auth = $window.btoa("admin:admin");
             return $http({
                 method: method,
                 url: url,
@@ -189,7 +255,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         var url = "http://"+host+":"+hostport+path;
         // console.log(`url: ${url}`);
         var method = "POST";
-        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+        var auth = $window.btoa("admin:admin");
 
         $http({
             method: method,
@@ -217,11 +283,11 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.deleteItem = function(item) {
 
         if ($window.confirm('Please confirm that you want to delete the subscription '+item.sp_id)) {
-            var path = "/api/running/open-net-access/inventory/sps/sp/"+item.sp_id;
+            var path = "/api/running/open-net-access/inventory/services/service/"+item.id;
             var url = "http://"+host+":"+hostport+path;
-            console.log(`url: ${url}`);
+            // console.log(`url: ${url}`);
             var method = "DELETE";
-            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+            var auth = $window.btoa("admin:admin");
 
             $http({
                 method: method,
@@ -232,7 +298,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                     'Authorization': 'Basic '+auth
                 }
             }).then(function(response) {
-                $location.path('/onserviceproviders');
+                $location.path('/onservices');
                 $route.reload();
             }, function errorCallback(response) {
                 console.log(`Status: ${response.status}`);
@@ -240,4 +306,5 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         };
 
     };
+
 }])

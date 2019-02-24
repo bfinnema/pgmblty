@@ -2,63 +2,48 @@
 
 <h1>Services</h1>
 <div ng-show="!newEntry && !editEntry">
-    <h2>List of entries ({{ collection.length }}) </h2>
+    <h2>List of entries</h2>
     <hr>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th width="10%">Service ID</th>
-                <th width="20%">Service Description</th>
-                <th width="10%">QoS Profile In</th>
-                <th width="10%">QoS Profile Out</th>
-                <th width="25%">VLAN's</th>
-                <!-- <th width="15%">Status</th> -->
-                <th width="15%">Operations</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="item in collection">
-                <td>{{ item.id }}</td>
-                <td>{{ item.service_description }}</td>
-                <td>{{ item.qos_profile_in }}</td>
-                <td>{{ item.qos_profile_out }}</td>
-                <td>VLAN's: <span ng-repeat="vlan in item.vlans">{{vlan.vlan}}, </span></td>
-<!-- 
-                <td>
-                    <a class="btn btn-primary" ng-click="checkSync(item)">
-                        <i class="glyphicon glyphicon-repeat"></i>
-                    </a>
-                    {{ item.sync_status.in_sync }}
-                </td>
- -->                
-                <td>
-                    <a class="btn btn-primary" ng-click="editItem(item)">
-                        <i class="glyphicon glyphicon-edit"></i>
-                    </a>
-                    <a class="btn btn-primary" ng-click="deleteItem(item)">
-                        <i class="glyphicon glyphicon-trash"></i>
-                    </a>
-                    <!-- <a class="btn btn-primary" ng-click="unDeployItem(item)">
-                        <i class="glyphicon glyphicon-stop"></i>
-                    </a>
-                    <a class="btn btn-primary" ng-click="reDeployItem(item)">
-                        <i class="glyphicon glyphicon-play"></i>
-                    </a> -->
-                </td>
-            </tr>
-            <tr ng-if="collection == null">
-                <td>There are no entries</td>
-            </tr>
-        </tbody>
-    </table>
+    <div ng-repeat="sp in collection">
+        <h4>Service Provider: {{ sp.sp_id }} </h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th width="10%">Service ID</th>
+                    <th width="20%">Service Description</th>
+                    <th width="10%">QoS Profile In</th>
+                    <th width="10%">QoS Profile Out</th>
+                    <th width="25%">VLAN's</th>
+                    <th width="15%">Operations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="service in sp.services.service">
+                    <td>{{ service.id }}</td>
+                    <td>{{ service.service_description }}</td>
+                    <td>{{ service.qos_profile_in }}</td>
+                    <td>{{ service.qos_profile_out }}</td>
+                    <td>VLAN's: <span ng-repeat="vlan in service.vlans">{{vlan.vlan}} <i ng-show="vlan.multicast"> (multicast)</i>, </span></td>
+                    <td>
+                        <a class="btn btn-primary" ng-click="editItem(service)">
+                            <i class="glyphicon glyphicon-edit"></i>
+                        </a>
+                        <a class="btn btn-primary" ng-click="deleteItem(service)">
+                            <i class="glyphicon glyphicon-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                <tr ng-if="collection == null">
+                    <td>There are no entries</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 <div class="row" ng-show="collection != null">
     <p><strong> Operations:   </strong>
         <span class="glyphicon glyphicon-edit"> </span> Edit the Service (not implemented yet).
         <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the Service.
-        <!-- <span class="glyphicon glyphicon-stop"> </span> Un-deploy. 
-        <span class="glyphicon glyphicon-play"> </span> Re-deploy. 
-        <span class="glyphicon glyphicon-repeat"> </span> Check Sync.  -->
     </p>
 </div>
 <hr>

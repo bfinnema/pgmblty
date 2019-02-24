@@ -2,7 +2,7 @@ angular.module('pgmblty')
 
 .factory('NSOServer',[function() {
     return({
-        host: "10.101.1.102",
+        host: "127.0.0.1",
         port: "8080",
         username: "admin",
         password: "admin"

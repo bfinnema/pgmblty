@@ -12,6 +12,9 @@ var {mongoose} = require('./db/mongoose');
 var accessareas = require('./routes/accessareas');
 var pseudowires = require('./routes/pseudowires');
 var vlanpools = require('./routes/vlanpools');
+var inventory = require('./routes/inventory');
+var subscriptions = require('./routes/subscriptions');
+var deviceservices = require('./routes/deviceservices');
 
 var app = express();
 
@@ -32,6 +35,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/accessareas', accessareas);
 app.use('/pseudowires', pseudowires);
 app.use('/vlanpools', vlanpools);
+app.use('/inventory', inventory);
+app.use('/subscriptions', subscriptions);
+app.use('/deviceservices', deviceservices);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

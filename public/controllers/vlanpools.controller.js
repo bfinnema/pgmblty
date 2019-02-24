@@ -9,29 +9,11 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.showAccessNodes = false;
     $scope.showAccessInterface = false;
     
-    var host = NSOServer.host;
-    var hostport = NSOServer.port;
-    var inventory_path = "/api/running/open-net-access/inventory?deep";
-    var inventory_url = "http://"+host+":"+hostport+inventory_path;
-    // console.log(`Core url: ${core_url}`);
-    // console.log(`Inventory url: ${inventory_url}`);
-    var method = "GET";
-    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
-    // console.log(`Encoded Authentication: ${auth}`);
-
     $http({
-        method: method,
-        url: inventory_url,
-        headers: {
-            'Content-Type': 'application/vnd.yang.data+json',
-            'Accept': 'application/vnd.yang.data+json',
-            'Authorization': 'Basic '+auth
-        }
+        method: "GET",
+        url: "/inventory"
     }).then(function(inventory) {
-        var strInventory = JSON.stringify(inventory.data);
-        var modInventory = strInventory.replace("open-net-access:inventory", "inventory");
-        var newInventory = JSON.parse(modInventory);
-        $scope.inventory = newInventory.inventory;
+        $scope.inventory = JSON.parse(JSON.stringify(inventory.data).replace("open-net-access:inventory", "inventory")).inventory;
         // console.log(`INVENTORY: ${JSON.stringify($scope.inventory)}`);
         // console.log(`SP: ${JSON.stringify($scope.inventory.sps.sp[0].sp_id)}`);
         return $http({

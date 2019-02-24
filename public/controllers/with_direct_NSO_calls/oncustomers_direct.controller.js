@@ -11,11 +11,27 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.spinnerStatus = false;
     $scope.spinnerStatusDelete = false;
     $scope.errorMessage = false;
-    $scope.cpe_id = 0;
     
+    var host = NSOServer.host;
+    var hostport = NSOServer.port;
+    var core_path = "/api/running/open-net-access/open-net-core?deep";
+    var inventory_path = "/api/running/open-net-access/inventory?deep";
+    var core_url = "http://"+host+":"+hostport+core_path;
+    var inventory_url = "http://"+host+":"+hostport+inventory_path;
+    // console.log(`Core url: ${core_url}`);
+    // console.log(`Inventory url: ${inventory_url}`);
+    var method = "GET";
+    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+    // console.log(`Encoded Authentication: ${auth}`);
+
     $http({
-        method: "GET",
-        url: "/inventory"
+        method: method,
+        url: inventory_url,
+        headers: {
+            'Content-Type': 'application/vnd.yang.data+json',
+            'Accept': 'application/vnd.yang.data+json',
+            'Authorization': 'Basic '+auth
+        }
     }).then(function(inventory) {
         $scope.inventory = JSON.parse(JSON.stringify(inventory.data).replace("open-net-access:inventory", "inventory")).inventory;
         // console.log(`INVENTORY: ${JSON.stringify($scope.inventory)}`);
@@ -37,8 +53,13 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         // console.log(`PW Sets: ${JSON.stringify($scope.pseudowires)}`);
         $scope.pseudowires = response.data;
         return $http({
-            method: "GET",
-            url: "/subscriptions"
+            method: method,
+            url: core_url,
+            headers: {
+                'Content-Type': 'application/vnd.yang.data+json',
+                'Accept': 'application/vnd.yang.collection+json',
+                'Authorization': 'Basic '+auth
+            }
         });
     }).then(function(collection) {
         $scope.subscriptions = JSON.parse(JSON.stringify(collection.data).replace("open-net-core:open-net-core", "openNetCore")).collection.openNetCore;
@@ -85,10 +106,25 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             };
 
             $scope.syncStatusArray = [];
+            // console.log(`SUBSCRIPTION string: ${JSON.stringify($scope.subscriptions[i])}`);
+            // var strSubscription = JSON.stringify($scope.subscriptions[i]);
+            // var modSubscription = JSON.stringify($scope.subscriptions[i]).replace('"check-sync":', '"check_sync":');
+            // console.log(`SUBSCRIPTION modified: ${modSubscription}`);
+            var newSubsciption = JSON.parse(JSON.stringify($scope.subscriptions[i]).replace('"check-sync":', '"check_sync":'));
+            var path = newSubsciption.operations.check_sync;
+            var url = "http://"+host+":"+hostport+path;
+            // console.log(`url: ${url}`);
+            var method = "POST";
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
             $http({
-                method: "GET",
-                url: "/subscriptions/check-sync/"+$scope.subscriptions[i].subscription_id
+                method: method,
+                url: url,
+                headers: {
+                    'Content-Type': 'application/vnd.yang.data+json',
+                    'Accept': 'application/vnd.yang.data+json',
+                    'Authorization': 'Basic '+auth
+                }
             }).then(function(response) {
                 // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
                 var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
@@ -98,6 +134,8 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                 console.log(`Status: ${response.status}`);
             });
         };
+        // console.log($scope.subscriptions);
+        // console.log(`showSubDetails: ${$scope.showSubDetails[0]}`);
 
     }, function errorCallback(response) {
         console.log(`Status: ${response.status}`);
@@ -120,33 +158,58 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         if (!$scope.subscriptions[index].allCollected) {    //  && $scope.subscriptions[index].sync_status.in_sync
             // console.log(`Getting the DETAILS`);
             $http({
-                method: 'GET',
-                url: "/deviceservices/newSubAccess/"+$scope.subscriptions[index].subscription_id
+                method: method,
+                url: "http://"+host+":"+hostport+"/api/running/newSubAccess/"+$scope.subscriptions[index].subscription_id+"?deep",
+                headers: {
+                    'Content-Type': 'application/vnd.yang.data+json',
+                    'Accept': 'application/vnd.yang.data+json',
+                    'Authorization': 'Basic '+auth
+                }
             }).then(function(subAccess) {
                 $scope.newSubAccess = JSON.parse(JSON.stringify(subAccess.data).replace("newSubAccess:newSubAccess", "newSubAccess")).newSubAccess;
                 // console.log(`newSubAccess: ${JSON.stringify($scope.newSubAccess)}`);
                 $scope.subscriptions[index].newSubAccess = $scope.newSubAccess;
                 // console.log(`Stringified: ${JSON.stringify($scope.subscriptions[index].newSubAccess)}`);
                 return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubPE/"+$scope.subscriptions[index].subscription_id
+                    method: method,
+                    url: "http://"+host+":"+hostport+"/api/running/newSubPE/"+$scope.subscriptions[index].subscription_id+"?deep",
+                    headers: {
+                        'Content-Type': 'application/vnd.yang.data+json',
+                        'Accept': 'application/vnd.yang.data+json',
+                        'Authorization': 'Basic '+auth
+                    }
                 });
             }).then(function(subPE) {
                 $scope.newSubPE = JSON.parse(JSON.stringify(subPE.data).replace("newSubPE:newSubPE", "newSubPE")).newSubPE;
                 // console.log(`newSubPE: ${JSON.stringify($scope.newSubPE)}`);
                 $scope.subscriptions[index].newSubPE = $scope.newSubPE;
                 return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubPOI/"+$scope.subscriptions[index].subscription_id
+                    method: method,
+                    url: "http://"+host+":"+hostport+"/api/running/newSubPOI/"+$scope.subscriptions[index].subscription_id+"?deep",
+                    headers: {
+                        'Content-Type': 'application/vnd.yang.data+json',
+                        'Accept': 'application/vnd.yang.data+json',
+                        'Authorization': 'Basic '+auth
+                    }
                 });
             }).then(function(subPOI) {
                 $scope.newSubPOI = JSON.parse(JSON.stringify(subPOI.data).replace("newSubPOI:newSubPOI", "newSubPOI")).newSubPOI;
                 // console.log(`newSubPOI: ${JSON.stringify($scope.newSubPOI)}`);
                 $scope.subscriptions[index].newSubPOI = $scope.newSubPOI;
 
+                var newSubsciption = JSON.parse(JSON.stringify($scope.subscriptions[index]).replace('"check-sync":', '"check_sync":'));
+                var path = newSubsciption.operations.check_sync;
+                var sync_url = "http://"+host+":"+hostport+path;
+                // console.log(`url: ${sync_url}`);
+
                 return $http({
-                    method: "GET",
-                    url: "/subscriptions/check-sync/"+$scope.subscriptions[index].subscription_id
+                    method: "POST",
+                    url: sync_url,
+                    headers: {
+                        'Content-Type': 'application/vnd.yang.data+json',
+                        'Accept': 'application/vnd.yang.data+json',
+                        'Authorization': 'Basic '+auth
+                    }
                 });
             }).then(function(response) {
                 // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
@@ -159,10 +222,19 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             });
             $scope.subscriptions[index].allCollected = true;
         } else {
+            var newSubsciption = JSON.parse(JSON.stringify($scope.subscriptions[index]).replace('"check-sync":', '"check_sync":'));
+            var path = newSubsciption.operations.check_sync;
+            var sync_url = "http://"+host+":"+hostport+path;
+            // console.log(`url: ${sync_url}`);
 
             $http({
-                method: "GET",
-                url: "/subscriptions/check-sync/"+$scope.subscriptions[index].subscription_id
+                method: "POST",
+                url: sync_url,
+                headers: {
+                    'Content-Type': 'application/vnd.yang.data+json',
+                    'Accept': 'application/vnd.yang.data+json',
+                    'Authorization': 'Basic '+auth
+                }
             }).then(function(response) {
                 // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
                 var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
@@ -188,10 +260,6 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             };
         };
         $scope.showServices = true;
-        if ($scope.sp_id) {var sp_id = $scope.sp_id} else {var sp_id = ""};
-        if ($scope.subscriber_id) {var subscriber_id = $scope.subscriber_id} else {var subscriber_id = 0};
-        if ($scope.service_id) {var service_id = $scope.service_id} else {var service_id = ""};
-        $scope.name = sp_id+"-Sub"+subscriber_id+"."+$scope.cpe_id+"-"+service_id;
     };
 
     $scope.listAccessNodes = function() {
@@ -216,21 +284,41 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         $scope.showAccessInterface = true;
     };
 
-    $scope.makeSubscriptionID = function() {
-        if ($scope.cpe_name) {
-            for (var w=0; w<$scope.inventory.cpes.cpe.length; w++) {
-                // console.log(`Counter w: ${w}`);
-                // console.log(`Looking for cpe: ${$scope.cpe_name}`);
-                if ($scope.inventory.cpes.cpe[w].cpe_name == $scope.cpe_name) {
-                    $scope.cpe_id = $scope.inventory.cpes.cpe[w].cpe_id;
-                    // console.log(`Found cpe_id: ${$scope.inventory.cpes.cpe[w].cpe_id}`);
-                };
-            };
+    $scope.VMArray = [0,1,2,3,4,5,6,7];
+    $scope.vlanMappings = [];
+    for (var i=0; i<8; i++) {
+        $scope.vlanMappings.push({inner_vlan: null, outer_vlan: null});
+    };
+    $scope.vlanMappingBtnShow = [false,true,false,false,false,false,false,false];
+    $scope.vlanMappingShow = [true,false,false,false,false,false,false,false];
+    var numVMLines = 0;
+
+    $scope.showVMLine = function() {
+        // console.log("Entering showVMline. numVMLines: "+numVMLines);
+        if ($scope.vlanMappings[numVMLines]) {
+            // console.log("numVMLines: "+numVMLines+", vlanMapping: "+$scope.vlanMappings[numVMLines].inner_vlan+", "+$scope.vlanMappings[numVMLines].outer_vlan);
+            numVMLines = numVMLines + 1;
+            $scope.numVMLines = numVMLines;
+            $scope.vlanMappingShow[numVMLines] = true;
+            $scope.vlanMappingBtnShow[numVMLines] = false;
+            $scope.vlanMappingBtnShow[numVMLines+1] = true;
+        }
+        else {
+            $window.alert("You must fill in the previous field.");
         };
-        if ($scope.sp_id) {var sp_id = $scope.sp_id} else {var sp_id = ""};
-        if ($scope.subscriber_id) {var subscriber_id = $scope.subscriber_id} else {var subscriber_id = 0};
-        if ($scope.service_id) {var service_id = $scope.service_id} else {var service_id = ""};
-        $scope.name = sp_id+"-Sub"+subscriber_id+"."+$scope.cpe_id+"-"+service_id;
+    };
+    
+    $scope.removeVlanMapping = function(orgNum) {
+        // console.log("Entering removevlanMapping. numVMLines: "+numVMLines);
+        for (var i=orgNum; i<numVMLines; i++) {
+            $scope.vlanMappings[i] = $scope.vlanMappings[i+1];
+        };
+        $scope.vlanMappings[numVMLines] = "";
+        $scope.vlanMappingShow[numVMLines] = false;
+        $scope.vlanMappingBtnShow[numVMLines] = true;
+        $scope.vlanMappingBtnShow[numVMLines+1] = false;
+        numVMLines -= 1;
+        $scope.numVMLines = numVMLines;
     };
 
     $scope.newEntryToggle = function() {
@@ -257,9 +345,24 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     };
 
     $scope.generateSubscription = function() {
+/* 
+        var vlan_mapping = [];
+        for (var n=0; n<$scope.vlanMappings.length; n++) {
+            if ($scope.vlanMappings[n].inner_vlan > 10 && $scope.vlanMappings[n].outer_vlan > 10) {
+                vlan_mapping.push($scope.vlanMappings[n]);
+            };
+        };
+ */
         $scope.spinnerStatus = true;
-        var subscription_id = $scope.name;
-        // console.log(`subscription_id: ${subscription_id}`);
+        for (var w=0; w<$scope.inventory.cpes.cpe.length; w++) {
+            // console.log(`Counter w: ${w}`);
+            // console.log(`Looking for cpe: ${$scope.cpe_name}`);
+            if ($scope.inventory.cpes.cpe[w].cpe_name == $scope.cpe_name) {
+                var cpe_id = $scope.inventory.cpes.cpe[w].cpe_id;
+                // console.log(`Found cpe_id: ${$scope.inventory.cpes.cpe[w].cpe_id}`);
+            };
+        };
+        var subscription_id = $scope.sp_id+"-Sub"+$scope.subscriber_id+"."+cpe_id+"-"+$scope.service_id;
 
         for (var z=0; z<$scope.inventory.sps.sp.length; z++) {
             // console.log(`Counter z: ${z}`);
@@ -320,7 +423,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         for (var l=0; l<$scope.pseudowires.length; l++) {
             if ($scope.sp_id == $scope.pseudowires[l].sp_id && $scope.access_node_id == $scope.pseudowires[l].access_node_id) {
                 var pw = $scope.pseudowires[l];
-                // console.log(`Found PW: ${JSON.stringify(pw)}`);
+                console.log(`Found PW: ${JSON.stringify(pw)}`);
             };
         };
         var pwSubIntAllocated = false;
@@ -340,24 +443,38 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         // console.log(`PW now: ${JSON.stringify(pw)}`);
 
         var data = {
-            "name": $scope.name,
-            "subscriber_id": $scope.subscriber_id,
-            "cpe_name": $scope.cpe_name,
-            "sp_id": $scope.sp_id,
-            "service_id": $scope.service_id,
-            "access_area_id": $scope.access_area_id,
-            "access_node_id": $scope.access_node_id,
-            "access_if": $scope.access_if,
-            "pe_area_id": $scope.pe_area_id,
-            "poi_area_id": $scope.poi_area_id,
-            "pwsubinterface_id": selectedPWSubInterface,
-            "vlan_mappings": vlan_mappings
+            "open-net-core:open-net-core": {
+                "name": $scope.name,
+                "subscriber_id": $scope.subscriber_id,
+                "cpe_name": $scope.cpe_name,
+                "sp_id": $scope.sp_id,
+                "service_id": $scope.service_id,
+                "access_area_id": $scope.access_area_id,
+                "access_node_id": $scope.access_node_id,
+                "access_if": $scope.access_if,
+                "pe_area_id": $scope.pe_area_id,
+                "poi_area_id": $scope.poi_area_id,
+                "pwsubinterface_id": selectedPWSubInterface,
+                "vlan_mappings": vlan_mappings
+            }
         };
         // console.log(`DATA: ${JSON.stringify(data)}`);
 
+        var path = "/api/running/open-net-access";
+        var url = "http://"+host+":"+hostport+path;
+        console.log(`url: ${url}`);
+        var method = "POST";
+        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+        // console.log(`Encoded Authentication: ${auth}`);
+
         $http({
-            method: 'POST',
-            url: '/subscriptions',
+            method: method,
+            url: url,
+            headers: {
+                'Content-Type': 'application/vnd.yang.data+json',
+                'Accept': 'application/vnd.yang.data+json',
+                'Authorization': 'Basic '+auth
+            },
             data: data
         }).then(function(response) {
             // console.log(`open-net-access Status: ${response.status}`);
@@ -405,15 +522,35 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.unDeploySubscription = function(subscription) {
         $scope.spinnerStatusDelete = true;
         var now = new Date();
+        var path = JSON.parse(JSON.stringify(subscription).replace('"un-deploy":', '"un_deploy":')).operations.un_deploy;
+        // var path = newSubsciption.operations.un_deploy;
+        var url = "http://"+host+":"+hostport+path;
+        // console.log(`url: ${url}`);
+        var method = "POST";
+        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
         $http({
-            method: "GET",
-            url: "/subscriptions/un-deploy/"+subscription.subscription_id
+            method: method,
+            url: url,
+            headers: {
+                'Content-Type': 'application/vnd.yang.data+json',
+                'Accept': 'application/vnd.yang.data+json',
+                'Authorization': 'Basic '+auth
+            }
         }).then(function(response) {
-            // console.log(`Un-deploy Status: ${response.status}`);
+            var path = JSON.parse(JSON.stringify(subscription).replace('"check-sync":', '"check_sync":')).operations.check_sync;
+            var url = "http://"+host+":"+hostport+path;
+            // console.log(`url: ${url}`);
+            var method = "POST";
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
             return $http({
-                method: "GET",
-                url: "/subscriptions/check-sync/"+subscription.subscription_id
+                method: method,
+                url: url,
+                headers: {
+                    'Content-Type': 'application/vnd.yang.data+json',
+                    'Accept': 'application/vnd.yang.data+json',
+                    'Authorization': 'Basic '+auth
+                }
             });
         }).then(function(response) {
             // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
@@ -481,15 +618,35 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.reDeploySubscription = function(subscription) {
         $scope.spinnerStatusDelete = true;
         var now = new Date();
+        var path = JSON.parse(JSON.stringify(subscription).replace('"re-deploy":', '"re_deploy":')).operations.re_deploy;
+        // var path = newSubsciption.operations.re_deploy;
+        var url = "http://"+host+":"+hostport+path;
+        // console.log(`url: ${url}`);
+        var method = "POST";
+        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
         $http({
-            method: "GET",
-            url: "/subscriptions/re-deploy/"+subscription.subscription_id
+            method: method,
+            url: url,
+            headers: {
+                'Content-Type': 'application/vnd.yang.data+json',
+                'Accept': 'application/vnd.yang.data+json',
+                'Authorization': 'Basic '+auth
+            }
         }).then(function(response) {
-            // console.log(`Re-deploy Status: ${response.status}`);
+            var path = JSON.parse(JSON.stringify(subscription).replace('"check-sync":', '"check_sync":')).operations.check_sync;
+            var url = "http://"+host+":"+hostport+path;
+            // console.log(`url: ${url}`);
+            var method = "POST";
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
             return $http({
-                method: "GET",
-                url: "/subscriptions/check-sync/"+subscription.subscription_id
+                method: method,
+                url: url,
+                headers: {
+                    'Content-Type': 'application/vnd.yang.data+json',
+                    'Accept': 'application/vnd.yang.data+json',
+                    'Authorization': 'Basic '+auth
+                }
             });
         }).then(function(response) {
             // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
@@ -559,10 +716,20 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         if ($window.confirm('Please confirm that you want to delete the subscription '+subscription.subscription_id)) {
             $scope.spinnerStatusDelete = true;
             var now = new Date();
+            var path = "/api/running/open-net-access/open-net-core:open-net-core/"+subscription.name;
+            var url = "http://"+host+":"+hostport+path;
+            // console.log(`url: ${url}`);
+            var method = "DELETE";
+            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
 
             $http({
-                method: "DELETE",
-                url: "/subscriptions/"+subscription.subscription_id
+                method: method,
+                url: url,
+                headers: {
+                    'Content-Type': 'application/vnd.yang.data+json',
+                    'Accept': 'application/vnd.yang.data+json',
+                    'Authorization': 'Basic '+auth
+                }
             }).then(function(response) {
                 // console.log(`DELETE Status: ${response.status}`);
 

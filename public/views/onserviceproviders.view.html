@@ -10,8 +10,8 @@
                 <th width="14%">SP ID</th>
                 <th width="12%">SP VLAN offset</th>
                 <th width="12%">MVR VLAN </th>
-                <th width="12%">MVR Receiver VLAN</th>
-                <th width="16%">VLAN Pool</th>
+                <th width="28%">Services</th>
+                <!-- <th width="16%">VLAN Pool</th> -->
                 <th width="14%">Status</th>
                 <th width="20%">Operations</th>
             </tr>
@@ -21,8 +21,19 @@
                 <td>{{ item.sp_id }}</td>
                 <td>{{ item.s_vlan_offset }}</td>
                 <td>{{ item.mvr_vlan }}</td>
-                <td>{{ item.mvr_receiver_vlan }}</td>
-                <td>{{ item.vlan_pool.start }} - {{ item.vlan_pool.end }}</td>
+                <td>
+                    <span ng-repeat="service in item.services.service">
+                        <p>
+                            <strong>{{ service.id }}</strong>. VLAN's: 
+                            <span ng-repeat="vlan in service.vlans">
+                                <strong ng-show="vlan.multicast">{{vlan.vlan}}</strong>
+                                <span ng-show="!vlan.multicast">{{vlan.vlan}}</span>, 
+                            </span>
+                        </p>
+                    </span>
+                </td>
+                <!-- <td>{{ item.mvr_receiver_vlan }}</td> -->
+                <!-- <td>{{ item.vlan_pool.start }} - {{ item.vlan_pool.end }}</td> -->
                 <td>
                     <a class="btn btn-primary" ng-click="checkSync(item)">
                         <i class="glyphicon glyphicon-repeat"></i>

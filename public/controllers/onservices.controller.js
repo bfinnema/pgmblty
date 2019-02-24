@@ -1,31 +1,17 @@
 angular.module('pgmblty')
 
-.controller('onservicesCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
-function($scope, $http, $window, $route, $location, NSOServer) {
+.controller('onservicesCtrl', ['$scope', '$http', '$window', '$route', '$location', 
+function($scope, $http, $window, $route, $location) {
     // console.log(`You are in OpenNET Services section.`);
 
     $scope.newEntry = false;
     $scope.editEntry = false;
     
-    var host = NSOServer.host;
-    var hostport = NSOServer.port;
-    var path = "/api/running/open-net-access/inventory/services/service?deep";
-    var url = "http://"+host+":"+hostport+path;
-    // console.log(`url: ${url}`);
-    var method = "GET";
-    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
-    // console.log(`Encoded Authentication: ${auth}`);
-
     $http({
-        method: method,
-        url: url,
-        headers: {
-            'Content-Type': 'application/vnd.yang.data+json',
-            'Accept': 'application/vnd.yang.collection+json',
-            'Authorization': 'Basic '+auth
-        }
+        method: "GET",
+        url: "/inventory/sps"
     }).then(function(response) {
-        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:service", "service")).collection.service;
+        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:sp", "sp")).collection.sp;
         // console.log(`SP's: ${JSON.stringify($scope.collection)}`);
         // console.log(`SP: ${$scope.collection[0].sp_id}`);
         

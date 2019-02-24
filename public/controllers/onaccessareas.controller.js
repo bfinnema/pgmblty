@@ -7,23 +7,9 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.newEntry = false;
     $scope.editEntry = false;
     
-    var host = NSOServer.host;
-    var hostport = NSOServer.port;
-    var path = "/api/running/open-net-access/inventory/access_areas/access_area?deep";
-    var url = "http://"+host+":"+hostport+path;
-    // console.log(`url: ${url}`);
-    var method = "GET";
-    var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
-    // console.log(`Encoded Authentication: ${auth}`);
-
     $http({
-        method: method,
-        url: url,
-        headers: {
-            'Content-Type': 'application/vnd.yang.data+json',
-            'Accept': 'application/vnd.yang.collection+json',
-            'Authorization': 'Basic '+auth
-        }
+        method: "GET",
+        url: "/inventory/accessareas"
     }).then(function(response) {
         $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:access_area", "access_area")).collection.access_area;
         // console.log(`Access Areas's: ${JSON.stringify($scope.collection)}`);
