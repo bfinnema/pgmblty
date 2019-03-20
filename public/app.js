@@ -43,6 +43,10 @@ pgmblty.config(['$routeProvider', function($routeProvider){
             templateUrl: 'views/oncustomers.view.html',
             controller: 'oncustomersCtrl'
         }).
+        when('/subscriptiondetails/:subscription_id', {
+            templateUrl: 'views/subscriptiondetails.view.html',
+            controller: 'subscriptiondetailsCtrl'
+        }).
         when('/onservices', {
             templateUrl: 'views/onservices.view.html',
             controller: 'onservicesCtrl'

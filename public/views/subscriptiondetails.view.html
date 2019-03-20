@@ -1,0 +1,126 @@
+<div ng-include="'nav-opennet.html'"></div>
+
+<h1>Subscription {{ subscription.subscription_id }} </h1>
+<hr>
+<div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th width="13%">Subscription</th>
+                <th width="13%">Access</th>
+                <th width="13%">PE</th>
+                <th width="13%">POI</th>
+                <th width="22%">Service Status</th>
+                <th width="16%">Operations</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <p>SP: {{subscription.sp_id}}</p>
+                    <p>Service: {{subscription.service_id}}</p>
+                    <p>Subscriber: {{subscription.subscriber_id}}</p>
+                    <p>CPE: {{subscription.cpe_name}}</p>
+                </td>
+                <td>
+                    <p>Access Area: {{ subscription.access_area_id }}</p>
+                    <p>Node: {{subscription.newSubAccess.device}}</p>
+                    <p>Interface: {{subscription.newSubAccess.access_interface}}</p>
+                    <p>MVR: {{subscription.newSubAccess.mvr_vlan}} / {{subscription.newSubAccess.mvr_receiver_vlan}}</p>
+                </td>
+                <td>
+                    <p>PE Area: {{ subscription.pe_area_id }}</p>
+                    <p>Node: {{subscription.pe_area.node.pe_node_id}}</p>
+                    <p>Interface: {{subscription.newSubPE.pe_interface}}</p>
+                </td>
+                <td>
+                    <p>POI Area: {{ subscription.poi_area_id }}</p>
+                    <p>Node: {{subscription.poi_area.node.poi_node_id}}</p>
+                    <p>Interface: {{subscription.newSubPOI.PWESubInt}}</p>
+                </td>
+                <td>
+                    <a ng-show="subscription.serviceStatus.status == 0" class="btn btn-primary" ng-click="ipslaIcmp()">
+                        Unknown
+                    </a>
+                    <a ng-show="subscription.serviceStatus.status == 1" class="btn btn-danger" ng-click="ipslaIcmp()">
+                        {{ subscription.serviceStatus.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}
+                    </a>
+                    <a ng-show="subscription.serviceStatus.status == 2" class="btn btn-warning" ng-click="ipslaIcmp()">
+                        {{ subscription.serviceStatus.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}
+                    </a>
+                    <a ng-show="subscription.serviceStatus.status == 3" class="btn btn-success" ng-click="ipslaIcmp()">
+                        {{ subscription.serviceStatus.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}
+                    </a>
+                    <hr>
+                    <p>Deployed: {{subscription.sync_status.in_sync}}</p>
+                </td>
+                <td>
+                    <a class="btn btn-primary" ng-click="editSubscription()">
+                        <i class="glyphicon glyphicon-edit"></i>
+                    </a>
+                    <a class="btn btn-primary" ng-click="deleteSubscription()">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </a>
+                    <a class="btn btn-primary" ng-click="unDeploySubscription()">
+                        <i class="glyphicon glyphicon-stop"></i>
+                    </a>
+                    <a class="btn btn-primary" ng-click="reDeploySubscription()">
+                        <i class="glyphicon glyphicon-play"></i>
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<h2>Services (VLAN's)</h2>
+<div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th width="15%">Inner VLAN</th>
+                <th width="15%">Access VLAN</th>
+                <th width="15%">PE VLAN</th>
+                <th width="15%">POI VLAN</th>
+                <th width="40%">Service Assurance Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="service_status in subscription.serviceStatus.services_status">
+                <td>
+                    {{service_status.inner_vlan_id}}
+                </td>
+                <td>
+                    {{service_status.access_vlan_id}}
+                </td>
+                <td>
+                    {{service_status.pe_vlan_id}}
+                </td>
+                <td>
+                    {{service_status.poi_vlan_id}}
+                </td>
+                <td>
+                    <button ng-show="showSpinner[service_status.index]" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Checking...
+                    </button>
+                    <button ng-show="!showSpinner[service_status.index] && service_status.status == 0" class="btn btn-primary">
+                        Unknown
+                    </button>
+                    <button ng-show="!showSpinner[service_status.index] && service_status.status == 1" class="btn btn-danger">
+                        {{service_status.timestamp | date:'dd/MM HH:mm:ss' : 'CET'}}
+                    </button>
+                    <button ng-show="!showSpinner[service_status.index] && service_status.status == 3" class="btn btn-success">
+                        {{service_status.timestamp | date:'dd/MM HH:mm:ss' : 'CET'}}, RTT: {{ service_status.RTT }}
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="row" ng-show="!newEntry && !editEntry && subscriptions != null">
+    <p><strong> Operations:   </strong>
+        <span class="glyphicon glyphicon-edit"> </span> Edit the subscription (not implemented yet).
+        <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the subscription.
+        <span class="glyphicon glyphicon-stop"> </span> Un-deploy. 
+        <span class="glyphicon glyphicon-play"> </span> Re-deploy. 
+    </p>
+</div>

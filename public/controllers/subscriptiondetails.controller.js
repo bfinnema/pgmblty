@@ -1,8 +1,11 @@
 angular.module('pgmblty')
 
-.controller('oncustomersCtrl', ['$scope', '$http', '$window', '$route', '$location', '$q', 
-function($scope, $http, $window, $route, $location, $q) {
-    // console.log(`You are in OpenNET Subscription Splash Screen.`);
+.controller('subscriptiondetailsCtrl', ['$scope', '$http', '$window', '$route', '$location', '$q', '$routeParams', 
+function($scope, $http, $window, $route, $location, $q, $routeParams) {
+    // console.log(`You are in OpenNET Subscription Screen for one subscription.`);
+
+    var subscription_id = $routeParams.subscription_id;
+    console.log(`SubscriptionID: ${subscription_id}`);
 
     $scope.newEntry = false;
     $scope.editEntry = false;
@@ -18,9 +21,10 @@ function($scope, $http, $window, $route, $location, $q) {
         url: "/inventory"
     }).then(function(inventory) {
         $scope.inventory = JSON.parse(JSON.stringify(inventory.data).replace("open-net-access:inventory", "inventory")).inventory;
-        // console.log(`INVENTORY: ${JSON.stringify($scope.inventory)}`);
-        // console.log(`SP: ${JSON.stringify($scope.inventory.sps.sp[0].sp_id)}`);
-        return $http({
+        console.log(`INVENTORY: ${JSON.stringify($scope.inventory)}`);
+        console.log(`SP: ${JSON.stringify($scope.inventory.sps.sp[0].sp_id)}`);
+
+        /* return $http({
             method: "GET",
             url: "/vlanpools"
         });
@@ -35,97 +39,136 @@ function($scope, $http, $window, $route, $location, $q) {
     }).then(function(response) {
         // console.log(`PW Sets Status: ${response.status}`);
         // console.log(`PW Sets: ${JSON.stringify($scope.pseudowires)}`);
-        $scope.pseudowires = response.data;
+        $scope.pseudowires = response.data; */
+
         return $http({
             method: "GET",
-            url: "/subscriptions"
+            url: "/subscriptions/"+subscription_id
         });
     }).then(function(collection) {
-        $scope.subscriptions = JSON.parse(JSON.stringify(collection.data).replace("open-net-core:open-net-core", "openNetCore")).collection.openNetCore;
-        
-        $scope.showSubDetails = [];
-        $scope.showIpslaSpinner = [];
+        $scope.subscription = JSON.parse(JSON.stringify(collection.data).replace("open-net-core:open-net-core", "openNetCore")).openNetCore;
+        console.log(`Subscription: ${JSON.stringify($scope.subscription)}`);
+        // $scope.showIpslaSpinner = [];
         var now = new Date();
-        for (var i=0; i<$scope.subscriptions.length; i++) {
-            // console.log(`Counter i: ${i}`);
-            $scope.subscriptions[i].index = i;
-            var services_status =[];
-            var showSpinner = [];
-            for (var j=0; j<$scope.subscriptions[i].vlan_mappings.vlan_mapping.length; j++) {
-                var service_status = {
-                    'index': j,
-                    'inner_vlan_id': $scope.subscriptions[i].vlan_mappings.vlan_mapping[j].inner_vlan,
-                    'access_vlan_id': $scope.subscriptions[i].vlan_mappings.vlan_mapping[j].outer_vlan,
-                    'pe_vlan_id': $scope.subscriptions[i].vlan_mappings.vlan_mapping[j].outer_vlan,
-                    'poi_vlan_id': $scope.subscriptions[i].vlan_mappings.vlan_mapping[j].outer_vlan,
-                    'status': 0,   // 0: Unknown, 1: IPSLA ICMP echo failed, 3: IPSLA ICMP echo success
-                    'timestamp': now,
-                    'RTT': 20
-                };
-                services_status.push(service_status);
-                showSpinner.push(false);
-            };
-            $scope.subscriptions[i].serviceStatus = {"status": 0, "timestamp": new Date(), "services_status": services_status};
-            $scope.subscriptions[i].allCollected = false;
-            $scope.showSubDetails.push(false);
-            $scope.showIpslaSpinner.push(showSpinner);
-            $scope.subscriptions[i].ipslaMessage = "";
-            $scope.subscriptions[i].showIpslaMessage = false;
-            for (var j=0; j<$scope.inventory.cpes.cpe.length; j++) {
-                // console.log(`Counter j: ${j}`);
-                // console.log(`Looking for cpe: ${$scope.subscriptions[i].cpe_name}`);
-                if ($scope.inventory.cpes.cpe[j].cpe_name == $scope.subscriptions[i].cpe_name) {
-                    $scope.subscriptions[i].cpe_id = $scope.inventory.cpes.cpe[j].cpe_id;
-                    // console.log(`Found cpe_id: ${$scope.inventory.cpes.cpe[j].cpe_id}`);
-                };
-            };
-            $scope.subscriptions[i].subscription_id = $scope.subscriptions[i].sp_id+"-Sub"+$scope.subscriptions[i].subscriber_id+"."+$scope.subscriptions[i].cpe_id+"-"+$scope.subscriptions[i].service_id;
-            // console.log(`Subscription ID calculated to be: ${$scope.subscriptions[i].subscription_id}`);
-            for (j=0; j<$scope.inventory.access_areas.access_area.length; j++) {
-                // console.log(`Counter j: ${j}`);
-                // console.log(`Looking for access_area: ${$scope.subscriptions[i].access_area_id}`);
-                if ($scope.inventory.access_areas.access_area[j].access_area_id == $scope.subscriptions[i].access_area_id) {
-                    $scope.subscriptions[i].access_area = $scope.inventory.access_areas.access_area[j];
-                    // console.log(`Found access_area: ${$scope.inventory.access_areas.access_area[j].access_area_id}`);
-                };
-            };
-            for (j=0; j<$scope.inventory.pe_areas.pe_area.length; j++) {
-                // console.log(`Counter j: ${j}`);
-                // console.log(`Looking for pe_area: ${$scope.subscriptions[i].pe_area_id}`);
-                if ($scope.inventory.pe_areas.pe_area[j].pe_area_id == $scope.subscriptions[i].pe_area_id) {
-                    $scope.subscriptions[i].pe_area = $scope.inventory.pe_areas.pe_area[j];
-                    // console.log(`Found pe_area: ${$scope.inventory.pe_areas.pe_area[j].pe_area_id}`);
-                };
-            };
-            for (j=0; j<$scope.inventory.poi_areas.poi_area.length; j++) {
-                // console.log(`Counter j: ${j}`);
-                // console.log(`Looking for poi_area: ${$scope.subscriptions[i].poi_area_id}`);
-                if ($scope.inventory.poi_areas.poi_area[j].poi_area_id == $scope.subscriptions[i].poi_area_id) {
-                    $scope.subscriptions[i].poi_area = $scope.inventory.poi_areas.poi_area[j];
-                    // console.log(`Found poi_area: ${$scope.inventory.poi_areas.poi_area[j].poi_area_id}`);
-                };
-            };
 
-            $scope.syncStatusArray = [];
-
-            $http({
-                method: "GET",
-                url: "/subscriptions/check-sync/"+$scope.subscriptions[i].subscription_id
-            }).then(function(response) {
-                // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
-                var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
-                // console.log(`newSyncStatus stringified: ${JSON.stringify(newSyncStatus)}`);
-                $scope.syncStatusArray.push(newSyncStatus.sync_output);
-            }, function errorCallback(response) {
-                console.log(`Status: ${response.status}`);
-            });
+        var services_status =[];
+        $scope.showSpinner = [];
+        for (var j=0; j<$scope.subscription.vlan_mappings.vlan_mapping.length; j++) {
+            var service_status = {
+                'index': j,
+                'inner_vlan_id': $scope.subscription.vlan_mappings.vlan_mapping[j].inner_vlan,
+                'access_vlan_id': $scope.subscription.vlan_mappings.vlan_mapping[j].outer_vlan,
+                'pe_vlan_id': $scope.subscription.vlan_mappings.vlan_mapping[j].outer_vlan,
+                'poi_vlan_id': $scope.subscription.vlan_mappings.vlan_mapping[j].outer_vlan,
+                'status': 0,   // 0: Unknown, 1: IPSLA ICMP echo failed, 3: IPSLA ICMP echo success
+                'timestamp': now,
+                'RTT': 20
+            };
+            services_status.push(service_status);
+            $scope.showSpinner.push(false);
         };
+        $scope.subscription.serviceStatus = {"status": 0, "timestamp": new Date(), "services_status": services_status};
+        // $scope.subscription.allCollected = false;
+        // $scope.showIpslaSpinner.push(showSpinner);
+        $scope.subscription.ipslaMessage = "";
+        $scope.subscription.showIpslaMessage = false;
+        for (var j=0; j<$scope.inventory.cpes.cpe.length; j++) {
+            // console.log(`Counter j: ${j}`);
+            // console.log(`Looking for cpe: ${$scope.subscription.cpe_name}`);
+            if ($scope.inventory.cpes.cpe[j].cpe_name == $scope.subscription.cpe_name) {
+                $scope.subscription.cpe_id = $scope.inventory.cpes.cpe[j].cpe_id;
+                console.log(`Found cpe_id: ${$scope.inventory.cpes.cpe[j].cpe_id}`);
+            };
+        };
+        $scope.subscription.subscription_id = subscription_id;
+        // console.log(`Subscription ID calculated to be: ${$scope.subscription.subscription_id}`);
+        for (j=0; j<$scope.inventory.access_areas.access_area.length; j++) {
+            // console.log(`Counter j: ${j}`);
+            // console.log(`Looking for access_area: ${$scope.subscription.access_area_id}`);
+            if ($scope.inventory.access_areas.access_area[j].access_area_id == $scope.subscription.access_area_id) {
+                $scope.subscription.access_area = $scope.inventory.access_areas.access_area[j];
+                console.log(`Found access_area: ${$scope.inventory.access_areas.access_area[j].access_area_id}`);
+            };
+        };
+        for (j=0; j<$scope.inventory.pe_areas.pe_area.length; j++) {
+            // console.log(`Counter j: ${j}`);
+            // console.log(`Looking for pe_area: ${$scope.subscription.pe_area_id}`);
+            if ($scope.inventory.pe_areas.pe_area[j].pe_area_id == $scope.subscription.pe_area_id) {
+                $scope.subscription.pe_area = $scope.inventory.pe_areas.pe_area[j];
+                console.log(`Found pe_area: ${$scope.inventory.pe_areas.pe_area[j].pe_area_id}`);
+            };
+        };
+        for (j=0; j<$scope.inventory.poi_areas.poi_area.length; j++) {
+            // console.log(`Counter j: ${j}`);
+            // console.log(`Looking for poi_area: ${$scope.subscription.poi_area_id}`);
+            if ($scope.inventory.poi_areas.poi_area[j].poi_area_id == $scope.subscription.poi_area_id) {
+                $scope.subscription.poi_area = $scope.inventory.poi_areas.poi_area[j];
+                console.log(`Found poi_area: ${$scope.inventory.poi_areas.poi_area[j].poi_area_id}`);
+            };
+        };
+
+        // $scope.syncStatusArray = [];
+
+        return $http({
+            method: "GET",
+            url: "/subscriptions/check-sync/"+$scope.subscription.subscription_id
+        });
+    
+    }).then(function(response) {
+        console.log(`Sync DATA stringified: ${JSON.stringify(response.data)}`);
+        var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
+        console.log(`newSyncStatus stringified: ${JSON.stringify(newSyncStatus)}`);
+        $scope.subscription.sync_status = newSyncStatus.sync_output;
+        // $scope.syncStatusArray.push(newSyncStatus.sync_output);
+
+        return $http({
+            method: 'GET',
+            url: "/deviceservices/newSubAccess/"+$scope.subscription.subscription_id
+        });
+    }).then(function(subAccess) {
+        $scope.newSubAccess = JSON.parse(JSON.stringify(subAccess.data).replace("newSubAccess:newSubAccess", "newSubAccess")).newSubAccess;
+        console.log(`newSubAccess: ${JSON.stringify($scope.newSubAccess)}`);
+        $scope.subscription.newSubAccess = $scope.newSubAccess;
+        console.log(`Stringified: ${JSON.stringify($scope.subscription.newSubAccess)}`);
+        return $http({
+            method: 'GET',
+            url: "/deviceservices/newSubPE/"+$scope.subscription.subscription_id
+        });
+    }).then(function(subPE) {
+        $scope.newSubPE = JSON.parse(JSON.stringify(subPE.data).replace("newSubPE:newSubPE", "newSubPE")).newSubPE;
+        console.log(`newSubPE: ${JSON.stringify($scope.newSubPE)}`);
+        $scope.subscription.newSubPE = $scope.newSubPE;
+        return $http({
+            method: 'GET',
+            url: "/deviceservices/newSubPOI/"+$scope.subscription.subscription_id
+        });
+    }).then(function(subPOI) {
+        $scope.newSubPOI = JSON.parse(JSON.stringify(subPOI.data).replace("newSubPOI:newSubPOI", "newSubPOI")).newSubPOI;
+        console.log(`newSubPOI: ${JSON.stringify($scope.newSubPOI)}`);
+        $scope.subscription.newSubPOI = $scope.newSubPOI;
+        return $http({
+            method: 'GET',
+            url: "/deviceservices/newSubCPE/"+$scope.subscription.subscription_id
+        });
+    }).then(function(subCPE) {
+        $scope.newSubCPE = JSON.parse(JSON.stringify(subCPE.data).replace("newSubCPE:newSubCPE", "newSubCPE")).newSubCPE;
+        console.log(`newSubCPE: ${JSON.stringify($scope.newSubCPE)}`);
+        $scope.subscription.newSubCPE = $scope.newSubCPE;
+        return $http({
+            method: "GET",
+            url: "/subscriptions/check-sync/"+$scope.subscription.subscription_id
+        });
+    }).then(function(response) {
+        console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
+        var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
+        console.log(`newSyncStatus stringified: ${JSON.stringify(newSyncStatus)}`);
+        $scope.subscription.sync_status = newSyncStatus.sync_output;
 
     }, function errorCallback(response) {
         console.log(`Status: ${response.status}`);
     });
 
-    setTimeout(function(){
+    /* setTimeout(function(){
         if ($scope.subscriptions == null) {
             console.log(`There are no subscriptions`);
         } else {
@@ -135,82 +178,9 @@ function($scope, $http, $window, $route, $location, $q) {
             };
             $scope.$digest();
         };
-    }, 3000);
-
-    $scope.hoverIn = function(index) {
-        $scope.showSubDetails[index] = true;
-        if (!$scope.subscriptions[index].allCollected) {    //  && $scope.subscriptions[index].sync_status.in_sync
-            // console.log(`Getting the DETAILS`);
-            $http({
-                method: 'GET',
-                url: "/deviceservices/newSubAccess/"+$scope.subscriptions[index].subscription_id
-            }).then(function(subAccess) {
-                $scope.newSubAccess = JSON.parse(JSON.stringify(subAccess.data).replace("newSubAccess:newSubAccess", "newSubAccess")).newSubAccess;
-                // console.log(`newSubAccess: ${JSON.stringify($scope.newSubAccess)}`);
-                $scope.subscriptions[index].newSubAccess = $scope.newSubAccess;
-                // console.log(`Stringified: ${JSON.stringify($scope.subscriptions[index].newSubAccess)}`);
-                return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubPE/"+$scope.subscriptions[index].subscription_id
-                });
-            }).then(function(subPE) {
-                $scope.newSubPE = JSON.parse(JSON.stringify(subPE.data).replace("newSubPE:newSubPE", "newSubPE")).newSubPE;
-                // console.log(`newSubPE: ${JSON.stringify($scope.newSubPE)}`);
-                $scope.subscriptions[index].newSubPE = $scope.newSubPE;
-                return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubPOI/"+$scope.subscriptions[index].subscription_id
-                });
-            }).then(function(subPOI) {
-                $scope.newSubPOI = JSON.parse(JSON.stringify(subPOI.data).replace("newSubPOI:newSubPOI", "newSubPOI")).newSubPOI;
-                // console.log(`newSubPOI: ${JSON.stringify($scope.newSubPOI)}`);
-                $scope.subscriptions[index].newSubPOI = $scope.newSubPOI;
-                return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubCPE/"+$scope.subscriptions[index].subscription_id
-                });
-            }).then(function(subCPE) {
-                $scope.newSubCPE = JSON.parse(JSON.stringify(subCPE.data).replace("newSubCPE:newSubCPE", "newSubCPE")).newSubCPE;
-                // console.log(`newSubCPE: ${JSON.stringify($scope.newSubCPE)}`);
-                $scope.subscriptions[index].newSubCPE = $scope.newSubCPE;
-
-                return $http({
-                    method: "GET",
-                    url: "/subscriptions/check-sync/"+$scope.subscriptions[index].subscription_id
-                });
-            }).then(function(response) {
-                // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
-                var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
-                // console.log(`newSyncStatus stringified: ${JSON.stringify(newSyncStatus)}`);
-                $scope.subscriptions[index].sync_status = newSyncStatus.sync_output;
-        
-            }, function errorCallback(response) {
-                console.log(`Status: ${response.status}`);
-            });
-            $scope.subscriptions[index].allCollected = true;
-        } else {
-
-            $http({
-                method: "GET",
-                url: "/subscriptions/check-sync/"+$scope.subscriptions[index].subscription_id
-            }).then(function(response) {
-                // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
-                var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
-                // console.log(`newSyncStatus stringified: ${JSON.stringify(newSyncStatus)}`);
-                $scope.subscriptions[index].sync_status = newSyncStatus.sync_output;
-            }, function errorCallback(response) {
-                console.log(`Status: ${response.status}`);
-            });
-        }
-        // console.log($scope.subscriptions);
-    };
-
-    $scope.hoverOut = function(index) {
-        $scope.showSubDetails[index] = false;
-    };
+    }, 3000); */
 
     $scope.ipslaIcmp = function(sub_index) {
-        $scope.showSubDetails[sub_index] = true;
 
         for (var j=0; j<$scope.showIpslaSpinner[sub_index].length; j++) {
             // console.log(`Sub index: ${sub_index}, j: ${j}, ${$scope.showIpslaSpinner[sub_index][j]}`);
@@ -265,7 +235,6 @@ function($scope, $http, $window, $route, $location, $q) {
                         if (response.data.result) {
                             numGood++;
                             $scope.subscriptions[sub_index].serviceStatus.services_status[count].status = 3;
-                            $scope.subscriptions[sub_index].serviceStatus.services_status[count].RTT = response.data.rtt
                         } else {
                             $scope.subscriptions[sub_index].serviceStatus.services_status[count].status = 1;
                         };
@@ -302,11 +271,8 @@ function($scope, $http, $window, $route, $location, $q) {
                 };
                 $scope.subscriptions[sub_index].serviceStatus.timestamp = new Date();
                 $scope.subscriptions[sub_index].ipslaMessage = "IPSLA Deleted";
-                // console.log(`showSubDetails: ${$scope.showSubDetails[sub_index]}, showIpslaSpinner: ${$scope.showIpslaSpinner[sub_index]}`);
+                // console.log(`showIpslaSpinner: ${$scope.showIpslaSpinner[sub_index]}`);
                 // console.log(`Services Status: ${JSON.stringify($scope.subscriptions[sub_index].serviceStatus.services_status)}`);
-                setTimeout(function(){
-                    $scope.subscriptions[sub_index].showIpslaMessage = false;
-                }, 3000);
             });
         });
 

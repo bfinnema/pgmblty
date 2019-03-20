@@ -1,24 +1,27 @@
 <div ng-include="'nav-opennet.html'"></div>
 
-<h1>Subscriptions</h1>
+<h1>Subscriptions ({{ subscriptions.length }})</h1>
 <div ng-show="!newEntry && !editEntry">
-    <h2>List of entries ({{ subscriptions.length }})</h2>
-    <hr>
+    <!-- <h2>List of entries ({{ subscriptions.length }})</h2>
+    <hr> -->
     <table class="table table-striped">
         <thead>
             <tr>
                 <th width="20%">Subscription</th>
-                <th width="16%">Access</th>
-                <th width="13%">PE </th>
-                <th width="13%">POI</th>
-                <th width="16%">Status</th>
-                <th width="22%">Operations</th>
+                <th width="14%">Access</th>
+                <th width="12%">PE </th>
+                <th width="12%">POI</th>
+                <th width="6%">Sync Status</th>
+                <th width="18%">Service Status</th>
+                <th width="18%">Operations</th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="subscription in subscriptions">
                 <td>
-                    {{ subscription.subscription_id }}
+                    <a class="btn btn-default" ng-mouseover="hoverIn(subscription.index)" ng-mouseleave="hoverOut(subscription.index)">
+                        {{ subscription.subscription_id }}
+                    </a>
                     <span ng-show="showSubDetails[subscription.index]">
                         <hr>
                         <p>SP: {{subscription.sp_id}}</p>
@@ -56,7 +59,36 @@
                     </span>
                 </td>
                 <td>
-                    Sync Status: {{subscription.sync_status.in_sync}}
+                    {{subscription.sync_status.in_sync}}
+                </td>
+                <td>
+                    <a ng-show="subscription.serviceStatus.status == 0" class="btn btn-primary" ng-click="ipslaIcmp(subscription.index)">
+                        Unknown
+                    </a>
+                    <a ng-show="subscription.serviceStatus.status == 1" class="btn btn-danger" ng-click="ipslaIcmp(subscription.index)">
+                        {{ subscription.serviceStatus.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}
+                    </a>
+                    <a ng-show="subscription.serviceStatus.status == 2" class="btn btn-warning" ng-click="ipslaIcmp(subscription.index)">
+                        {{ subscription.serviceStatus.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}
+                    </a>
+                    <a ng-show="subscription.serviceStatus.status == 3" class="btn btn-success" ng-click="ipslaIcmp(subscription.index)">
+                        {{ subscription.serviceStatus.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}
+                    </a>
+                    <div ng-repeat="service_status in subscription.serviceStatus.services_status">
+                        <button ng-show="showSubDetails[subscription.index] && showIpslaSpinner[subscription.index][service_status.index]" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> {{service_status.access_vlan_id}}: Checking...
+                        </button>
+                        <button ng-show="showSubDetails[subscription.index] && !showIpslaSpinner[subscription.index][service_status.index] && service_status.status == 0" class="btn btn-primary">
+                            {{service_status.access_vlan_id}}: Unknown
+                        </button>
+                        <button ng-show="showSubDetails[subscription.index] && !showIpslaSpinner[subscription.index][service_status.index] && service_status.status == 1" class="btn btn-danger">
+                            {{service_status.access_vlan_id}}: {{service_status.timestamp | date:'dd/MM HH:mm:ss' : 'CET'}}
+                        </button>
+                        <button ng-show="showSubDetails[subscription.index] && !showIpslaSpinner[subscription.index][service_status.index] && service_status.status == 3" class="btn btn-success">
+                            {{service_status.access_vlan_id}}: {{service_status.timestamp | date:'dd/MM HH:mm:ss' : 'CET'}}, RTT: {{ service_status.RTT }}
+                        </button>
+                    </div>
+                    <p ng-show="subscription.showIpslaMessage">{{ subscription.ipslaMessage }}</p>
                 </td>
                 <td>
                     <a class="btn btn-primary" ng-click="editSubscription(subscription)">
@@ -71,9 +103,11 @@
                     <a class="btn btn-primary" ng-click="reDeploySubscription(subscription)">
                         <i class="glyphicon glyphicon-play"></i>
                     </a>
+<!-- 
                     <a class="btn btn-primary" ng-mouseover="hoverIn(subscription.index)" ng-mouseleave="hoverOut(subscription.index)">
                         <i class="glyphicon glyphicon-zoom-in"></i>
                     </a>
+ -->                    
                 </td>
             </tr>
             <tr ng-show="subscriptions == null">
@@ -88,7 +122,7 @@
         <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the subscription.
         <span class="glyphicon glyphicon-stop"> </span> Un-deploy. 
         <span class="glyphicon glyphicon-play"> </span> Re-deploy. 
-        <span class="glyphicon glyphicon-zoom-in"> </span> Details.
+        <!-- <span class="glyphicon glyphicon-zoom-in"> </span> Details. -->
     </p>
 </div>
 <hr>

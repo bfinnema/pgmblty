@@ -2,7 +2,6 @@ const _ = require('lodash');
 const bodyParser = require('body-parser');
 const express = require('express');
 const router = express.Router();
-const http = require("http");
 const request = require("request");
 
 // GET Device Service Details
@@ -19,7 +18,7 @@ router.get('/:device_service/:id', (req, res) => {
 
 // POST check-sync
 router.get('/check-sync/:id', (req, res) => {
-  console.log(`Here we are in the device services router router. Check-sync for id: ${req.params.id}`);
+  // console.log(`Here we are in the device services router router. Check-sync for id: ${req.params.id}`);
   var options = makeOptions('/'+req.params.id+'/_operations/check-sync', 'data', 'POST');
   
   request(options, function (error, response, body) {
@@ -30,9 +29,9 @@ router.get('/check-sync/:id', (req, res) => {
 });
 
 function makeOptions(pathEnd, collOrData, method) {
-  console.log(`In the function: User: ${process.env.NSO_USER}, Password: ${process.env.NSO_PWD}`);
+  // console.log(`In the function: User: ${process.env.NSO_USER}, Password: ${process.env.NSO_PWD}`);
   var auth = new Buffer(process.env.NSO_USER + ':' + process.env.NSO_PWD).toString('base64');
-  console.log(`Encoded Authentication: ${auth}`);
+  // console.log(`Encoded Authentication: ${auth}`);
 
   var options = { method: method,
     url: 'http://'+process.env.NSO_ADDRESS+':'+process.env.NSO_PORT+'/api/running'+pathEnd,
