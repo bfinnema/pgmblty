@@ -21,7 +21,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             url: '/pseudowires',
         });
     }).then(function(response) {
-        console.log(`Pseudowire Set Status: ${response.status}`);
+        // console.log(`Pseudowire Set Status: ${response.status}`);
         $scope.pseudowires = response.data;
 
     }, function errorCallback(response) {

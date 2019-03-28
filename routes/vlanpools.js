@@ -80,6 +80,24 @@ router.get('/:id', (req, res) => {
   });
 });
 
+router.get('/specific/:sp_id/:access_area_id/:access_node_id', (req, res) => {
+  console.log(`Looking for specific vlanpool. SP: ${req.params.sp_id}, Area: ${req.params.access_area_id}, Node: ${req.params.access_node_id}`);
+  
+  Vlanpool.findOne({
+    sp_id: req.params.sp_id,
+    access_area_id: req.params.access_area_id,
+    access_node_id: req.params.access_node_id
+  }).then((vlanpool) => {
+    if (!vlanpool) {
+      return res.status(404).send();
+    }
+
+    res.json(vlanpool);
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
+
 router.delete('/:id', (req, res) => {
   var id = req.params.id;
 

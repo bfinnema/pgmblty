@@ -18,12 +18,12 @@ router.get('/', (req, res) => {
 
 // GET One Subscription
 router.get('/:id', (req, res) => {
-  console.log(`Here we are in the subscriptions router, GET one subscription: ${req.params.id}`);
+  // console.log(`Here we are in the subscriptions router, GET one subscription: ${req.params.id}`);
   var options = makeOptions('/'+req.params.id, 'data', 'GET');
   
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
-    console.log(body);
+    // console.log(body);
     res.send(body);
   });
 });
@@ -129,10 +129,10 @@ function makeOptions(pathEnd, collOrData, method) {
     url: 'http://'+process.env.NSO_ADDRESS+':'+process.env.NSO_PORT+'/api/running/open-net-access/open-net-core'+pathEnd,
     qs: { deep: '' },
     headers: {
-        Authorization: 'Basic '+auth,
-        Accept: 'application/vnd.yang.'+collOrData+'+json',
-        'Cache-Control': 'no-cache',
-        'Content-Type': 'application/vnd.yang.data+json'
+      Authorization: 'Basic '+auth,
+      Accept: 'application/vnd.yang.'+collOrData+'+json',
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/vnd.yang.data+json'
     }
   };
   // console.log(`Options url: ${options.url}`);

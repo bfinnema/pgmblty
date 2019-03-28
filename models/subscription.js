@@ -18,11 +18,38 @@ var SubscriptionSchema = new mongoose.Schema({
             access_vlan_id: {type: Number},
             pe_vlan_id: {type: Number},
             poi_vlan_id: {type: Number},
-            status: {type: Number},
-            timestamp: {type: Date},
-            RTT: {type: Number}
+            cpe_ipaddress: {
+                octet1: {
+                    type: Number
+                },
+                octet2: {
+                    type: Number
+                },
+                octet3: {
+                    type: Number
+                },
+                octet4: {
+                    type: Number
+                }
+            },
+            statistics: [
+                {
+                    status: {type: Number},
+                    timestamp: {type: Date},
+                    RTT: {type: Number}
+                }
+            ]
         }
     ],
+    summaryStatus: [
+        {
+            status: {type: Number},
+            timestamp: {type: Date}
+        }
+    ],
+    deploymentStatus: {
+        type: Boolean
+    },
     mvr: {
         mvr_vlan: {
             type: Number
@@ -38,7 +65,7 @@ var SubscriptionSchema = new mongoose.Schema({
         access_node_id: {
             type: String
         },
-        access_interface: {
+        access_if: {
             type: String
         }
     },
@@ -46,21 +73,39 @@ var SubscriptionSchema = new mongoose.Schema({
         pe_area_id: {
             type: String
         },
-        pe_node_id: {
+        pe_area_description: {
             type: String
         },
-        pe_interface: {
-            type: String
+        node: {
+            pe_node_id: {
+                type: String
+            },
+            pe_if: {
+                type: String
+            }
         }
     },
     poi: {
         poi_area_id: {
             type: String
         },
-        poi_node_id: {
+        poi_area_description: {
             type: String
         },
-        poi_interface: {
+        node: {
+            poi_node_id: {
+                type: String
+            },
+            poi_if: {
+                type: String
+            }
+        }
+    },
+    cpe: {
+        cpe_name: {
+            type: String
+        },
+        cpe_id: {
             type: String
         }
     },

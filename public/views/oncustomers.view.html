@@ -11,7 +11,7 @@
                 <th width="14%">Access</th>
                 <th width="12%">PE </th>
                 <th width="12%">POI</th>
-                <th width="6%">Sync Status</th>
+                <th width="6%">Deployment Status</th>
                 <th width="18%">Service Status</th>
                 <th width="18%">Operations</th>
             </tr>
@@ -59,7 +59,10 @@
                     </span>
                 </td>
                 <td>
-                    {{subscription.sync_status.in_sync}}
+                    <span ng-show="subscription.db_subscription.deploymentStatus">Deployed</span>
+                    <span ng-show="!subscription.db_subscription.deploymentStatus">Un-deployed</span>
+                    <!-- {{subscription.sync_status.in_sync}}
+                    {{subscription.db_subscription.deploymentStatus}} -->
                 </td>
                 <td>
                     <a ng-show="subscription.serviceStatus.status == 0" class="btn btn-primary" ng-click="ipslaIcmp(subscription.index)">
@@ -97,10 +100,10 @@
                     <a class="btn btn-primary" ng-click="deleteSubscription(subscription)">
                         <i class="glyphicon glyphicon-trash"></i>
                     </a>
-                    <a class="btn btn-primary" ng-click="unDeploySubscription(subscription)">
+                    <a class="btn btn-primary" ng-click="unDeploySubscription(subscription.index)">
                         <i class="glyphicon glyphicon-stop"></i>
                     </a>
-                    <a class="btn btn-primary" ng-click="reDeploySubscription(subscription)">
+                    <a class="btn btn-primary" ng-click="reDeploySubscription(subscription.index)">
                         <i class="glyphicon glyphicon-play"></i>
                     </a>
 <!-- 
@@ -110,13 +113,13 @@
  -->                    
                 </td>
             </tr>
-            <tr ng-show="subscriptions == null">
+            <tr ng-show="!subscriptions[0]">
                 <td>There are no entries</td>
             </tr>
         </tbody>
     </table>
 </div>
-<div class="row" ng-show="!newEntry && !editEntry && subscriptions != null">
+<div class="row" ng-show="!newEntry && !editEntry && subscriptions[0]">
     <p><strong> Operations:   </strong>
         <span class="glyphicon glyphicon-edit"> </span> Edit the subscription (not implemented yet).
         <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the subscription.

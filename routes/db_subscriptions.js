@@ -7,8 +7,8 @@ const router = express.Router();
 var {Subscription} = require('../models/subscription');
 
 router.post('/', (req, res) => {
-  // console.log(`In VLAN Pool POST: ${req.body.subscription_id}`);
-  var body = _.pick(req.body, ['subscription_id', 'subscription_description', 'subscriber_id', 'services', 'mvr', 'access', 'pe', 'poi', 'sp_id', 'service_id', ]);
+  console.log(`In DB Subscriptions POST: ${req.body.subscription_id}`);
+  var body = _.pick(req.body, ['subscription_id', 'subscription_description', 'subscriber_id', 'services', 'summaryStatus', 'deploymentStatus', 'mvr', 'access', 'pe', 'poi', 'sp_id', 'service_id', ]);
   var subscription = new Subscription(body);
 
   subscription.save().then((doc) => {
@@ -95,11 +95,10 @@ router.delete('/:id', (req, res) => {
 });
 
 router.patch('/:id', (req, res) => {
-  // console.log(`In router PATCH`);
-  // console.log(`In VLAN Pool PATCH, id: ${req.body.subscription_id}`);
+  console.log(`In DB Subscriptions PATCH, id: ${req.body.subscription_id}`);
   var id = req.params.id;
-  var body = _.pick(req.body, ['services']);
-  // console.log(`Patching VLAN Pool, vlans: ${JSON.stringify(body.vlans)}`);
+  var body = _.pick(req.body, ['services', 'summaryStatus', 'deploymentStatus']);
+  console.log(`Patching DB Subscription, services: ${JSON.stringify(body.services)}`);
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
