@@ -12,6 +12,12 @@ var SubscriptionSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    moved_subscriber: {
+        moved: {type: Boolean},
+        original_subscription_id: {type: String},
+        original_vlanpool: {type: String},
+        original_pw_pool: {type: String}
+    },
     services: [
         {
             inner_vlan_id: {type: Number},
@@ -97,6 +103,9 @@ var SubscriptionSchema = new mongoose.Schema({
                 type: String
             },
             poi_if: {
+                type: String
+            },
+            pw_sub_if: {
                 type: String
             }
         }

@@ -6,6 +6,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
     $scope.newEntry = false;
     $scope.editEntry = false;
+    $scope.resetEntry = false;
     $scope.showAccessNodes = false;
     $scope.showAccessInterface = false;
     
@@ -23,7 +24,10 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     }).then(function(response) {
         // console.log(`VLAN Pools Status: ${response.status}`);
         $scope.vlanpools = response.data;
-
+        for (var j=0; j<$scope.vlanpools.length; j++) {
+            $scope.vlanpools[j].index = j;
+            $scope.vlanpools[j].showVlans = false;
+        };
     }, function errorCallback(response) {
         console.log(`Status: ${response.status}`);
     });
@@ -51,6 +55,36 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             $scope.poi_area_id = null;
         } else {
             $scope.newEntry = true;
+        };
+    };
+
+    $scope.editItem = function(item) {
+        $scope.editEntry = true;
+        $scope.editedVlanpool = item;
+    };
+
+    $scope.editToggle = function() {
+        if ($scope.editEntry) {
+            $scope.editEntry = false;
+        } else {
+            $scope.editEntry = true;
+        };
+    };
+
+    $scope.resetToggle = function(vp) {
+        if ($scope.resetEntry) {
+            $scope.resetEntry = false;
+        } else {
+            $scope.resetEntry = true;
+            $scope.vpToReset = vp;
+        };
+    };
+
+    $scope.showVlansToggle = function(index) {
+        if ($scope.vlanpools[index].showVlans) {
+            $scope.vlanpools[index].showVlans = false;
+        } else {
+            $scope.vlanpools[index].showVlans = true;
         };
     };
 
@@ -84,16 +118,52 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
         });
-
     };
 
-    $scope.editSubscription = function(subscription) {
-        $scope.editEntry = true;
-        $scope.editedSubscription = subscription;
-    };
-
-    $scope.editToggle = function() {
-        $scope.editEntry = false;
+    $scope.resetItem = function() {
+        var now = new Date();
+        for (var i=0; i<$scope.vpToReset.vlans.length; i++) {
+            $scope.vpToReset.vlans[i].status = "Free";
+            $scope.vpToReset.vlans[i].subscriber_id = "";
+            $scope.vpToReset.vlans[i].subscription_id = "";
+            $scope.vpToReset.vlans[i].timestamp = now;
+        };
+        if ($scope.vlanreserved_start && $scope.vlanreserved_stop) {
+            // console.log(`Reserved start and stop values have been entered`);
+            if ($scope.vlanreserved_start >= $scope.vpToReset.vlans[0].vlan_id && $scope.vlanreserved_start <= $scope.vpToReset.vlans[$scope.vpToReset.vlans.length-1].vlan_id) {
+                // console.log(`Start value is within range`);
+                if ($scope.vlanreserved_stop >= $scope.vpToReset.vlans[0].vlan_id && $scope.vlanreserved_stop <= $scope.vpToReset.vlans[$scope.vpToReset.vlans.length-1].vlan_id) {
+                    // console.log(`Stop value is within range`);
+                    if ($scope.vlanreserved_start <= $scope.vlanreserved_stop) {
+                        // console.log(`Start value is smaller than stop value`);
+                        var j=0;
+                        while ($scope.vpToReset.vlans[j].vlan_id != $scope.vlanreserved_start) {
+                            console.log(`Count: ${j}, VLAN: ${$scope.vpToReset.vlans[j].vlan_id}`);
+                            j++;
+                        };
+                        while ($scope.vpToReset.vlans[j].vlan_id <= $scope.vlanreserved_stop) {
+                            console.log(`Count: ${j}, VLAN: ${$scope.vpToReset.vlans[j].vlan_id}`);
+                            $scope.vpToReset.vlans[j].status = "Reserved";
+                            $scope.vpToReset.vlans[j].subscriber_id = $scope.subscriber_id;
+                            $scope.vpToReset.vlans[j].subscription_id = $scope.description;
+                            $scope.vpToReset.vlans[j].timestamp = now;
+                            j++;
+                        };
+                    } else {console.log(`!!!!!!!!! Stop value is smaller than start value!!!!!!!!!`);};
+                } else {console.log(`Stop value is NOT within range`);};
+            } else {console.log(`Start value is NOT within range`);};
+        } else {console.log(`Reserved start and stop values have NOT been entered`);};
+        $http({
+            method: "PATCH",
+            url: "/vlanpools/"+$scope.vpToReset._id,
+            data: $scope.vpToReset
+        }).then(function(response) {
+            // console.log(`VLAN Pool Status: ${response.status}`);
+            $location.path('/vlanpools');
+            $route.reload();
+        }, function errorCallback(response) {
+            console.log(`Status: ${response.status}`);
+        });
     };
 
     $scope.deleteItem = function(item) {

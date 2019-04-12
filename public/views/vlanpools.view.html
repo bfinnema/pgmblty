@@ -1,54 +1,82 @@
 <div ng-include="'nav-opennet.html'"></div>
 
-<h1>VLAN Pools ({{ vlanpools.length }})</h1>
-<div ng-show="!newEntry && !editEntry">
+<div class="row">
+    <div class="col-md-6">
+        <h1>VLAN Pools ({{ vlanpools.length }})</h1>
+    </div>
+    <div class="col-md-3" ng-show="!newEntry && !editEntry && !resetEntry">
+        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New VLAN Pool</a>
+    </div>
+</div>
+<hr>
+<div ng-show="!newEntry && !editEntry && !resetEntry">
     <div ng-repeat="vlanpool in vlanpools" class="row">
-        <h2>VLAN Pool: {{ vlanpool.vlanpool_id }} </h2>
-        <div class="col-md-6">
-            <table class="table table-striped">
-                <tr>
-                    <td>Description</td><td>{{ vlanpool.vlanpool_description }}</td>
-                </tr>
-                <tr>
-                    <td>Access Area</td><td>{{ vlanpool.access_area_id }}</td>
-                </tr>
-                <tr>
-                    <td>Access Node</td><td>{{ vlanpool.access_node_id }}</td>
-                </tr>
-                <tr>
-                    <td>Service Provider</td><td>{{ vlanpool.sp_id }}</td>
-                </tr>
-            </table>
-        </div>
-        <div class="col-md-6">
+        <div class="row">
             <div class="col-md-6">
-                <a class="btn btn-warning btn-lg btn-block" ng-click="deleteItem(vlanpool)">Delete VLAN Pool</a>
+                <h2>VLAN Pool: {{ vlanpool.vlanpool_id }} </h2>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-striped">
+                    <tr>
+                        <td>Description</td><td>{{ vlanpool.vlanpool_description }}</td>
+                    </tr>
+                    <tr>
+                        <td>Access Area</td><td>{{ vlanpool.access_area_id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Access Node</td><td>{{ vlanpool.access_node_id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Service Provider</td><td>{{ vlanpool.sp_id }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-2">
+                <a class="btn btn-warning btn-lg btn-block" ng-click="deleteItem(vlanpool)">Delete VLAN Pool</a>
+            </div>
+            <div class="col-md-2">
+                <a class="btn btn-warning btn-lg btn-block" ng-click="resetToggle(vlanpool)">Reset VLAN Pool</a>
+            </div>
+            <!-- <div class="col-md-2">
+                <a class="btn btn-warning btn-lg btn-block" ng-click="editToggle(vlanpool)">Edit VLAN Pool</a>
+            </div> -->
+        </div>
         <br>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th width="10%">VLAN</th>
-                    <th width="15%">Status</th>
-                    <th width="30%">Timestamp</th>
-                    <th width="15%">Subscriber</th>
-                    <th width="30%">Subscription</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="vlan in vlanpool.vlans">
-                    <td>{{ vlan.vlan_id }}</td>
-                    <td>{{ vlan.status }}</td>
-                    <td>{{ vlan.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}</td>
-                    <td>{{ vlan.subscriber_id }}</td>
-                    <td>{{ vlan.subscription_id }}</td>
-                </tr>
-                <tr ng-if="vlanpool.vlans == null">
-                    <td>There are no entries</td>
-                </tr>
-            </tbody>
-        </table>
+        <div ng-show="!vlanpool.showVlans">
+            <div class="col-md-2">
+                <a class="btn btn-default" ng-click="showVlansToggle(vlanpool.index)">Show VLAN's</a>
+            </div>
+        </div>
+        <div ng-show="vlanpool.showVlans">
+            <div class="col-md-2">
+                <a class="btn btn-default" ng-click="showVlansToggle(vlanpool.index)">Hide VLAN's</a>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th width="10%">VLAN</th>
+                        <th width="15%">Status</th>
+                        <th width="30%">Timestamp</th>
+                        <th width="15%">Subscriber</th>
+                        <th width="30%">Subscription</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="vlan in vlanpool.vlans">
+                        <td>{{ vlan.vlan_id }}</td>
+                        <td>{{ vlan.status }}</td>
+                        <td>{{ vlan.timestamp | date:'dd-MM-yyyy HH:mm:ss' : 'CET'  }}</td>
+                        <td>{{ vlan.subscriber_id }}</td>
+                        <td>{{ vlan.subscription_id }}</td>
+                    </tr>
+                    <tr ng-if="vlanpool.vlans == null">
+                        <td>There are no entries</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 <hr>
@@ -104,7 +132,7 @@
         <br>
         <div class="row">
             <div class="form-group col-md-4">
-                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+                <button ng-disabled="formNewItem.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
             </div>
             <div class="col-md-4">
                 <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
@@ -113,10 +141,37 @@
     </form>
 </div>
 
-<div class="row actions" ng-show="!newEntry && !editEntry">
-    <div class="col-md-4">
-        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New VLAN Pool</a>
-    </div>
+<div ng-show="resetEntry" class="row">
+    <form name="formResetItem" ng-submit="resetItem()" novalidate>
+        <h2 class="form-signin-heading">Reset VLAN Pool Form</h2>
+        <div class="row">
+            <h3>VLAN's to be reserved (Optional)</h3>
+            <div class="form-group col-md-3">
+                <label for="vlanreserved_start">VLAN Pool Start</label>
+                <input type="number" id="vlanreserved_start" class="form-control" ng-model="vlanreserved_start" placeholder="VLAN's Reserved Start">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="vlanreserved_stop">VLAN Pool Stop</label>
+                <input type="text" id="vlanreserved_stop" class="form-control" ng-model="vlanreserved_stop" placeholder="VLAN's Reserved Stop">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="description">Description of reservation</label>
+                <input type="text" id="description" class="form-control" ng-model="description" placeholder="VLAN Pool Description">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="subscriber_id">Reserved for Subscriber</label>
+                <input type="text" id="subscriber_id" class="form-control" ng-model="subscriber_id" placeholder="Subscriber ID">
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <button ng-disabled="formResetItem.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="resetToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
 </div>
 
 <div ng-show="editEntry">
@@ -126,7 +181,7 @@
             <div class="form-group col-md-3">
                 <label for="vlanpool_id">VLAN Pool ID</label>
                 <input type="text" id="vlanpool_id" class="form-control" ng-model="vlanpool_id" placeholder="VLAN Pool ID" required>
-                <i ng-show="formNewItem.vlanpool_id.$error.required">*Must be filled in</i>
+                <i ng-show="formEditItem.vlanpool_id.$error.required">*Must be filled in</i>
             </div>
             <div class="form-group col-md-4">
                 <label for="description">VLAN Pool Description</label>
@@ -137,7 +192,7 @@
                 <select class="form-control" ng-model="sp_id" name="sp_id" required>
                     <option ng-repeat="sp in inventory.sps.sp" value="{{sp.sp_id}}">{{sp.sp_id}}</option>
                 </select>
-                <i ng-show="formSubscription.sp_id.$error.required">*Must be filled in</i>
+                <i ng-show="formEditItem.sp_id.$error.required">*Must be filled in</i>
             </div>
         <div class="row">
         </div>
@@ -146,26 +201,26 @@
                 <select class="form-control" ng-model="access_area_id" name="access_area_id" ng-change="listAccessNodes()" required>
                     <option ng-repeat="access_area in inventory.access_areas.access_area" value="{{access_area.access_area_id}}">{{access_area.access_area_id}}</option>
                 </select>
-                <i ng-show="formNewItem.access_area_id.$error.required">*Must be filled in</i>
+                <i ng-show="formEditItem.access_area_id.$error.required">*Must be filled in</i>
             </div>
             <div class="form-group col-md-3" ng-show="showAccessNodes">
                 <label>Access Node</label>
                 <select class="form-control" ng-model="access_node_id" name="access_node_id" ng-change="listAccessInterfaces()" required>
                     <option ng-repeat="access_node in access_nodes" value="{{access_node.access_node_id}}">{{access_node.access_node_id}}</option>
                 </select>
-                <i ng-show="formNewItem.access_node_id.$error.required">*Must be filled in</i>
+                <i ng-show="formEditItem.access_node_id.$error.required">*Must be filled in</i>
             </div>
         <div class="row">
         </div>
             <div class="form-group col-md-3">
                 <label for="vlanpool_start">VLAN Pool Start</label>
                 <input type="number" id="vlanpool_start" class="form-control" ng-model="vlanpool_start" placeholder="VLAN Pool Start" required>
-                <i ng-show="formNewItem.vlanpool_start.$error.required">*Must be filled in</i>
+                <i ng-show="formEditItem.vlanpool_start.$error.required">*Must be filled in</i>
             </div>
             <div class="form-group col-md-3">
                 <label for="vlanpool_stop">VLAN Pool Stop</label>
                 <input type="text" id="vlanpool_stop" class="form-control" ng-model="vlanpool_stop" placeholder="VLAN Pool Stop" required>
-                <i ng-show="formNewItem.vlanpool_stop.$error.required">*Must be filled in</i>
+                <i ng-show="formEditItem.vlanpool_stop.$error.required">*Must be filled in</i>
             </div>
         </div>
         <br>

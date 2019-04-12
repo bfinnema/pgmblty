@@ -20,7 +20,8 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     });
 
     $scope.newEntryToggle = function() {
-        if ($scope.newEntry) {
+        $window.alert("This function is not implemented yet.");
+        /* if ($scope.newEntry) {
             $scope.newEntry = false;
             $scope.name = null;
             $scope.s_vlan_offset = null;
@@ -30,7 +31,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             $scope.vlan_pool_end = null;
         } else {
             $scope.newEntry = true;
-        };
+        }; */
     };
 
     $scope.generateItem = function() {

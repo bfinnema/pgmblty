@@ -42,25 +42,25 @@ router.get('/check-sync/:id', (req, res) => {
 
 // POST subscription
 router.post('/', (req, res) => {
-  // console.log(`Here we are in the subscriptions router. POST Subscription`);
-  var picked_body = _.pick(req.body, ['name', 'subscriber_id', 'cpe_name', 'sp_id', 'service_id', 'access_area_id', 'access_node_id', 'access_if', 'pe_area_id', 'poi_area_id', 'pwsubinterface_id', 'vlan_mappings']);
+  console.log(`Here we are in the subscriptions router. POST Subscription`);
+  var picked_body = _.pick(req.body, ['name', 'subscriber_id', 'moved_subscriber', 'cpe_name', 'sp_id', 'service_id', 'access_area_id', 'access_node_id', 'access_if', 'pe_area_id', 'poi_area_id', 'pwsubinterface_id', 'vlan_mappings', 'original_access']);
   // console.log(`req.body, name: ${req.body.name}, pick body, name: ${picked_body.name}`);
-  // console.log(`Picked body: ${JSON.stringify(picked_body)}`);
-  // console.log(`***************`);
+  console.log(`Picked body: ${JSON.stringify(picked_body)}`);
+  console.log(`***************`);
   var object_body = {
     "open-net-core:open-net-core": picked_body
   };
-  // console.log(`Object body: ${JSON.stringify(object_body)}`);
-  // console.log(`***************`);
-  var body = JSON.stringify(object_body);
-  // console.log(`body: ${body}`);
-  // console.log(`***************`);
+  console.log(`Object body: ${JSON.stringify(object_body)}`);
+  console.log(`***************`);
+  var sub_body = JSON.stringify(object_body);
+  console.log(`body: ${sub_body}`);
+  console.log(`***************`);
   
   // console.log(`***************`);
   // console.log(`User: ${process.env.NSO_USER}, Password: ${process.env.NSO_PWD}`);
   var auth = new Buffer(process.env.NSO_USER + ':' + process.env.NSO_PWD).toString('base64');
-  // console.log(`Encoded Authentication: ${auth}`);
-  // console.log(`***************`);
+  console.log(`Encoded Authentication: ${auth}`);
+  console.log(`***************`);
 
   var options = {
     method: 'POST',
@@ -71,15 +71,20 @@ router.post('/', (req, res) => {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/vnd.yang.data+json'
     },
-    body: body
+    body: sub_body
   };
 
   // console.log(`Options: ${JSON.stringify(options)}`);
 
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
-    // console.log(`Body: ${body}`);
-    res.send(body);
+    console.log(`Body: ${body}, response: ${JSON.stringify(response)}`);
+    if (response.statusCode < 210) {
+      res.send(body);
+    } else {
+      res.status(response.statusCode).send(body);
+    };
+    // res.send(body);
   });
 
 });
@@ -92,7 +97,12 @@ router.get('/un-deploy/:id', (req, res) => {
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
     // console.log(`Body: ${body}`);
-    res.send(body);
+    if (response.statusCode < 210) {
+      res.send(body);
+    } else {
+      res.status(response.statusCode).send(body);
+    };
+    // res.send(body);
   });
 });
 
@@ -104,7 +114,12 @@ router.get('/re-deploy/:id', (req, res) => {
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
     // console.log(`Body: ${body}`);
-    res.send(body);
+    if (response.statusCode < 210) {
+      res.send(body);
+    } else {
+      res.status(response.statusCode).send(body);
+    };
+    // res.send(body);
   });
 });
 
@@ -115,8 +130,13 @@ router.delete('/:id', (req, res) => {
   
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
-    // console.log(`Body: ${body}`);
-    res.send(body);
+    // console.log(`Body: ${body}, response: ${JSON.stringify(response)}`);
+    if (response.statusCode < 210) {
+      res.send(body);
+    } else {
+      res.status(response.statusCode).send(body);
+    };
+    // res.send(body);
   });
 });
 

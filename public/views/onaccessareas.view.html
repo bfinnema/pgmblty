@@ -1,8 +1,7 @@
 <div ng-include="'nav-opennet.html'"></div>
 
-<h1>Access Areas</h1>
+<h1>Access Areas ({{ collection.length }})</h1>
 <div ng-show="!newEntry && !editEntry">
-    <h2>List of entries ({{ collection.length }}) </h2>
     <hr>
     <table class="table table-striped">
         <thead>
@@ -53,7 +52,7 @@
 <hr>
 <div ng-show="newEntry">
     <form name="formNewItem" ng-submit="generateItem()" novalidate>
-        <h2 class="form-signin-heading">New Service Provider Form</h2>
+        <h2 class="form-signin-heading">New Access Area Form</h2>
         <div class="row">
             <div class="form-group col-md-3">
                 <label for="name">SP ID</label>

@@ -57,7 +57,8 @@ function($scope, $http, $window, $route, $location) {
     };
 
     $scope.newEntryToggle = function() {
-        if ($scope.newEntry) {
+        $window.alert("This function is not implemented yet.");
+        /* if ($scope.newEntry) {
             $scope.newEntry = false;
             $scope.name = null;
             $scope.qos_profile_in = null;
@@ -76,7 +77,7 @@ function($scope, $http, $window, $route, $location) {
             
         } else {
             $scope.newEntry = true;
-        };
+        }; */
     };
 
     $scope.generateItem = function() {
@@ -139,7 +140,8 @@ function($scope, $http, $window, $route, $location) {
     };
 
     $scope.editToggle = function() {
-        $scope.editEntry = false;
+        $window.alert("This function is not implemented yet.");
+        // $scope.editEntry = false;
     };
 
     $scope.unDeployItem = function(item) {
