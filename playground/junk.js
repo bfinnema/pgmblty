@@ -90,3 +90,69 @@ $http({
 }, function errorCallback(response) {
     console.log(`Status: ${response.status}`);
 });
+
+// About VLAN's
+
+/* 
+    $scope.VMArray = [0,1,2,3,4,5,6,7];
+    $scope.vlans = [];
+    for (var i=0; i<8; i++) {
+        $scope.vlans.push({vlan: null});
+    };
+    $scope.vlanBtnShow = [false,true,false,false,false,false,false,false];
+    $scope.vlanShow = [true,false,false,false,false,false,false,false];
+    var numVMLines = 0;
+
+    $scope.showVMLine = function() {
+        // console.log("Entering showVMline. numVMLines: "+numVMLines);
+        if ($scope.vlans[numVMLines]) {
+            console.log("numVMLines: "+numVMLines+", vlan: "+$scope.vlans[numVMLines].inner_vlan+", "+$scope.vlans[numVMLines].outer_vlan);
+            numVMLines = numVMLines + 1;
+            $scope.numVMLines = numVMLines;
+            $scope.vlanShow[numVMLines] = true;
+            $scope.vlanBtnShow[numVMLines] = false;
+            $scope.vlanBtnShow[numVMLines+1] = true;
+        }
+        else {
+            $window.alert("You must fill in the previous field");
+        };
+    };
+    
+    $scope.removeVlan = function(orgNum) {
+        // console.log("Entering removevlan. numVMLines: "+numVMLines);
+        for (var i=orgNum; i<numVMLines; i++) {
+            $scope.vlans[i] = $scope.vlans[i+1];
+        };
+        $scope.vlans[numVMLines] = "";
+        $scope.vlanShow[numVMLines] = false;
+        $scope.vlanBtnShow[numVMLines] = true;
+        $scope.vlanBtnShow[numVMLines+1] = false;
+        numVMLines -= 1;
+        $scope.numVMLines = numVMLines;
+    };
+ */
+
+$scope.newEntryToggle = function() {
+/* 
+        $scope.vlans = [];
+        for (var i=0; i<8; i++) {
+            $scope.vlans.push({vlan: null});
+        };
+        $scope.vlanBtnShow = [false,true,false,false,false,false,false,false];
+        $scope.vlanShow = [true,false,false,false,false,false,false,false];
+        numVMLines = 0;
+*/            
+};
+
+$scope.generateItem = function() {
+/* 
+    var vlans = [];
+    for (var n=0; n<$scope.vlans.length; n++) {
+        if ($scope.vlans[n].vlan > 10) {
+            vlans.push($scope.vlans[n]);
+        };
+    };
+*/        
+
+
+};

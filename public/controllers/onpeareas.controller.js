@@ -26,51 +26,38 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             $scope.pe_node_id = null;
             $scope.pe_if = null;
             $scope.pe_area_description = null;
+            $scope.pe_pwhe_ipaddress = null;
         } else {
             $scope.newEntry = true;
         };
     };
 
     $scope.generateItem = function() {
-        console.log(`vlans: ${JSON.stringify(vlans)}`);
 
         var data = {
-            "open-net-access:inventory": {
-                "pe_areas": {
-                    "pe_area": [
-                        {
-                            "pe_area_id": $scope.pe_area_id,
-                            "pe_area_description": $scope.description,
-                            "node": {
-                                "pe_node_id": $scope.pe_node_id,
-                                "pe_if": $scope.pe_if
-                            }
+            "pe_areas": {
+                "pe_area": [
+                    {
+                        "pe_area_id": $scope.pe_area_id,
+                        "pe_area_description": $scope.description,
+                        "node": {
+                            "pe_node_id": $scope.pe_node_id,
+                            "pe_if": $scope.pe_if,
+                            "pe_pwhe_ipaddress": $scope.pe_pwhe_ipaddress
                         }
-                    ]
-                }
+                    }
+                ]
             }
         }
         // console.log(`DATA: ${JSON.stringify(data)}`);
 
-        var path = "/api/config/open-net-access/inventory";
-        var url = "http://"+host+":"+hostport+path;
-        // console.log(`url: ${url}`);
-        var method = "PATCH";
-        var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
-        // console.log(`Encoded Authentication: ${auth}`);
-
         $http({
-            method: method,
-            url: url,
-            headers: {
-                'Content-Type': 'application/vnd.yang.data+json',
-                'Accept': 'application/vnd.yang.data+json',
-                'Authorization': 'Basic '+auth
-            },
+            method: "POST",
+            url: "/inventory/peareas",
             data: data
         }).then(function(response) {
             // console.log(`DATA: ${response.data}`);
-            $location.path('/onservices');
+            $location.path('/onpeareas');
             $route.reload();
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
@@ -90,23 +77,13 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
     $scope.deleteItem = function(item) {
 
-        if ($window.confirm('Please confirm that you want to delete the subscription '+item.sp_id)) {
-            var path = "/api/running/open-net-access/inventory/services/service/"+item.id;
-            var url = "http://"+host+":"+hostport+path;
-            // console.log(`url: ${url}`);
-            var method = "DELETE";
-            var auth = $window.btoa(NSOServer.username+":"+NSOServer.password);
+        if ($window.confirm('Please confirm that you want to delete the subscription '+item.pe_area_id)) {
 
             $http({
-                method: method,
-                url: url,
-                headers: {
-                    'Content-Type': 'application/vnd.yang.data+json',
-                    'Accept': 'application/vnd.yang.data+json',
-                    'Authorization': 'Basic '+auth
-                }
+                method: "DELETE",
+                url: "/inventory/peareas/"+item.pe_area_id
             }).then(function(response) {
-                $location.path('/onservices');
+                $location.path('/onpeareas');
                 $route.reload();
             }, function errorCallback(response) {
                 console.log(`Status: ${response.status}`);

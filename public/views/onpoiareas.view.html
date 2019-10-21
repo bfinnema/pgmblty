@@ -9,7 +9,10 @@
                 <th width="10%">POI Area ID</th>
                 <th width="20%">POI Area Description</th>
                 <th width="10%">POI Node</th>
-                <th width="10%">PW Sub-interface</th>
+                <th width="10%">Interface to PE</th>
+                <th width="10%">Interface to SP</th>
+                <th width="10%">POI SP Interface</th>
+                <th width="15%">PWHE IP Address</th>
                 <th width="15%">Operations</th>
             </tr>
         </thead>
@@ -18,7 +21,10 @@
                 <td>{{ item.poi_area_id }}</td>
                 <td>{{ item.poi_area_description }}</td>
                 <td>{{ item.node.poi_node_id }}</td>
+                <td>{{ item.node.to_pe_if }}</td>
+                <td>{{ item.node.to_sp_if }}</td>
                 <td>{{ item.node.poi_if }}</td>
+                <td>{{ item.node.poi_pwhe_ipaddress }}</td>
                 <td>
                     <a class="btn btn-primary" ng-click="editItem(item)">
                         <i class="glyphicon glyphicon-edit"></i>
@@ -37,7 +43,7 @@
 <div class="row" ng-show="collection != null && !newEntry && !editEntry">
     <p><strong> Operations:   </strong>
         <span class="glyphicon glyphicon-edit"> </span> Edit the area (not implemented yet).
-        <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the area.
+        <span class="glyphicon glyphicon-trash"> </span> Delete the area.
     </p>
 </div>
 <hr>
@@ -46,8 +52,8 @@
         <h2 class="form-signin-heading">New POI Area Form</h2>
         <div class="row">
             <div class="form-group col-md-3">
-                <label for="name">POI Area ID</label>
-                <input type="text" id="name" class="form-control" ng-model="name" placeholder="POI Area ID" required>
+                <label for="poi_area_id">POI Area ID</label>
+                <input type="text" id="poi_area_id" class="form-control" ng-model="poi_area_id" placeholder="POI Area ID" required>
             </div>
             <div class="form-group col-md-4">
                 <label for="description">POI Area Description</label>
@@ -57,9 +63,25 @@
                 <label for="poi_node_id">POI Node</label>
                 <input type="text" id="poi_node_id" class="form-control" ng-model="poi_node_id" placeholder="POI Node" required>
             </div>
+        </div>
+        <div class="row">
             <div class="form-group col-md-3">
-                <label for="poi_if">Interface</label>
+                <label for="to_pe_if">Interface to PE</label>
+                <input type="text" id="to_pe_if" class="form-control" ng-model="to_pe_if" placeholder="Interface to PE" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="to_sp_if">Interface to SP</label>
+                <input type="text" id="to_sp_if" class="form-control" ng-model="to_sp_if" placeholder="Interface to SP" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="poi_if">POI SP Interface</label>
                 <input type="text" id="poi_if" class="form-control" ng-model="poi_if" placeholder="POI Node Interface" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="poi_pwhe_ipaddress">PWHE IP address</label>
+                <input type="text" id="poi_pwhe_ipaddress" class="form-control" ng-model="poi_pwhe_ipaddress" placeholder="PWHE IP address" required>
             </div>
         </div>
         <br>
@@ -97,7 +119,15 @@
                 <input type="text" id="poi_node_id" class="form-control" ng-model="poi_node_id" placeholder="POI Node" required>
             </div>
             <div class="form-group col-md-3">
-                <label for="poi_if">Interface</label>
+                <label for="to_pe_if">Interface to PE</label>
+                <input type="text" id="to_pe_if" class="form-control" ng-model="to_pe_if" placeholder="Interface to PE" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="to_sp_if">Interface to SP</label>
+                <input type="text" id="to_sp_if" class="form-control" ng-model="to_sp_if" placeholder="Interface to SP" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="poi_if">POI SP Interface</label>
                 <input type="text" id="poi_if" class="form-control" ng-model="poi_if" placeholder="POI Node Interface" required>
             </div>
         </div>

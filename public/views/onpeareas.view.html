@@ -6,11 +6,12 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th width="10%">PE Area ID</th>
+                <th width="15%">PE Area ID</th>
                 <th width="20%">PE Area Description</th>
-                <th width="10%">PE Node</th>
-                <th width="10%">Interface</th>
-                <th width="15%">Operations</th>
+                <th width="15%">PE Node</th>
+                <th width="15%">Interface</th>
+                <th width="15%">PWHE IP Address</th>
+                <th width="20%">Operations</th>
             </tr>
         </thead>
         <tbody>
@@ -19,6 +20,7 @@
                 <td>{{ item.pe_area_description }}</td>
                 <td>{{ item.node.pe_node_id }}</td>
                 <td>{{ item.node.pe_if }}</td>
+                <td>{{ item.node.pe_pwhe_ipaddress }}</td>
                 <td>
                     <a class="btn btn-primary" ng-click="editItem(item)">
                         <i class="glyphicon glyphicon-edit"></i>
@@ -37,7 +39,7 @@
 <div class="row" ng-show="collection != null && !newEntry && !editEntry">
     <p><strong> Operations:   </strong>
         <span class="glyphicon glyphicon-edit"> </span> Edit the area (not implemented yet).
-        <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the area.
+        <span class="glyphicon glyphicon-trash"> </span> Delete the area.
     </p>
 </div>
 <hr>
@@ -46,13 +48,15 @@
         <h2 class="form-signin-heading">New PE Area Form</h2>
         <div class="row">
             <div class="form-group col-md-3">
-                <label for="name">PE Area ID</label>
-                <input type="text" id="name" class="form-control" ng-model="name" placeholder="PE Area ID" required>
+                <label for="pe_area_id">PE Area ID</label>
+                <input type="text" id="pe_area_id" class="form-control" ng-model="pe_area_id" placeholder="PE Area ID" required>
             </div>
             <div class="form-group col-md-4">
                 <label for="description">PE Area Description</label>
                 <input type="text" id="description" class="form-control" ng-model="description" placeholder="PE Area Description" required>
             </div>
+        </div>
+        <div class="row">
             <div class="form-group col-md-3">
                 <label for="pe_node_id">PE Node</label>
                 <input type="text" id="pe_node_id" class="form-control" ng-model="pe_node_id" placeholder="PE Node" required>
@@ -60,6 +64,10 @@
             <div class="form-group col-md-3">
                 <label for="pe_if">Interface</label>
                 <input type="text" id="pe_if" class="form-control" ng-model="pe_if" placeholder="PE Node Interface" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="pe_pwhe_ipaddress">PWHE IP address</label>
+                <input type="text" id="pe_pwhe_ipaddress" class="form-control" ng-model="pe_pwhe_ipaddress" placeholder="PWHE IP address" required>
             </div>
         </div>
         <br>
@@ -85,13 +93,15 @@
         <h2 class="form-signin-heading">Edit Service Form</h2>
         <div class="row">
             <div class="form-group col-md-3">
-                <label for="name">PE Area ID</label>
-                <input type="text" id="name" class="form-control" ng-model="name" placeholder="PE Area ID" required>
+                <label for="pe_area_id">PE Area ID</label>
+                <input type="text" id="pe_area_id" class="form-control" ng-model="pe_area_id" placeholder="PE Area ID" required>
             </div>
             <div class="form-group col-md-4">
-                <label for="name">PE Area Description</label>
+                <label for="description">PE Area Description</label>
                 <input type="text" id="description" class="form-control" ng-model="description" placeholder="PE Area Description" required>
             </div>
+        </div>
+        <div class="row">
             <div class="form-group col-md-3">
                 <label for="pe_node_id">PE Node</label>
                 <input type="text" id="pe_node_id" class="form-control" ng-model="pe_node_id" placeholder="PE Node" required>
@@ -99,6 +109,10 @@
             <div class="form-group col-md-3">
                 <label for="pe_if">Interface</label>
                 <input type="text" id="pe_if" class="form-control" ng-model="pe_if" placeholder="PE Node Interface" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="pe_pwhe_ipaddress">PWHE IP address</label>
+                <input type="text" id="pe_pwhe_ipaddress" class="form-control" ng-model="pe_pwhe_ipaddress" placeholder="PWHE IP address" required>
             </div>
         </div>
         <br>
