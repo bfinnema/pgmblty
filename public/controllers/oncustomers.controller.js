@@ -663,15 +663,15 @@ function($scope, $http, $window, $route, $location, $q) {
             var vp = vlanResults.updatedVlanpool;
             var PWPool = vlanResults.updatedPWPool;
             var vlan_mappings = {"vlan_mapping": vlan_mapping};
-            console.log(`vlan_mappings: ${JSON.stringify(vlan_mappings)}`);
-            console.log(`VLAN Pool now: ${JSON.stringify(vp)}`);
+            // console.log(`vlan_mappings: ${JSON.stringify(vlan_mappings)}`);
+            // console.log(`VLAN Pool now: ${JSON.stringify(vp)}`);
 
-            console.log(`PW now after local PW Sub interfaces: ${JSON.stringify(PWPool)}`);
+            // console.log(`PW now after local PW Sub interfaces: ${JSON.stringify(PWPool)}`);
 
             PWResults = allocatePWSubInt(PWPool);
             pw = PWResults.updatedPWPool;
             var selectedPWSubInterface = PWResults.selectedPWSubInterface;
-            console.log(`PW now after global PW sub if: ${JSON.stringify(pw)}`);
+            // console.log(`PW now after global PW sub if: ${JSON.stringify(pw)}`);
 
             var access = {
                 "access_area_id": $scope.access_area_id,
@@ -695,7 +695,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 "vlan_mappings": vlan_mappings,
                 "original_access": $scope.subscriptionToMove.db_subscription.access
             };
-            console.log(`DATA: ${JSON.stringify(data_for_nso)}`);
+            // console.log(`DATA: ${JSON.stringify(data_for_nso)}`);
 
             var cpe = {
                 "cpe_name": $scope.cpe_name,
@@ -725,7 +725,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 };
                 services_for_db.push(service_for_db);
             };
-            console.log(`services_for_db DATA: ${JSON.stringify(services_for_db)}`);
+            // console.log(`services_for_db DATA: ${JSON.stringify(services_for_db)}`);
 
             var mvr = {
                 "mvr_vlan": 0,
@@ -769,18 +769,18 @@ function($scope, $http, $window, $route, $location, $q) {
                 "sp_id": $scope.sp_id,
                 "service_id": $scope.service_id
             };
-            console.log(`db_subscription DATA: ${JSON.stringify(data_for_db_subscription)}`);
+            // console.log(`db_subscription DATA: ${JSON.stringify(data_for_db_subscription)}`);
 
             $http({
                 method: "DELETE",
                 url: "/subscriptions/"+$scope.subscriptionToMove.subscription_id
             }).then(function(response) {
-                console.log(`DELETE Status: ${response.status}`);
+                // console.log(`DELETE Status: ${response.status}`);
 
                 for (var l=0; l<$scope.vlanpools.length; l++) {
                     if ($scope.subscriptionToMove.sp_id == $scope.vlanpools[l].sp_id && $scope.subscriptionToMove.access_area_id == $scope.vlanpools[l].access_area_id && $scope.subscriptionToMove.access_node_id == $scope.vlanpools[l].access_node_id) {
                         var vpToChange = $scope.vlanpools[l];
-                        console.log(`Found VLAN Pool: ${JSON.stringify(vpToChange)}`);
+                        // console.log(`Found VLAN Pool: ${JSON.stringify(vpToChange)}`);
                     };
                 };
                 var now = new Date();
@@ -802,15 +802,15 @@ function($scope, $http, $window, $route, $location, $q) {
                     data: vpToChange
                 });
             }).then(function(response) {
-                console.log(`VLAN Pool Status: ${response.status}`);
+                // console.log(`VLAN Pool Status: ${response.status}`);
 
-                console.log(`Deleting db_subscription, _id: ${$scope.subscriptionToMove.db_subscription._id}, subscription_id: ${$scope.subscriptionToMove.db_subscription.subscription_id}`);
+                // console.log(`Deleting db_subscription, _id: ${$scope.subscriptionToMove.db_subscription._id}, subscription_id: ${$scope.subscriptionToMove.db_subscription.subscription_id}`);
                 return $http({
                     method: "DELETE",
                     url: "/db_subscriptions/"+$scope.subscriptionToMove.db_subscription._id
                 });
             }).then(function(response) {
-                console.log(`DELETE Status of DB Subscription: ${response.status}`);
+                // console.log(`DELETE Status of DB Subscription: ${response.status}`);
 
                 return $http({
                     method: "POST",
@@ -818,7 +818,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     data: data_for_nso
                 });
             }).then(function(response) {
-                console.log(`open-net-access Status: ${response.status}`);
+                // console.log(`open-net-access Status: ${response.status}`);
 
                 return $http({
                     method: 'GET',
@@ -839,7 +839,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 });
             }).then(function(subPE) {
                 $scope.moveSubPE = JSON.parse(JSON.stringify(subPE.data).replace("moveSubPE:moveSubPE", "moveSubPE")).moveSubPE;
-                console.log(`moveSubPE: ${JSON.stringify($scope.moveSubPE)}`);
+                // console.log(`moveSubPE: ${JSON.stringify($scope.moveSubPE)}`);
                 data_for_db_subscription.pe.node.pe_if = $scope.moveSubPE.vlans.vlan[0].pe_interface;
 
                 return $http({
@@ -857,21 +857,21 @@ function($scope, $http, $window, $route, $location, $q) {
                     data: vp
                 });
             }).then(function(response) {
-                console.log(`VLAN Pool Status: ${response.status}`);
+                // console.log(`VLAN Pool Status: ${response.status}`);
                 return $http({
                     method: "PATCH",
                     url: "/pseudowires/"+pw._id,
                     data: pw
                 });
             }).then(function(response) {
-                console.log(`Status of PW Set: ${response.status}`);
+                // console.log(`Status of PW Set: ${response.status}`);
                 return $http({
                     method: "POST",
                     url: "/db_subscriptions",
                     data: data_for_db_subscription
                 });
             }).then(function(response) {
-                console.log(`Status of Subscription in DB: ${response.status}`);
+                // console.log(`Status of Subscription in DB: ${response.status}`);
                 $location.path('/oncustomers');
                 $route.reload();
             }, function errorCallback(response) {
@@ -1354,8 +1354,8 @@ function($scope, $http, $window, $route, $location, $q) {
                         var endReserve = j+8;
                         console.log(`j: ${j} k: ${k}, endReserve: ${endReserve}`);
                         for (var o=j+numVlanMappings; o<endReserve; o++) {
-                            console.log(`Setting Reserved VLAN's`);
-                            console.log(`j: ${j} o: ${o}, k: ${k}, endReserve: ${endReserve}`);
+                            // console.log(`Setting Reserved VLAN's`);
+                            // console.log(`j: ${j} o: ${o}, k: ${k}, endReserve: ${endReserve}`);
                             vp.vlans[o].status = "Reserved";
                             vp.vlans[o].subscriber_id = $scope.subscriber_id;
                             vp.vlans[o].subscription_id = $scope.name;

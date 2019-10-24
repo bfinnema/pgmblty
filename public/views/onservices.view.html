@@ -4,7 +4,14 @@
 <div ng-show="!newEntry && !editEntry">
     <hr>
     <div ng-repeat="sp in collection">
-        <h4>Service Provider: {{ sp.sp_id }} </h4>
+        <div class="row">
+            <div class="col-md-4">
+                <h4>Service Provider: {{ sp.sp_id }} </h4>
+            </div>
+            <div class="col-md-4" ng-show="!newEntry && !editEntry">
+                <a class="btn btn-info " ng-click="addServiceToggle(sp)">New Service for SP {{ sp.sp_id }}</a>
+            </div>
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -27,7 +34,7 @@
                         <a class="btn btn-primary" ng-click="editItem(service)">
                             <i class="glyphicon glyphicon-edit"></i>
                         </a>
-                        <a class="btn btn-primary" ng-click="deleteItem(service)">
+                        <a class="btn btn-primary" ng-click="deleteService(sp.sp_id, service.id)">
                             <i class="glyphicon glyphicon-trash"></i>
                         </a>
                     </td>
@@ -42,21 +49,87 @@
 <div class="row" ng-show="collection != null">
     <p><strong> Operations:   </strong>
         <span class="glyphicon glyphicon-edit"> </span> Edit the Service (not implemented yet).
-        <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the Service.
+        <span class="glyphicon glyphicon-trash"> </span> Delete the Service.
     </p>
 </div>
 <hr>
-<div ng-show="newEntry">
-    <form name="formNewItem" ng-submit="generateItem()" novalidate>
-        <h2 class="form-signin-heading">New Service Form</h2>
+<!-- NEW SERVICE FORM -->
+<div ng-show="newService">
+    <form name="formNewService" ng-submit="generateService()" novalidate>
+        <h2 class="form-signin-heading">New Service for SP {{editSP.sp_id}}</h2>
         <div class="row">
             <div class="form-group col-md-3">
-                <label for="name">Service ID</label>
-                <input type="text" id="name" class="form-control" ng-model="name" placeholder="Service ID" required>
+                <label for="service_id">Service ID</label>
+                <input type="text" id="service_id" class="form-control" ng-model="service_id" placeholder="Service ID" required>
             </div>
+            <div class="form-group col-md-6">
+                <label for="service_description">Service Description</label>
+                <input type="text" id="service_description" class="form-control" ng-model="service_description" placeholder="Service Description">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="qos_profile_in">QoS Profile In</label>
+                <input type="text" id="qos_profile_in" class="form-control" ng-model="qos_profile_in" placeholder="QoS Profile In">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="qos_profile_out">QoS Profile Out</label>
+                <input type="text" id="qos_profile_out" class="form-control" ng-model="qos_profile_out" placeholder="QoS Profile Out">
+            </div>
+        </div>
+        <h3 class="form-signin-heading">VLAN's, Max 8</h3>
+        <div class="row">
+            <div ng-repeat="z in vlanArray">
+                <div class="form-group col-md-3" ng-show="vlanShow[z]">
+                    <div class="col-md-10">
+                        <label for="headline">Inner VLAN {{z+1}}</label>
+                        <input type="number" class="form-control" ng-model="vlans[z].vlan" placeholder="Inner VLAN">
+                    </div>
+                    <div class="checkbox col-md-10">
+                        <label>
+                            <input type="checkbox" ng-model="vlans[z].multicast" id="mobilepay">Carry Multicast Service?
+                        </label>
+                    </div>
+                    <div ng-show="numVlanLines > 0" class="col-md-2">
+                        <label for="headline" style="color:white;">.</label>
+                        <a class="btn btn-danger" ng-click="removeVlan(z)">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <a class="btn btn-info" ng-show="vlanBtnShow[1]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[2]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[3]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[4]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[5]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[6]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[7]" ng-click="showVlanLine()">Add a VLAN</a>
+        </div>
+        <br>
+        <div class="row">
             <div class="form-group col-md-4">
-                <label for="name">Service Description</label>
-                <input type="text" id="description" class="form-control" ng-model="description" placeholder="Service Description" required>
+                <button ng-disabled="formNewService.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-danger btn-lg btn-block" ng-click="addServiceToggle()">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+    
+<!-- EDIT SERVICE FORM. NOT DONE YET -->
+<div ng-show="editEntry">
+    <form name="formEditItem" ng-submit="editItem()" novalidate>
+        <h2 class="form-signin-heading">Edit Service Form</h2>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label for="service_id">Service ID</label>
+                <input type="text" id="service_id" class="form-control" ng-model="service_id" placeholder="Service ID" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="service_description">Service Description</label>
+                <input type="text" id="service_description" class="form-control" ng-model="service_description" placeholder="Service Description">
             </div>
             <div class="form-group col-md-3">
                 <label for="qos_profile_in">QoS Profile In</label>
@@ -69,13 +142,18 @@
         </div>
         <h3 class="form-signin-heading">VLAN's, Max 8</h3>
         <div class="row">
-            <div ng-repeat="z in VMArray">
+            <div ng-repeat="z in vlanArray">
                 <div class="form-group col-md-3" ng-show="vlanShow[z]">
                     <div class="col-md-10">
                         <label for="headline">Inner VLAN {{z+1}}</label>
                         <input type="number" class="form-control" ng-model="vlans[z].vlan" placeholder="Inner VLAN">
                     </div>
-                    <div ng-show="numVMLines > 0" class="col-md-2">
+                    <div class="checkbox col-md-10">
+                        <label>
+                            <input type="checkbox" ng-model="vlans[z].multicast" id="mobilepay">Carry Multicast Service?
+                        </label>
+                    </div>
+                    <div ng-show="numVlanLines > 0" class="col-md-2">
                         <label for="headline" style="color:white;">.</label>
                         <a class="btn btn-danger" ng-click="removeVlan(z)">
                             <i class="glyphicon glyphicon-remove"></i>
@@ -85,79 +163,14 @@
             </div>
         </div>
         <div class="row">
-            <a class="btn btn-info" ng-show="vlanBtnShow[1]" ng-click="showVMLine()">Add a VLAN </a>
-            <a class="btn btn-info" ng-show="vlanBtnShow[2]" ng-click="showVMLine()">Add a VLAN </a>
-            <a class="btn btn-info" ng-show="vlanBtnShow[3]" ng-click="showVMLine()">Add a VLAN </a>
-            <a class="btn btn-info" ng-show="vlanBtnShow[4]" ng-click="showVMLine()">Add a VLAN </a>
-            <a class="btn btn-info" ng-show="vlanBtnShow[5]" ng-click="showVMLine()">Add a VLAN </a>
-            <a class="btn btn-info" ng-show="vlanBtnShow[6]" ng-click="showVMLine()">Add a VLAN </a>
-            <a class="btn btn-info" ng-show="vlanBtnShow[7]" ng-click="showVMLine()">Add a VLAN </a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[1]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[2]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[3]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[4]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[5]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[6]" ng-click="showVlanLine()">Add a VLAN</a>
+            <a class="btn btn-info" ng-show="vlanBtnShow[7]" ng-click="showVlanLine()">Add a VLAN</a>
         </div>
-        <br>
-        <div class="row">
-            <div class="form-group col-md-4">
-                <button ng-disabled="formCust.$invalid" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-danger btn-lg btn-block" ng-click="newEntryToggle()">Cancel</a>
-            </div>
-        </div>
-    </form>
-</div>
-
-<div class="row actions" ng-show="!newEntry && !editEntry">
-    <div class="col-md-4">
-        <a class="btn btn-info btn-lg btn-block" ng-click="newEntryToggle()">New Service</a>
-    </div>
-</div>
-
-<div ng-show="editEntry">
-    <form name="formEditItem" ng-submit="editItem()" novalidate>
-        <h2 class="form-signin-heading">Edit Service Form</h2>
-        <div class="row">
-                <div class="form-group col-md-3">
-                    <label for="name">Service ID</label>
-                    <input type="text" id="name" class="form-control" ng-model="name" placeholder="Service ID" required>
-                </div>
-                <div class="form-group col-md-4">
-                    <label for="name">Service Description</label>
-                    <input type="text" id="description" class="form-control" ng-model="description" placeholder="Service Description" required>
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="qos_profile_in">QoS Profile In</label>
-                    <input type="text" id="qos_profile_in" class="form-control" ng-model="qos_profile_in" placeholder="QoS Profile In" required>
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="qos_profile_out">QoS Profile Out</label>
-                    <input type="text" id="qos_profile_out" class="form-control" ng-model="qos_profile_out" placeholder="QoS Profile Out" required>
-                </div>
-            </div>
-            <h3 class="form-signin-heading">VLAN's, Max 8</h3>
-            <div class="row">
-                <div ng-repeat="z in VMArray">
-                    <div class="form-group col-md-3" ng-show="vlanShow[z]">
-                        <div class="col-md-10">
-                            <label for="headline">Inner VLAN {{z+1}}</label>
-                            <input type="number" class="form-control" ng-model="vlans[z].inner_vlan" placeholder="Inner VLAN">
-                        </div>
-                        <div ng-show="numVMLines > 0" class="col-md-2">
-                            <label for="headline" style="color:white;">.</label>
-                            <a class="btn btn-danger" ng-click="removeVlan(z)">
-                                <i class="glyphicon glyphicon-remove"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <a class="btn btn-info" ng-show="vlanBtnShow[1]" ng-click="showVMLine()">Add a VLAN </a>
-                <a class="btn btn-info" ng-show="vlanBtnShow[2]" ng-click="showVMLine()">Add a VLAN </a>
-                <a class="btn btn-info" ng-show="vlanBtnShow[3]" ng-click="showVMLine()">Add a VLAN </a>
-                <a class="btn btn-info" ng-show="vlanBtnShow[4]" ng-click="showVMLine()">Add a VLAN </a>
-                <a class="btn btn-info" ng-show="vlanBtnShow[5]" ng-click="showVMLine()">Add a VLAN </a>
-                <a class="btn btn-info" ng-show="vlanBtnShow[6]" ng-click="showVMLine()">Add a VLAN </a>
-                <a class="btn btn-info" ng-show="vlanBtnShow[7]" ng-click="showVMLine()">Add a VLAN </a>
-            </div>
             <br>
         <div class="row">
             <div class="form-group col-md-4">

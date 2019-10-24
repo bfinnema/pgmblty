@@ -42,25 +42,21 @@ router.get('/check-sync/:id', (req, res) => {
 
 // POST subscription
 router.post('/', (req, res) => {
-  console.log(`Here we are in the subscriptions router. POST Subscription`);
+  // console.log(`Here we are in the subscriptions router. POST Subscription`);
   var picked_body = _.pick(req.body, ['name', 'subscriber_id', 'moved_subscriber', 'cpe_name', 'sp_id', 'service_id', 'access_area_id', 'access_node_id', 'access_if', 'pe_area_id', 'poi_area_id', 'pwsubinterface_id', 'vlan_mappings', 'original_access']);
   // console.log(`req.body, name: ${req.body.name}, pick body, name: ${picked_body.name}`);
-  console.log(`Picked body: ${JSON.stringify(picked_body)}`);
-  console.log(`***************`);
+  // console.log(`Picked body: ${JSON.stringify(picked_body)}`);
   var object_body = {
     "open-net-core:open-net-core": picked_body
   };
-  console.log(`Object body: ${JSON.stringify(object_body)}`);
-  console.log(`***************`);
+  // console.log(`Object body: ${JSON.stringify(object_body)}`);
   var sub_body = JSON.stringify(object_body);
-  console.log(`body: ${sub_body}`);
-  console.log(`***************`);
+  // console.log(`body: ${sub_body}`);
   
   // console.log(`***************`);
   // console.log(`User: ${process.env.NSO_USER}, Password: ${process.env.NSO_PWD}`);
   var auth = new Buffer(process.env.NSO_USER + ':' + process.env.NSO_PWD).toString('base64');
-  console.log(`Encoded Authentication: ${auth}`);
-  console.log(`***************`);
+  // console.log(`Encoded Authentication: ${auth}`);
 
   var options = {
     method: 'POST',
