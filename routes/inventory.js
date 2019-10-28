@@ -44,16 +44,16 @@ router.get('/peareas', (req, res) => {
 
 // GET POI Areas
 router.get('/poiareas', (req, res) => {
-  console.log(`Here we are in the inventory router, POI areas.`);
+  // console.log(`Here we are in the inventory router, POI areas.`);
   var options = makeOptions('/poi_areas/poi_area','collection', 'GET', 'running');
   sendNSORequest(options, res);
 });
 
 // POST POI Area
 router.post('/poiareas', (req, res) => {
-  console.log(`Here we are in the inventory-poiarea router. POST POI Area`);
-  console.log(`Stringified body: ${JSON.stringify(req.body)}`);
-  console.log(`poi_area_id: ${req.body.poi_areas.poi_area[0].poi_area_id}`);
+  // console.log(`Here we are in the inventory-poiarea router. POST POI Area`);
+  // console.log(`Stringified body: ${JSON.stringify(req.body)}`);
+  // console.log(`poi_area_id: ${req.body.poi_areas.poi_area[0].poi_area_id}`);
   
   var object_body = {
     "open-net-access:inventory": req.body
@@ -76,9 +76,9 @@ router.delete('/poiareas/:id', (req, res) => {
 
 // POST PE Area
 router.post('/peareas', (req, res) => {
-  console.log(`Here we are in the inventory-pearea router. POST PE Area`);
-  console.log(`Stringified body: ${JSON.stringify(req.body)}`);
-  console.log(`pe_area_id: ${req.body.pe_areas.pe_area[0].pe_area_id}`);
+  // console.log(`Here we are in the inventory-pearea router. POST PE Area`);
+  // console.log(`Stringified body: ${JSON.stringify(req.body)}`);
+  // console.log(`pe_area_id: ${req.body.pe_areas.pe_area[0].pe_area_id}`);
   
   var object_body = {
     "open-net-access:inventory": req.body

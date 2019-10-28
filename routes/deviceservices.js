@@ -4,6 +4,18 @@ const express = require('express');
 const router = express.Router();
 const request = require("request");
 
+// GET Devices
+router.get('/devices', (req, res) => {
+  // console.log(`Here we are in the device services router, GET all devices`);
+  var options = makeOptions('/devices', 'data', 'GET');
+  
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+    // console.log(body);
+    res.send(body);
+  })
+});
+
 // GET Device Service Details
 router.get('/:device_service/:id', (req, res) => {
   // console.log(`Here we are in the device services router, GET service details for ${req.params.device_service}, ${req.params.id}.`);

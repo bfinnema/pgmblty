@@ -59,9 +59,12 @@
                 <label for="description">POI Area Description</label>
                 <input type="text" id="description" class="form-control" ng-model="description" placeholder="POI Area Description" required>
             </div>
-            <div class="form-group col-md-3">
-                <label for="poi_node_id">POI Node</label>
-                <input type="text" id="poi_node_id" class="form-control" ng-model="poi_node_id" placeholder="POI Node" required>
+            <div class="form-group col-md-2">
+                <label>POI Node</label>
+                <select class="form-control" ng-model="poi_node_id" name="poi_node_id" required>
+                    <option ng-repeat="device in devices" value="{{device.device_id}}">{{device.device_id}}</option>
+                </select>
+                <i ng-show="formNewItem.poi_node_id.$error.required">*Must be filled in</i>
             </div>
         </div>
         <div class="row">

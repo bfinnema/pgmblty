@@ -5,7 +5,6 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     // console.log(`You are in OpenNET Access Areas section.`);
 
     $scope.newEntry = false;
-    $scope.editEntry = false;
     $scope.newService = false;
     
     $scope.vlanArray = [0,1,2,3,4,5,6,7];
@@ -24,7 +23,21 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:access_area", "access_area")).collection.access_area;
         // console.log(`Access Areas's: ${JSON.stringify($scope.collection)}`);
         // console.log(`Access Area: ${$scope.collection[0].access_area_id}`);
-        
+        return $http({
+            method: "GET",
+            url: "/deviceservices/devices"
+        });
+    }).then(function(response) {
+        // console.log(JSON.stringify(response.data));
+        devicedetails = JSON.parse(JSON.stringify(response.data).replace("tailf-ncs:devices", "devices")).devices.device;
+        // console.log(`Devicedetails: ${JSON.stringify($scope.devicedetails)}`);
+        // console.log(`Devices Status: ${response.status}`);
+        var devices = [];
+        for (var i=0; i<devicedetails.length; i++) {
+            devices.push({"device_id": devicedetails[i].name});
+        };
+        // console.log(`Devices: ${JSON.stringify(devices)}`);
+        $scope.devices = devices;
     }, function errorCallback(response) {
         console.log(`Status: ${response.status}`);
     });
@@ -103,7 +116,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     };
 
     $scope.showVlanLine = function() {
-        console.log("Entering showVlanline. numVlanLines: "+numVlanLines);
+        // console.log("Entering showVlanline. numVlanLines: "+numVlanLines);
         if ($scope.vlans[numVlanLines].vlan != null) {
             // console.log("numVlanLines: "+numVlanLines+", vlan: "+$scope.vlans[numVlanLines].vlan);
             numVlanLines++;
@@ -190,15 +203,6 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             });
         };
 
-    };
-
-    $scope.editItem = function(item) {
-        $scope.editEntry = true;
-        $scope.editedItem = item;
-    };
-
-    $scope.editToggle = function() {
-        $scope.editEntry = false;
     };
 
 }])

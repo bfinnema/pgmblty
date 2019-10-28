@@ -5,8 +5,10 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     // console.log(`You are in OpenNET Service Provider section.`);
 
     $scope.newEntry = false;
-    $scope.editEntry = false;
     $scope.newService = false;
+    $scope.newAccessNode = false;
+    $scope.showAccessNodes = false;
+    $scope.spinnerStatus = false;
     
     $scope.vlanArray = [0,1,2,3,4,5,6,7];
     $scope.vlans = [];
@@ -19,15 +21,40 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
     $http({
         method: "GET",
-        url: "/inventory/sps"
+        url: "/inventory"
     }).then(function(response) {
-        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:sp", "sp")).collection.sp;
-        // console.log(`SP's: ${JSON.stringify($scope.collection)}`);
-        // console.log(`SP: ${$scope.collection[0].sp_id}`);
+        $scope.inventory = JSON.parse(JSON.stringify(response.data).replace("open-net-access:inventory", "inventory")).inventory;
+        // console.log(`Inventory: ${JSON.stringify($scope.inventory)}`);
+        // console.log(`SP: ${$scope.inventory.sps.sp[0].sp_id}`);
+        $scope.sps = $scope.inventory.sps.sp;
+        // console.log(`SP's: ${JSON.stringify($scope.sps)}`);
         
     }, function errorCallback(response) {
         console.log(`Status: ${response.status}`);
     });
+
+    $scope.listAccessNodes = function() {
+        if ($scope.inventory.access_areas) {
+            for (var i=0; i<$scope.inventory.access_areas.access_area.length; i++) {
+                // console.log(`access_area_id: ${$scope.inventory.access_areas.access_area[i].access_area_id}`);
+                if ($scope.access_area_id == $scope.inventory.access_areas.access_area[i].access_area_id) {
+                    if ($scope.inventory.access_areas.access_area[i].nodes) {
+                        $scope.access_nodes = $scope.inventory.access_areas.access_area[i].nodes.node;
+                        // console.log(`Found: ${JSON.stringify($scope.access_nodes)}`);
+                        $scope.showAccessNodes = true;
+                    } else {
+                        $window.alert("No Access Nodes have been defined for this Access Area. Do that under 'Access Areas'.");
+                        $scope.showAccessNodes = false;
+                        $scope.access_node_id = null;
+                    };
+                };
+            };
+        } else {
+            $window.alert("No Access Areas have been defined. Do that under 'Access Areas'.");
+            $scope.showAccessNodes = false;
+            $scope.access_node_id = null;
+        };
+    };
 
     $scope.newEntryToggle = function() {
         if ($scope.newEntry) {
@@ -58,6 +85,22 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         };
     };
 
+    $scope.addAccessNodeToggle = function(editSP) {
+        if ($scope.newAccessNode) {
+            $scope.newAccessNode = false;
+            $scope.name = null;
+            $scope.access_area_id = null;
+            $scope.access_node_id = null;
+            $scope.pe_area_id = null;
+            $scope.poi_area_id = null;
+            $scope.vlanpool_start = null;
+            $scope.vlanpool_stop = null;
+        } else {
+            $scope.newAccessNode = true;
+            $scope.editSP = editSP;
+        };
+    };
+
     $scope.generateItem = function() {
 
         var data = {
@@ -70,7 +113,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                     }
                 ]
             }
-        }
+        };
         // console.log(`DATA: ${JSON.stringify(data)}`);
 
         $http({
@@ -162,7 +205,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                     }
                 ]
             }
-        }
+        };
         // console.log(`DATA: ${JSON.stringify(data)}`);
 
         $http({
@@ -195,14 +238,80 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
     };
 
-    $scope.editItem = function(item) {
-        $window.alert("This function is not implemented yet.");
-        // $scope.editEntry = true;
-        // $scope.editedItem = item;
+    $scope.generateNode = function() {
+
+        $scope.spinnerStatus = true;
+
+        var vlanpool_id = $scope.editSP.sp_id + '_' + $scope.access_node_id + '_' + Math.floor(Math.random() * 1000);
+        var data = {
+            "name": $scope.name,
+            "sp_id": $scope.editSP.sp_id,
+            "poi_area_id": $scope.poi_area_id,
+            "pe_area_id": $scope.pe_area_id,
+            "access_area_id": $scope.access_area_id,
+            "access_node_id": $scope.access_node_id,
+            "vlanpool_id": vlanpool_id
+        };
+        // console.log(`DATA: ${JSON.stringify(data)}`);
+
+        var now = new Date();
+        var vlans = [];
+        for (var v=$scope.vlanpool_start; v<=$scope.vlanpool_stop; v++) {
+            vlans.push({"vlan_id": v, "status": "Free", "timestamp": now, "subscriber_id": "", "subscription_id": ""})
+        };
+        // console.log(`VLANS: ${JSON.stringify(vlans)}`);
+
+        var vlanpool = {
+            "vlanpool_id": vlanpool_id,
+            "vlanpool_description": 'VLAN Pool for SP ' + $scope.editSP.sp_id + ', Access Area ' + $scope.access_area_id + ', Node ' + $scope.access_node_id + '.',
+            "sp_id": $scope.editSP.sp_id,
+            "access_area_id": $scope.access_area_id,
+            "access_node_id": $scope.access_node_id,
+            "vlans": vlans
+        };
+        // console.log(`DATA: ${JSON.stringify(vlanpool)}`);
+
+        $http({
+            method: "POST",
+            url: "/accessswitchandsp",
+            data: data
+        }).then(function(response) {
+            // console.log(`accessswitchandsp status: ${response.status}`);
+            return $http({
+                method: "POST",
+                url: "/vlanpools",
+                data: vlanpool
+            });
+        }).then(function(response) {
+            // console.log(`vlanpool status: ${response.status}`);
+            $location.path('/onserviceproviders');
+            $route.reload();
+        }, function errorCallback(response) {
+            console.log(`Status: ${response.status}`);
+        });
+
     };
 
-    $scope.editToggle = function() {
-        $scope.editEntry = false;
+    $scope.deleteNode = function(sp_id, access_node_and_sp_service_id, vlanpool_id) {
+        if ($window.confirm('Please confirm that you want to delete the access node for service provider,  '+sp_id+', service id '+access_node_and_sp_service_id)) {
+            $scope.spinnerStatus = true;
+            $http({
+                method: "DELETE",
+                url: "/accessswitchandsp/"+access_node_and_sp_service_id
+            }).then(function(response) {
+                console.log(`accessswitchandsp status: ${response.status}`);
+                return $http({
+                    method: "DELETE",
+                    url: "/vlanpools/by_vlanpool_id/"+vlanpool_id
+                });
+            }).then(function(response) {
+                console.log(`vlanpool status: ${response.status}`);
+                $location.path('/onserviceproviders');
+                $route.reload();
+            }, function errorCallback(response) {
+                console.log(`Status: ${response.status}`);
+            });
+        };
     };
 
 }])

@@ -14,7 +14,21 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:pe_area", "pe_area")).collection.pe_area;
         // console.log(`SP's: ${JSON.stringify($scope.collection)}`);
         // console.log(`SP: ${$scope.collection[0].pe_area_id}`);
-        
+        return $http({
+            method: "GET",
+            url: "/deviceservices/devices"
+        });
+    }).then(function(response) {
+        // console.log(JSON.stringify(response.data));
+        devicedetails = JSON.parse(JSON.stringify(response.data).replace("tailf-ncs:devices", "devices")).devices.device;
+        // console.log(`Devicedetails: ${JSON.stringify($scope.devicedetails)}`);
+        // console.log(`Devices Status: ${response.status}`);
+        var devices = [];
+        for (var i=0; i<devicedetails.length; i++) {
+            devices.push({"device_id": devicedetails[i].name});
+        };
+        // console.log(`Devices: ${JSON.stringify(devices)}`);
+        $scope.devices = devices;
     }, function errorCallback(response) {
         console.log(`Status: ${response.status}`);
     });

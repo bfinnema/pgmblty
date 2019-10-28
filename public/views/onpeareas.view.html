@@ -57,9 +57,12 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-3">
-                <label for="pe_node_id">PE Node</label>
-                <input type="text" id="pe_node_id" class="form-control" ng-model="pe_node_id" placeholder="PE Node" required>
+            <div class="form-group col-md-2">
+                <label>PE Node</label>
+                <select class="form-control" ng-model="pe_node_id" name="pe_node_id" required>
+                    <option ng-repeat="device in devices" value="{{device.device_id}}">{{device.device_id}}</option>
+                </select>
+                <i ng-show="formNewItem.pe_node_id.$error.required">*Must be filled in</i>
             </div>
             <div class="form-group col-md-3">
                 <label for="pe_if">Interface</label>

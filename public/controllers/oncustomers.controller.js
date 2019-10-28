@@ -6,6 +6,7 @@ function($scope, $http, $window, $route, $location, $q) {
 
     $scope.newEntry = false;
     $scope.editEntry = false;
+    $scope.showAccessAreas = false;
     $scope.showAccessNodes = false;
     $scope.showAccessInterface = false;
     $scope.spinnerStatus = false;
@@ -322,11 +323,41 @@ function($scope, $http, $window, $route, $location, $q) {
         for (var i=0; i<$scope.inventory.sps.sp.length; i++) {
             // console.log(`sp_id: ${$scope.inventory.sps.sp[i].sp_id}`);
             if ($scope.sp_id == $scope.inventory.sps.sp[i].sp_id) {
-                $scope.services = $scope.inventory.sps.sp[i].services.service;
-                // console.log(`Found: ${JSON.stringify($scope.services)}`);
+                // console.log(`SP: ${JSON.stringify($scope.inventory.sps.sp[i])}`);
+                if ($scope.inventory.sps.sp[i].services) {
+                    $scope.services = $scope.inventory.sps.sp[i].services.service;
+                    // console.log(`Found: ${JSON.stringify($scope.services)}`);
+                    $scope.showServices = true;
+                } else {
+                    $window.alert("You cannot deploy this subscription. No Services have been defined for this SP. Do that under 'Service Providers'.")
+                    $scope.service_id = null;
+                    $scope.showServices = false;
+                    $scope.showAccessAreas = false;
+                    $scope.access_area_id = null
+                    $scope.showAccessNodes = false;
+                    $scope.access_node_id = null;
+                    $scope.showAccessInterface = false;
+                    $scope.access_if = null;
+                };
+                if ($scope.inventory.sps.sp[i].access_deployment) {
+                    $scope.sp_access_areas = $scope.inventory.sps.sp[i].access_deployment.access_area;
+                    // console.log(`Found: ${JSON.stringify($scope.sp_access_areas)}`);
+                    $scope.showAccessAreas = true;
+                } else {
+                    console.log(`No access nodes deployed for the SP.`);
+                    $window.alert("You cannot deploy this subscription. The SP has not been deployed in any access areas / nodes. Do that under 'Service Providers'.")
+                    $scope.showAccessAreas = false;
+                    $scope.access_area_id = null
+                    $scope.showAccessNodes = false;
+                    $scope.access_node_id = null;
+                    $scope.showAccessInterface = false;
+                    $scope.access_if = null;
+                    $scope.service_id = null;
+                    $scope.showServices = false;
+                };
+                $scope.selectedSP = $scope.inventory.sps.sp[i];
             };
         };
-        $scope.showServices = true;
         if ($scope.sp_id) {var sp_id = $scope.sp_id} else {var sp_id = ""};
         if ($scope.subscriber_id) {var subscriber_id = $scope.subscriber_id} else {var subscriber_id = 0};
         if ($scope.service_id) {var service_id = $scope.service_id} else {var service_id = ""};
@@ -334,21 +365,30 @@ function($scope, $http, $window, $route, $location, $q) {
     };
 
     $scope.listAccessNodes = function() {
-        for (var i=0; i<$scope.inventory.access_areas.access_area.length; i++) {
+        var foundAccessArea = false;
+        for (var i=0; i<$scope.selectedSP.access_deployment.access_area.length; i++) {
             // console.log(`access_area_id: ${$scope.inventory.access_areas.access_area[i].access_area_id}`);
             if ($scope.access_area_id == $scope.inventory.access_areas.access_area[i].access_area_id) {
-                $scope.access_nodes = $scope.inventory.access_areas.access_area[i].nodes.node;
+                $scope.all_access_nodes = $scope.inventory.access_areas.access_area[i].nodes.node;
+                // console.log(`Found: ${JSON.stringify($scope.all_access_nodes)}`);
+            };
+            if ($scope.access_area_id == $scope.selectedSP.access_deployment.access_area[i].access_area_id) {
+                $scope.access_nodes = $scope.selectedSP.access_deployment.access_area[i].access_nodes;
                 // console.log(`Found: ${JSON.stringify($scope.access_nodes)}`);
+                $scope.showAccessNodes = true;
+                foundAccessArea = true;
             };
         };
-        $scope.showAccessNodes = true;
+        if (!foundAccessArea) {
+            $window.alert("You cannot deploy this subscription. No Access Nodes have been defined for this Access Area. Do that under 'Access Areas'.");
+        };
     };
 
     $scope.listAccessInterfaces = function() {
-        for (var j=0; j<$scope.access_nodes.length; j++) {
-            // console.log(`access_node_id: ${$scope.access_nodes[j].access_node_id}`);
-            if ($scope.access_node_id == $scope.access_nodes[j].access_node_id) {
-                $scope.access_interfaces = $scope.access_nodes[j].interfaces.interface;
+        for (var j=0; j<$scope.all_access_nodes.length; j++) {
+            // console.log(`access_node_id: ${$scope.all_access_nodes[j].access_node_id}`);
+            if ($scope.access_node_id == $scope.all_access_nodes[j].access_node_id) {
+                $scope.access_interfaces = $scope.all_access_nodes[j].interfaces.interface;
                 // console.log(`Found: ${JSON.stringify($scope.access_interfaces)}`);
             };
         };
@@ -380,6 +420,8 @@ function($scope, $http, $window, $route, $location, $q) {
             $scope.sp_id = null;
             $scope.service_id = null;
             $scope.access_area_id = null;
+            $scope.access_node_id = null;
+            $scope.access_if = null;
             $scope.pe_area_id = null;
             $scope.poi_area_id = null;
 
@@ -465,6 +507,11 @@ function($scope, $http, $window, $route, $location, $q) {
                 "access_if": $scope.access_if
             };
 
+            var original_access = {
+                "access_area_id": $scope.access_area_id,
+                "access_node_id": $scope.access_node_id
+            };
+
             var data_for_nso = {
                 "name": $scope.name,
                 "subscriber_id": $scope.subscriber_id,
@@ -479,7 +526,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 "poi_area_id": $scope.poi_area_id,
                 "pwsubinterface_id": selectedPWSubInterface,
                 "vlan_mappings": vlan_mappings,
-                "original_access": access
+                "original_access": original_access
             };
             // console.log(`DATA: ${JSON.stringify(data_for_nso)}`);
 
@@ -1321,7 +1368,7 @@ function($scope, $http, $window, $route, $location, $q) {
             if ($scope.spServices[n].id == $scope.service_id) {
                 var serviceVlans = $scope.spServices[n].vlans;
                 var numVlanMappings = $scope.spServices[n].vlans.length;
-                console.log(`serviceVlans: ${JSON.stringify(serviceVlans)}, numVlanMappings: ${numVlanMappings}`);
+                // console.log(`serviceVlans: ${JSON.stringify(serviceVlans)}, numVlanMappings: ${numVlanMappings}`);
                 var outerVlansAllocated = false;
                 var j = 0;
                 while (!outerVlansAllocated && j<vp.vlans.length) {
@@ -1330,7 +1377,7 @@ function($scope, $http, $window, $route, $location, $q) {
                         // console.log(`j: ${j}`);
                     } else {
                         for (var k=0; k<numVlanMappings; k++) {
-                            console.log(`j: ${j}, k: ${k} inner_vlan: ${serviceVlans[k].vlan}, outer_vlan: ${vp.vlans[j+k].vlan_id}`);
+                            // console.log(`j: ${j}, k: ${k} inner_vlan: ${serviceVlans[k].vlan}, outer_vlan: ${vp.vlans[j+k].vlan_id}`);
                             if (moved_subscriber) {
                                 PWResults = allocatePWSubInt(PWPool);
                                 PWPool = PWResults.updatedPWPool;

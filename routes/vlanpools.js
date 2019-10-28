@@ -118,6 +118,23 @@ router.delete('/:id', (req, res) => {
   });
 });
 
+router.delete('/by_vlanpool_id/:vlanpool_id', (req, res) => {
+  // console.log(`In VLAN Pool DELETE by vlanpool_id, id: ${req.params.vlanpool_id}`);
+  var id = req.params.vlanpool_id;
+
+  Vlanpool.findOneAndRemove({
+    vlanpool_id: id
+  }).then((vlanpool) => {
+    if (!vlanpool) {
+      return res.status(404).send();
+    }
+
+    res.json(vlanpool);
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
+
 router.patch('/:id', (req, res) => {
   // console.log(`In router PATCH`);
   // console.log(`In VLAN Pool PATCH, id: ${req.body.vlanpool_id}`);
