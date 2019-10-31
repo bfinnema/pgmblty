@@ -1,0 +1,22 @@
+{
+  "test": {
+    "PORT": 3010,
+    "MONGODB_URI": "mongodb://mongo:27017/OpenNET",
+    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_PORT": 8080,
+    "NSO_USER": "admin",
+    "NSO_PWD": "admin",
+    "PYTHON_PATH": "/usr/local/bin/python",
+    "PYTHON_SCRIPT_PATH": "/var/www/opennet/python"
+  },
+  "development": {
+    "PORT": 3010,
+    "MONGODB_URI": "mongodb://mongo:27017/OpenNET",
+    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_PORT": 8080,
+    "NSO_USER": "admin",
+    "NSO_PWD": "admin",
+    "PYTHON_PATH": "/usr/local/bin/python",
+    "PYTHON_SCRIPT_PATH": "/var/www/opennet/python"
+  }
+}

@@ -323,7 +323,7 @@ function($scope, $http, $window, $route, $location, $q) {
         for (var i=0; i<$scope.inventory.sps.sp.length; i++) {
             // console.log(`sp_id: ${$scope.inventory.sps.sp[i].sp_id}`);
             if ($scope.sp_id == $scope.inventory.sps.sp[i].sp_id) {
-                // console.log(`SP: ${JSON.stringify($scope.inventory.sps.sp[i])}`);
+                // console.log(`SP Found: ${JSON.stringify($scope.inventory.sps.sp[i])}`);
                 if ($scope.inventory.sps.sp[i].services) {
                     $scope.services = $scope.inventory.sps.sp[i].services.service;
                     // console.log(`Found: ${JSON.stringify($scope.services)}`);
@@ -341,7 +341,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 };
                 if ($scope.inventory.sps.sp[i].access_deployment) {
                     $scope.sp_access_areas = $scope.inventory.sps.sp[i].access_deployment.access_area;
-                    // console.log(`Found: ${JSON.stringify($scope.sp_access_areas)}`);
+                    console.log(`Found: ${JSON.stringify($scope.sp_access_areas)}`);
                     $scope.showAccessAreas = true;
                 } else {
                     console.log(`No access nodes deployed for the SP.`);
@@ -366,6 +366,7 @@ function($scope, $http, $window, $route, $location, $q) {
 
     $scope.listAccessNodes = function() {
         var foundAccessArea = false;
+        // console.log(`Selected SP in listAccessNodes: ${JSON.stringify($scope.selectedSP)}`);
         for (var i=0; i<$scope.selectedSP.access_deployment.access_area.length; i++) {
             // console.log(`access_area_id: ${$scope.inventory.access_areas.access_area[i].access_area_id}`);
             if ($scope.access_area_id == $scope.inventory.access_areas.access_area[i].access_area_id) {
@@ -376,6 +377,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 $scope.access_nodes = $scope.selectedSP.access_deployment.access_area[i].access_nodes;
                 // console.log(`Found: ${JSON.stringify($scope.access_nodes)}`);
                 $scope.showAccessNodes = true;
+                $scope.access_node_id = null;
                 foundAccessArea = true;
             };
         };
@@ -431,6 +433,7 @@ function($scope, $http, $window, $route, $location, $q) {
     };
 
     $scope.editToggle = function(index) {
+        // console.log(`In editToggle`);
         if ($scope.editEntry) {
             $scope.editEntry = false;
             $scope.name = null;
@@ -459,8 +462,9 @@ function($scope, $http, $window, $route, $location, $q) {
             $scope.poi_area_id = $scope.subscriptions[index].poi_area_id;
             // $scope.showAccessNodes = false;
             // $scope.showAccessInterface = false;
-            $scope.listAccessNodes();
+            // console.log(`Running listAccessNodes og listServices`);
             $scope.listServices();
+            $scope.listAccessNodes();
         };
     };
 
@@ -686,11 +690,11 @@ function($scope, $http, $window, $route, $location, $q) {
         // $window.alert("This function is not implemented yet.");
         $scope.spinnerStatus = true;
         var subscription_id = $scope.name;
-        console.log(`subscription_id: ${subscription_id}`);
+        // console.log(`subscription_id: ${subscription_id}`);
 
         var subscriptionExistsAlready = false;
         for (var q=0; q<$scope.subscriptions.length; q++) {
-            console.log(`Subscription ID: ${$scope.subscriptions[q].name}`);
+            // console.log(`Subscription ID: ${$scope.subscriptions[q].name}`);
             if ($scope.subscriptions[q].name == subscription_id) {
                 subscriptionExistsAlready = true;
                 $window.alert("The Subscription ID exists already. Operation interrupted.");
@@ -726,6 +730,12 @@ function($scope, $http, $window, $route, $location, $q) {
                 "access_if": $scope.access_if
             };
 
+            var original_access = {
+                "access_area_id": $scope.subscriptionToMove.db_subscription.access.access_area_id,
+                "access_node_id": $scope.subscriptionToMove.db_subscription.access.access_node_id
+            };
+            // console.log(`original_access: ${JSON.stringify(original_access)}`);
+
             var data_for_nso = {
                 "name": $scope.name,
                 "moved_subscriber": moved_subscriber,
@@ -740,7 +750,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 "poi_area_id": $scope.poi_area_id,
                 "pwsubinterface_id": selectedPWSubInterface,
                 "vlan_mappings": vlan_mappings,
-                "original_access": $scope.subscriptionToMove.db_subscription.access
+                "original_access": original_access
             };
             // console.log(`DATA: ${JSON.stringify(data_for_nso)}`);
 
@@ -789,7 +799,7 @@ function($scope, $http, $window, $route, $location, $q) {
             for (var l=0; l<$scope.pseudowires.length; l++) {
                 if ($scope.subscriptionToMove.sp_id == $scope.pseudowires[l].sp_id && $scope.subscriptionToMove.access_node_id == $scope.pseudowires[l].access_node_id) {
                     var original_pw_pool = $scope.pseudowires[l];
-                    console.log(`Found PW: ${JSON.stringify(original_pw_pool)}`);
+                    // console.log(`Found PW: ${JSON.stringify(original_pw_pool)}`);
                 };
             };
 
@@ -841,7 +851,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     };
                 };
                 data_for_db_subscription.moved_subscriber.original_vlanpool = vpToChange.vlanpool_id;
-                console.log(`vpToChange: ${JSON.stringify(vpToChange)}`);
+                // console.log(`vpToChange: ${JSON.stringify(vpToChange)}`);
     
                 return $http({
                     method: "PATCH",
@@ -1120,7 +1130,7 @@ function($scope, $http, $window, $route, $location, $q) {
             for (var l=0; l<$scope.vlanpools.length; l++) {
                 if (subscription.sp_id == $scope.vlanpools[l].sp_id && subscription.access_area_id == $scope.vlanpools[l].access_area_id && subscription.access_node_id == $scope.vlanpools[l].access_node_id) {
                     var vp = $scope.vlanpools[l];
-                    console.log(`Found new VLAN Pool: ${JSON.stringify(vp)}`);
+                    // console.log(`Found new VLAN Pool: ${JSON.stringify(vp)}`);
                 };
             };
             for (var n=0; n<vp.vlans.length; n++) {
@@ -1152,14 +1162,14 @@ function($scope, $http, $window, $route, $location, $q) {
             for (var l=0; l<$scope.pseudowires.length; l++) {
                 if (subscription.sp_id == $scope.pseudowires[l].sp_id && subscription.access_node_id == $scope.pseudowires[l].access_node_id) {
                     var pw = $scope.pseudowires[l];
-                    console.log(`Found PW: ${JSON.stringify(pw)}`);
+                    // console.log(`Found PW: ${JSON.stringify(pw)}`);
                 };
             };
             // console.log(`PW Subinterfaces length: ${pw.subinterfaces.length}`);
             for (var z=0; z<pw.subinterfaces.length; z++) {
-                console.log(`subinterface_id: ${subscription.pwsubinterface_id}, ${pw.subinterfaces[z].subinterface_id}`);
+                // console.log(`subinterface_id: ${subscription.pwsubinterface_id}, ${pw.subinterfaces[z].subinterface_id}`);
                 if (subscription.subscription_id == pw.subinterfaces[z].subscription_id) {
-                    console.log(`Found subinterface_id: ${subscription.pwsubinterface_id}`);
+                    // console.log(`Found subinterface_id: ${subscription.pwsubinterface_id}`);
                     pw.subinterfaces[z].status = "Free";
                     pw.subinterfaces[z].timestamp = now;
                     pw.subinterfaces[z].subscriber_id = "";
@@ -1399,7 +1409,7 @@ function($scope, $http, $window, $route, $location, $q) {
                             vp.vlans[j+k].timestamp = now;
                         };
                         var endReserve = j+8;
-                        console.log(`j: ${j} k: ${k}, endReserve: ${endReserve}`);
+                        // console.log(`j: ${j} k: ${k}, endReserve: ${endReserve}`);
                         for (var o=j+numVlanMappings; o<endReserve; o++) {
                             // console.log(`Setting Reserved VLAN's`);
                             // console.log(`j: ${j} o: ${o}, k: ${k}, endReserve: ${endReserve}`);

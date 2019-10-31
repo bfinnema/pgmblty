@@ -2,7 +2,7 @@
   "test": {
     "PORT": 3000,
     "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
-    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_ADDRESS": "127.0.0.1",
     "NSO_PORT": 8080,
     "NSO_USER": "admin",
     "NSO_PWD": "admin",
@@ -12,7 +12,7 @@
   "development": {
     "PORT": 3000,
     "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
-    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_ADDRESS": "127.0.0.1",
     "NSO_PORT": 8080,
     "NSO_USER": "admin",
     "NSO_PWD": "admin",
