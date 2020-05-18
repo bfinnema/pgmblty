@@ -6,17 +6,19 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th width="8%">SP ID</th>
-                <th width="10%">SP VLAN offset</th>
-                <th width="8%">MVR VLAN </th>
+                <th width="6%">SP ID</th>
+                <th width="8%">Node & Interface</th>
+                <th width="8%">SP VLAN offset</th>
+                <th width="6%">MVR VLAN </th>
                 <th width="25%">Access Areas / Nodes</th>
-                <th width="37%">Services</th>
+                <th width="35%">Services</th>
                 <th width="12%">Operations</th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="item in sps">
                 <td>{{ item.sp_id }}</td>
+                <td>{{ item.node.sp_node_id }}, {{ item.node.sp_if }}</td>
                 <td>{{ item.s_vlan_offset }}</td>
                 <td>{{ item.mvr_vlan }}</td>
                 <td>
@@ -25,7 +27,8 @@
                         <span ng-repeat="access_node in access_area.access_nodes">
                             <p>
                                 <span>{{access_node.access_node_id}} (ID: {{access_node.access_node_and_sp_service_id}})</span> 
-                                <a class="btn btn-primary" ng-click="deleteNode(item.sp_id, access_node.access_node_and_sp_service_id, access_node.vlanpool_id)">
+                                <a class="btn btn-primary" ng-click="deleteNode(item.sp_id, access_node.access_node_and_sp_service_id, access_node.vlanpool_id_pw, access_node.vlanpool_id_ev)">
+                                <!-- <a class="btn btn-primary" ng-click="deleteNode(item.sp_id, access_node.access_node_and_sp_service_id, access_node.vlanpool_id)"> -->
                                     <i class="glyphicon glyphicon-fire"></i>
                                 </a>
                             </p>
@@ -105,6 +108,29 @@
                 <input type="number" id="mvr_vlan" class="form-control" ng-model="mvr_vlan" placeholder="MVR VLAN" required>
             </div>
         </div>
+        <div class="row">
+            <div class="form-group col-md-2">
+                <label>SP Node</label>
+                <select class="form-control" ng-model="sp_node_id" name="sp_node_id" required>
+                    <option ng-repeat="sp_node in sp_nodes" value="{{sp_node.sp_node_id}}">{{sp_node.sp_node_id}}</option>
+                </select>
+                <i ng-show="formAccessNode.sp_node_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-2">
+                <label>SP Node Interface</label>
+                <select class="form-control" ng-model="sp_if_id" name="sp_if_id" required>
+                    <option ng-repeat="sp_if in sp_interfaces" value="{{sp_if.sp_if_id}}">{{sp_if.sp_if_id}}</option>
+                </select>
+                <i ng-show="formAccessNode.sp_if_id.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-2">
+                <label>SP Termination Type</label>
+                <select class="form-control" ng-model="sp_termination_type_id" name="sp_termination_type_id" required>
+                    <option ng-repeat="sp_termination_type in sp_termination_types" value="{{sp_termination_type.sp_termination_type_id}}">{{sp_termination_type.sp_termination_type_id}}</option>
+                </select>
+                <i ng-show="formAccessNode.sp_termination_type_id.$error.required">*Must be filled in</i>
+            </div>
+        </div>
         <br>
         <div class="row">
             <div class="form-group col-md-4">
@@ -141,7 +167,7 @@
                     </div>
                     <div class="checkbox col-md-10">
                         <label>
-                            <input type="checkbox" ng-model="vlans[z].multicast" id="mobilepay">Carry Multicast Service?
+                            <input type="checkbox" ng-model="vlans[z].multicast" id="vlans[z].multicast">Carry Multicast Service?
                         </label>
                     </div>
                     <div ng-show="numVlanLines > 0" class="col-md-2">
@@ -215,15 +241,29 @@
             </div>
         </div>
         <div class="row">
+            <h3>VLAN pool for subscriptions using PW</h3>
             <div class="form-group col-md-3">
                 <label for="vlanpool_start">VLAN Pool Start</label>
-                <input type="number" id="vlanpool_start" class="form-control" ng-model="vlanpool_start" placeholder="VLAN Pool Start" required>
-                <i ng-show="formAccessNode.vlanpool_start.$error.required">*Must be filled in</i>
+                <input type="number" id="vlanpool_start_pw" class="form-control" ng-model="vlanpool_start_pw" placeholder="VLAN Pool Start" required>
+                <i ng-show="formAccessNode.vlanpool_start_pw.$error.required">*Must be filled in</i>
             </div>
             <div class="form-group col-md-3">
                 <label for="vlanpool_stop">VLAN Pool Stop</label>
-                <input type="text" id="vlanpool_stop" class="form-control" ng-model="vlanpool_stop" placeholder="VLAN Pool Stop" required>
-                <i ng-show="formAccessNode.vlanpool_stop.$error.required">*Must be filled in</i>
+                <input type="text" id="vlanpool_stop_pw" class="form-control" ng-model="vlanpool_stop_pw" placeholder="VLAN Pool Stop" required>
+                <i ng-show="formAccessNode.vlanpool_stop_pw.$error.required">*Must be filled in</i>
+            </div>
+        </div>
+        <div class="row">
+            <h3>VLAN pool for subscriptions using EVPN-VPWS</h3>
+            <div class="form-group col-md-3">
+                <label for="vlanpool_start">VLAN Pool Start</label>
+                <input type="number" id="vlanpool_start_ev" class="form-control" ng-model="vlanpool_start_ev" placeholder="VLAN Pool Start" required>
+                <i ng-show="formAccessNode.vlanpool_start_ev.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="vlanpool_stop">VLAN Pool Stop</label>
+                <input type="text" id="vlanpool_stop_ev" class="form-control" ng-model="vlanpool_stop_ev" placeholder="VLAN Pool Stop" required>
+                <i ng-show="formAccessNode.vlanpool_stop_ev.$error.required">*Must be filled in</i>
             </div>
         </div>
         <br>

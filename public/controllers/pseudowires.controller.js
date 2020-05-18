@@ -60,21 +60,21 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
     $scope.generateItem = function() {
 
-        console.log(`In generateItem, PW`);
-        console.log(`PW ID: ${$scope.pseudowire_id}`);
-        console.log(`${$scope.description}`);
-        console.log(`${$scope.sp_id}`);
-        console.log(`${$scope.pe_node_id}`);
-        console.log(`${$scope.access_node_id}`);
-        console.log(`${$scope.poi_node_id}`);
-        console.log(`${$scope.subint_start}`);
-        console.log(`${$scope.subint_stop}`);
+        // console.log(`In generateItem, PW`);
+        // console.log(`PW ID: ${$scope.pseudowire_id}`);
+        // console.log(`${$scope.description}`);
+        // console.log(`${$scope.sp_id}`);
+        // console.log(`${$scope.pe_node_id}`);
+        // console.log(`${$scope.access_node_id}`);
+        // console.log(`${$scope.poi_node_id}`);
+        // console.log(`${$scope.subint_start}`);
+        // console.log(`${$scope.subint_stop}`);
         var now = new Date();
         var subinterfaces = [];
         for (var v=$scope.subint_start; v<=$scope.subint_stop; v++) {
             subinterfaces.push({"subinterface_id": v, "status": "Free", "timestamp": now, "subscriber_id": "", "subscription_id": ""})
         };
-        console.log(`PW Sets: ${JSON.stringify(subinterfaces)}`);
+        // console.log(`PW Sets: ${JSON.stringify(subinterfaces)}`);
 
         var data = {
             "pseudowire_id": $scope.pseudowire_id,
@@ -85,7 +85,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             "poi_node_id": $scope.poi_node_id,
             "subinterfaces": subinterfaces
         };
-        console.log(`DATA: ${JSON.stringify(data)}`);
+        // console.log(`DATA: ${JSON.stringify(data)}`);
 
         $http({
             method: "POST",

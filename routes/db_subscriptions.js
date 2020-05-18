@@ -8,7 +8,7 @@ var {Subscription} = require('../models/subscription');
 
 router.post('/', (req, res) => {
   console.log(`In DB Subscriptions POST: ${req.body.subscription_id}`);
-  var body = _.pick(req.body, ['subscription_id', 'subscription_description', 'subscriber_id', 'moved_subscriber', 'services', 'summaryStatus', 'deploymentStatus', 'mvr', 'access', 'pe', 'poi', 'sp_id', 'service_id', ]);
+  var body = _.pick(req.body, ['subscription_id', 'subscription_description', 'subscriber_id', 'moved_subscriber', 'services', 'summaryStatus', 'deploymentStatus', 'mvr', 'access', 'tunnel_technology', 'pe', 'poi', 'sp_id', 'service_id', ]);
   var subscription = new Subscription(body);
 
   subscription.save().then((doc) => {

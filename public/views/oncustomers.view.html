@@ -28,6 +28,7 @@
                         <p>Subscriber: {{subscription.subscriber_id}}</p>
                         <p>CPE: {{subscription.cpe_name}}</p>
                         <p>Service: {{subscription.service_id}}</p>
+                        <p>Tunnel: {{subscription.db_subscription.tunnel_technology}}</p>
                     </span>
                 </td>
                 <td>
@@ -48,7 +49,12 @@
                         <hr>
                         <p>Node: {{subscription.pe_area.node.pe_node_id}}</p>
                         <!-- <p>Interface: {{subscription.newSubPE.pe_interface}}</p> -->
-                        <p>Interface: {{subscription.db_subscription.pe.node.pe_if}}</p>
+                        <p>Interface: {{subscription.db_subscription.pe.node.pe_sub_if}}</p>
+                        <p ng-show="subscription.tunnel_technology == 'EVPN-VPWS'">
+                            EVI: {{subscription.evpn_vpws.evi}},
+                            TARGET: {{subscription.evpn_vpws.target}},
+                            SOURCE: {{subscription.evpn_vpws.source}}
+                        </p>
                         <!-- <p>VLAN's: <span ng-repeat="vlan in subscription.newSubPE.vlans.vlan">{{vlan.vlan_id}}, </span></p> -->
                         <p>VLAN's: <span ng-repeat="service in subscription.db_subscription.services">{{service.pe_vlan_id}}, </span></p>
                     </span>
@@ -59,8 +65,13 @@
                         <hr>
                         <p>Node: {{subscription.poi_area.node.poi_node_id}}</p>
                         <!-- <p>Interface: {{subscription.newSubPOI.PWESubInt}}</p> -->
-                        <p>Interface: {{subscription.db_subscription.poi.node.poi_if}}</p>
-                        <p>PW subint.: {{subscription.db_subscription.poi.node.pw_sub_if}}</p>
+                        <p>SP Interface: {{subscription.db_subscription.poi.node.to_sp_if}}</p>
+                        <p ng-show="!subscription.tunnel_technology">PW subint.: {{subscription.db_subscription.poi.node.pw_sub_if}}</p>
+                        <p ng-show="subscription.tunnel_technology == 'EVPN-VPWS'">
+                            EVI: {{subscription.evpn_vpws.evi}},
+                            TARGET: {{subscription.evpn_vpws.target}},
+                            SOURCE: {{subscription.evpn_vpws.source}}
+                        </p>
                         <!-- <p>VLAN's: <span ng-repeat="c_vlan in subscription.newSubPOI.c_vlans.c_vlan">{{c_vlan.c_vlan_id}}, </span></p> -->
                         <p>VLAN's: <span ng-repeat="service in subscription.db_subscription.services">{{service.poi_vlan_id}}, </span></p>
                     </span>
@@ -150,17 +161,24 @@
             <i ng-show="formSubscription.subscriber_id.$error.required">*Must be filled in</i>
             <div class="form-group col-md-2">
                 <label>CPE</label>
-                <select class="form-control" ng-model="cpe_name" name="cpe_name" ng-change="makeSubscriptionID()" required>
-                    <option ng-repeat="cpe in inventory.cpes.cpe" value="{{cpe.cpe_name}}">{{cpe.cpe_name}}</option>
+                <select class="form-control" ng-model="cpe" name="cpe" ng-change="makeSubscriptionID()" required>
+                    <option ng-repeat="cpe in inventory.cpes.cpe" value="{{cpe}}">{{cpe.cpe_name}}</option>
                 </select>
-                <i ng-show="formSubscription.cpe_name.$error.required">*Must be filled in</i>
+                <i ng-show="formSubscription.cpe.$error.required">*Must be filled in</i>
             </div>
-            <div class="form-group col-md-2">
+            <!-- <div class="form-group col-md-2">
                 <label>Service Provider</label>
                 <select class="form-control" ng-model="sp_id" name="sp_id" ng-change="listServices()" required>
                     <option ng-repeat="sp in inventory.sps.sp" value="{{sp.sp_id}}">{{sp.sp_id}}</option>
                 </select>
                 <i ng-show="formSubscription.sp_id.$error.required">*Must be filled in</i>
+            </div> -->
+            <div class="form-group col-md-2">
+                <label>Service Provider</label>
+                <select class="form-control" ng-model="sp" name="sp" ng-change="listServices()" required>
+                    <option ng-repeat="sp in inventory.sps.sp" value="{{sp}}">{{sp.sp_id}}</option>
+                </select>
+                <i ng-show="formSubscription.sp.$error.required">*Must be filled in</i>
             </div>
             <div class="form-group col-md-2" ng-show="showServices">
                 <label>Service</label>
@@ -194,7 +212,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-2">
+            <!-- <div class="form-group col-md-2">
                 <label>PE Area</label>
                 <select class="form-control" ng-model="pe_area_id" name="pe_area_id" required>
                     <option ng-repeat="pe_area in inventory.pe_areas.pe_area" value="{{pe_area.pe_area_id}}">{{pe_area.pe_area_id}}</option>
@@ -207,6 +225,27 @@
                     <option ng-repeat="poi_area in inventory.poi_areas.poi_area" value="{{poi_area.poi_area_id}}">{{poi_area.poi_area_id}}</option>
                 </select>
                 <i ng-show="formSubscription.poi_area_id.$error.required">*Must be filled in</i>
+            </div> -->
+            <div class="form-group col-md-2">
+                <label>PE Area</label>
+                <select class="form-control" ng-model="pe_area" name="pe_area" required>
+                    <option ng-repeat="pe_area in inventory.pe_areas.pe_area" value="{{pe_area}}">{{pe_area.pe_area_id}}</option>
+                </select>
+                <i ng-show="formSubscription.pe_area.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-2">
+                <label>POI Area</label>
+                <select class="form-control" ng-model="poi_area" name="poi_area" required>
+                    <option ng-repeat="poi_area in inventory.poi_areas.poi_area" value="{{poi_area}}">{{poi_area.poi_area_id}}</option>
+                </select>
+                <i ng-show="formSubscription.poi_area.$error.required">*Must be filled in</i>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Tunnel Technology</label>
+                <select class="form-control" ng-model="tunnel_technology_id" name="tunnel_technology_id" required>
+                    <option ng-repeat="tunnel_technology in tunnel_technologies" value="{{tunnel_technology.tunnel_technology_id}}">{{tunnel_technology.tunnel_technology_id}}</option>
+                </select>
+                <i ng-show="formSubscription.tunnel_technology_id.$error.required">*Must be filled in</i>
             </div>
         </div>
         <div class="row">

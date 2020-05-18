@@ -3,17 +3,15 @@ const express = require('express');
 const router = express.Router();
 const request = require("request");
 const {PythonShell} = require('python-shell');
+const mo = require('./nso_restconf');
+const servicePath = "/multipleIpslaIcmp:multipleIpslaIcmp";
 
 // GET ipsla icmp operations
 router.get('/', (req, res) => {
   console.log(`Here we are in the ipsla icmp router, GET all operations.`);
-  var options = makeOptions('', 'collection', 'GET');
+  var options = mo.makeOptions(servicePath, 'GET');
   
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    // console.log(body);
-    res.send(body);
-  });
+  sendNSORequest(options, res);
 });
 
 // GET ipsla icmp statistics, one vlan
@@ -39,18 +37,6 @@ router.post('/statistics/:subscription_id', (req, res) => {
 
 });
 
-// POST check-sync
-router.get('/check-sync/:id', (req, res) => {
-  // console.log(`Here we are in the subscriptions router. Check-sync for id: ${req.params.id}`);
-  var options = makeOptions(':multipleIpslaIcmp/'+req.params.id+'/_operations/check-sync', 'data', 'POST');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    // console.log(`Body: ${body}`);
-    res.send(body);
-  });
-});
-
 // POST an ipsla icmp operation
 router.post('/', (req, res) => {
   // console.log(`Here we are in the ipsla icmp router. POST operation`);
@@ -66,88 +52,32 @@ router.post('/', (req, res) => {
   var body = JSON.stringify(object_body);
   // console.log(`body: ${body}`);
   // console.log(`***************`);
-  // console.log(`User: ${process.env.NSO_USER}, Password: ${process.env.NSO_PWD}`);
-  var auth = new Buffer(process.env.NSO_USER + ':' + process.env.NSO_PWD).toString('base64');
-  // console.log(`Encoded Authentication: ${auth}`);
-  // console.log(`***************`);
 
-  var options = {
-    method: 'POST',
-    url: 'http://'+process.env.NSO_ADDRESS+':'+process.env.NSO_PORT+'/api/running',
-    headers: {
-      Authorization: 'Basic '+auth,
-      Accept: 'application/vnd.yang.data+json',
-      'Cache-Control': 'no-cache',
-      'Content-Type': 'application/vnd.yang.data+json'
-    },
-    body: body
-  };
+  var options = mo.makeOptions('', 'POST', body);
+  // console.log(`Options in router: ${JSON.stringify(options)}`);
 
-  // console.log(`Options: ${JSON.stringify(options)}`);
-
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    console.log(`Body: ${body}`);
-    res.send(body);
-  });
-
-});
-
-// POST un-deploy an ipsla icmp operation
-router.get('/un-deploy/:id', (req, res) => {
-  console.log(`Here we are in the ipsla icmp router. Un-deploy id: ${req.params.id}`);
-  var options = makeOptions(':multipleIpslaIcmp/'+req.params.id+'/_operations/un-deploy', 'data', 'POST');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    console.log(`Body: ${body}`);
-    res.send(body);
-  });
-});
-
-// POST re-deploy an ipsla icmp operation
-router.get('/re-deploy/:id', (req, res) => {
-  console.log(`Here we are in the ipsla icmp router. Re-deploy id: ${req.params.id}`);
-  var options = makeOptions(':multipleIpslaIcmp/'+req.params.id+'/_operations/re-deploy', 'data', 'POST');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    console.log(`Body: ${body}`);
-    res.send(body);
-  });
+  sendNSORequest(options, res);
 });
 
 // DELETE an ipsla icmp operation
 router.delete('/:id', (req, res) => {
   // console.log(`Here we are in the ipsla icmp router. Delete: ${req.params.id}`);
-  var options = makeOptions(':multipleIpslaIcmp/'+req.params.id, 'data', 'DELETE');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    console.log(`Body: ${body}`);
-    res.send(body);
-  });
+  var options = mo.makeOptions(`${servicePath}=${req.params.id}`, 'DELETE');
+  // console.log(`Options url: ${options.url}`);
+  sendNSORequest(options, res);
 });
 
-function makeOptions(pathEnd, collOrData, method) {
-  // console.log(`In the function: User: ${process.env.NSO_USER}, Password: ${process.env.NSO_PWD}`);
-  var auth = new Buffer(process.env.NSO_USER + ':' + process.env.NSO_PWD).toString('base64');
-  // console.log(`Encoded Authentication: ${auth}`);
+function sendNSORequest(options, res) {
 
-  var options = {
-    method: method,
-    url: 'http://'+process.env.NSO_ADDRESS+':'+process.env.NSO_PORT+'/api/running/multipleIpslaIcmp'+pathEnd,
-    qs: { deep: '' },
-    headers: {
-        Authorization: 'Basic '+auth,
-        Accept: 'application/vnd.yang.'+collOrData+'+json',
-        'Cache-Control': 'no-cache',
-        'Content-Type': 'application/vnd.yang.data+json'
-    }
-  };
-  console.log(`Options url: ${options.url}`);
-
-  return options;
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+    // console.log(`Body: ${body}, response: ${JSON.stringify(response)}`);
+    if (response.statusCode < 210) {
+      res.send(body);
+    } else {
+      res.status(response.statusCode).send(body);
+    };
+  });
 };
 
 module.exports = router;

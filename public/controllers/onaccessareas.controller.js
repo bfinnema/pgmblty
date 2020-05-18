@@ -15,12 +15,13 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.vlanBtnShow = [false,true,false,false,false,false,false,false];
     $scope.vlanShow = [true,false,false,false,false,false,false,false];
     var numVlanLines = 0;
+    $scope.devices = [{"device_id": "c4500"}];
 
     $http({
         method: "GET",
         url: "/inventory/accessareas"
     }).then(function(response) {
-        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:access_area", "access_area")).collection.access_area;
+        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:access_area", "access_area")).access_area;
         // console.log(`Access Areas's: ${JSON.stringify($scope.collection)}`);
         // console.log(`Access Area: ${$scope.collection[0].access_area_id}`);
         return $http({
@@ -28,11 +29,11 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             url: "/deviceservices/devices"
         });
     }).then(function(response) {
-        // console.log(JSON.stringify(response.data));
+        console.log(JSON.stringify(response.data));
         devicedetails = JSON.parse(JSON.stringify(response.data).replace("tailf-ncs:devices", "devices")).devices.device;
         // console.log(`Devicedetails: ${JSON.stringify($scope.devicedetails)}`);
         // console.log(`Devices Status: ${response.status}`);
-        var devices = [];
+        devices = [];
         for (var i=0; i<devicedetails.length; i++) {
             devices.push({"device_id": devicedetails[i].name});
         };

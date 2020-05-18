@@ -13,6 +13,10 @@ function($scope, $http, $window, $route, $location, $q) {
     $scope.spinnerStatusDelete = false;
     $scope.errorMessage = false;
     $scope.cpe_id = 0;
+    $scope.tunnel_technologies = [
+        {"tunnel_technology_id": "PW"},
+        {"tunnel_technology_id": "EVPN-VPWS"}
+    ];
     
     $http({
         method: "GET",
@@ -53,7 +57,7 @@ function($scope, $http, $window, $route, $location, $q) {
         // console.log(`Collection: ${JSON.stringify(collection.data)}`);
         if (collection.data) {
             // console.log(`There are some subscriptions.`);
-            $scope.subscriptions = JSON.parse(JSON.stringify(collection.data).replace("open-net-core:open-net-core", "openNetCore")).collection.openNetCore;
+            $scope.subscriptions = JSON.parse(JSON.stringify(collection.data).replace("open-net-core:open-net-core", "openNetCore")).openNetCore;
         } else {
             console.log(`There are no subscriptions.`);
             $scope.subscriptions = [];
@@ -92,7 +96,7 @@ function($scope, $http, $window, $route, $location, $q) {
             $scope.showIpslaSpinner.push(showSpinner);
             $scope.subscriptions[i].ipslaMessage = "";
             $scope.subscriptions[i].showIpslaMessage = false;
-            $scope.subscriptions[i].cpe_id = matchCPE($scope.subscriptions[i].cpe_name);
+            $scope.subscriptions[i].cpe_id = matchCPE($scope.subscriptions[i].cpe_name).cpe_id;
             $scope.subscriptions[i].subscription_id = $scope.subscriptions[i].sp_id+"-Sub"+$scope.subscriptions[i].subscriber_id+"."+$scope.subscriptions[i].cpe_id+"-"+$scope.subscriptions[i].service_id;
             // console.log(`Subscription ID calculated to be: ${$scope.subscriptions[i].subscription_id}`);
 
@@ -100,7 +104,7 @@ function($scope, $http, $window, $route, $location, $q) {
             $scope.subscriptions[i].pe_area = matchPE($scope.subscriptions[i].pe_area_id);
             $scope.subscriptions[i].poi_area = matchPOI($scope.subscriptions[i].poi_area_id);
 
-            var chain = $q.when();
+            /* var chain = $q.when();
             (function(s_id, count) {
                 chain = chain.then(function() {
                     return $http({
@@ -115,7 +119,8 @@ function($scope, $http, $window, $route, $location, $q) {
                         console.log(`Status: ${response.status}`);
                     });
                 });
-            })($scope.subscriptions[i].subscription_id, i);
+            })($scope.subscriptions[i].subscription_id, i); */
+
         };
     }, function errorCallback(response) {
         console.log(`Status: ${response.status}`);
@@ -123,71 +128,6 @@ function($scope, $http, $window, $route, $location, $q) {
 
     $scope.hoverIn = function(index) {
         $scope.showSubDetails[index] = true;
-        /* if (!$scope.subscriptions[index].allCollected) {    //  && $scope.subscriptions[index].sync_status.in_sync
-            // console.log(`Getting the DETAILS`);
-            $http({
-                method: 'GET',
-                url: "/deviceservices/newSubAccess/"+$scope.subscriptions[index].subscription_id
-            }).then(function(subAccess) {
-                $scope.newSubAccess = JSON.parse(JSON.stringify(subAccess.data).replace("newSubAccess:newSubAccess", "newSubAccess")).newSubAccess;
-                // console.log(`newSubAccess: ${JSON.stringify($scope.newSubAccess)}`);
-                $scope.subscriptions[index].newSubAccess = $scope.newSubAccess;
-                // console.log(`Stringified: ${JSON.stringify($scope.subscriptions[index].newSubAccess)}`);
-
-                return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubPE/"+$scope.subscriptions[index].subscription_id
-                });
-            }).then(function(subPE) {
-                $scope.newSubPE = JSON.parse(JSON.stringify(subPE.data).replace("newSubPE:newSubPE", "newSubPE")).newSubPE;
-                // console.log(`newSubPE: ${JSON.stringify($scope.newSubPE)}`);
-                $scope.subscriptions[index].newSubPE = $scope.newSubPE;
-                return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubPOI/"+$scope.subscriptions[index].subscription_id
-                });
-            }).then(function(subPOI) {
-                $scope.newSubPOI = JSON.parse(JSON.stringify(subPOI.data).replace("newSubPOI:newSubPOI", "newSubPOI")).newSubPOI;
-                // console.log(`newSubPOI: ${JSON.stringify($scope.newSubPOI)}`);
-                $scope.subscriptions[index].newSubPOI = $scope.newSubPOI;
-                return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubCPE/"+$scope.subscriptions[index].subscription_id
-                });
-            }).then(function(subCPE) {
-                $scope.newSubCPE = JSON.parse(JSON.stringify(subCPE.data).replace("newSubCPE:newSubCPE", "newSubCPE")).newSubCPE;
-                // console.log(`newSubCPE: ${JSON.stringify($scope.newSubCPE)}`);
-                $scope.subscriptions[index].newSubCPE = $scope.newSubCPE;
-
-                return $http({
-                    method: "GET",
-                    url: "/subscriptions/check-sync/"+$scope.subscriptions[index].subscription_id
-                });
-            }).then(function(response) {
-                // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
-                var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
-                // console.log(`newSyncStatus stringified: ${JSON.stringify(newSyncStatus)}`);
-                $scope.subscriptions[index].sync_status = newSyncStatus.sync_output;
-        
-            }, function errorCallback(response) {
-                console.log(`Status: ${response.status}`);
-            });
-            $scope.subscriptions[index].allCollected = true;
-        } else {
-
-            $http({
-                method: "GET",
-                url: "/subscriptions/check-sync/"+$scope.subscriptions[index].subscription_id
-            }).then(function(response) {
-                // console.log(`DATA stringified: ${JSON.stringify(response.data)}`);
-                var newSyncStatus = JSON.parse(JSON.stringify(response.data).replace('"open-net-core:output":{"in-sync":', '"sync_output":{"in_sync":'));
-                // console.log(`newSyncStatus stringified: ${JSON.stringify(newSyncStatus)}`);
-                $scope.subscriptions[index].sync_status = newSyncStatus.sync_output;
-            }, function errorCallback(response) {
-                console.log(`Status: ${response.status}`);
-            });
-        }; */
-        // console.log($scope.subscriptions);
     };
 
     $scope.hoverOut = function(index) {
@@ -231,13 +171,13 @@ function($scope, $http, $window, $route, $location, $q) {
                 url: '/ipslaicmp',
                 data: data
             }).then(function(response) {
-                // console.log(`ipslaicmp deployment Status: ${response.status}`);
+                console.log(`ipslaicmp deployment Status: ${response.status}`);
                 $scope.subscriptions[sub_index].ipslaMessage = "IPSLA deployed. Checking each service..";
             });
         });
         // for(var v = 0; v < vlan.length; v++) {
         for(var v = 0; v < $scope.subscriptions[sub_index].db_subscription.services.length; v++) {
-            // console.log(`#: ${v}, vlan_id: ${$scope.subscriptions[sub_index].db_subscription.services[v].access_vlan_id}`);
+            console.log(`#: ${v}, vlan_id: ${$scope.subscriptions[sub_index].db_subscription.services[v].access_vlan_id}`);
             (function(index, count, len) {
                 chain = chain.then(function() {
                     return $http({
@@ -247,8 +187,8 @@ function($scope, $http, $window, $route, $location, $q) {
                             "the_vlan": index
                         }
                     }).then(function(response) {
-                        // console.log(`ipslaicmp statistics Status: ${response.status}`);
-                        // console.log(`Result: ${JSON.stringify(response.data)}`);
+                        console.log(`ipslaicmp statistics Status: ${response.status}`);
+                        console.log(`Result: ${JSON.stringify(response.data)}`);
                         if (response.data.result) {
                             numGood++;
                             $scope.subscriptions[sub_index].serviceStatus.services_status[count].status = 3;
@@ -313,14 +253,49 @@ function($scope, $http, $window, $route, $location, $q) {
                 url: "/db_subscriptions/"+subscription.db_subscription._id,
                 data: subscription.db_subscription
             }).then(function(response) {
-                // console.log(`PATCH db_subscriptions Status: ${response.status}`);
+                console.log(`PATCH db_subscriptions Status: ${response.status}`);
             });
         })
 
     };
 
     $scope.listServices = function() {
-        for (var i=0; i<$scope.inventory.sps.sp.length; i++) {
+        $scope.selectedSP = JSON.parse($scope.sp);
+        $scope.sp_id = $scope.selectedSP.sp_id;
+        // console.log(`Parsed SP: ${$scope.selectedSP.sp_id}`);
+        if ($scope.selectedSP.services) {
+            $scope.services = $scope.selectedSP.services.service;
+            // console.log(`Found: ${JSON.stringify($scope.services)}`);
+            $scope.showServices = true;
+            $scope.s_vlan_offset = $scope.selectedSP.s_vlan_offset;
+        } else {
+            $window.alert("You cannot deploy this subscription. No Services have been defined for this SP. Do that under 'Service Providers'.")
+            $scope.service_id = null;
+            $scope.showServices = false;
+            $scope.showAccessAreas = false;
+            $scope.access_area_id = null
+            $scope.showAccessNodes = false;
+            $scope.access_node_id = null;
+            $scope.showAccessInterface = false;
+            $scope.access_if = null;
+        };
+        if ($scope.selectedSP.access_deployment) {
+            $scope.sp_access_areas = $scope.selectedSP.access_deployment.access_area;
+            // console.log(`Found: ${JSON.stringify($scope.sp_access_areas)}`);
+            $scope.showAccessAreas = true;
+        } else {
+            // console.log(`No access nodes deployed for the SP.`);
+            $window.alert("You cannot deploy this subscription. The SP has not been deployed in any access areas / nodes. Do that under 'Service Providers'.")
+            $scope.showAccessAreas = false;
+            $scope.access_area_id = null
+            $scope.showAccessNodes = false;
+            $scope.access_node_id = null;
+            $scope.showAccessInterface = false;
+            $scope.access_if = null;
+            $scope.service_id = null;
+            $scope.showServices = false;
+        };
+        /* for (var i=0; i<$scope.inventory.sps.sp.length; i++) {
             // console.log(`sp_id: ${$scope.inventory.sps.sp[i].sp_id}`);
             if ($scope.sp_id == $scope.inventory.sps.sp[i].sp_id) {
                 // console.log(`SP Found: ${JSON.stringify($scope.inventory.sps.sp[i])}`);
@@ -328,6 +303,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     $scope.services = $scope.inventory.sps.sp[i].services.service;
                     // console.log(`Found: ${JSON.stringify($scope.services)}`);
                     $scope.showServices = true;
+                    $scope.s_vlan_offset = $scope.inventory.sps.sp[i].s_vlan_offset;
                 } else {
                     $window.alert("You cannot deploy this subscription. No Services have been defined for this SP. Do that under 'Service Providers'.")
                     $scope.service_id = null;
@@ -341,10 +317,10 @@ function($scope, $http, $window, $route, $location, $q) {
                 };
                 if ($scope.inventory.sps.sp[i].access_deployment) {
                     $scope.sp_access_areas = $scope.inventory.sps.sp[i].access_deployment.access_area;
-                    console.log(`Found: ${JSON.stringify($scope.sp_access_areas)}`);
+                    // console.log(`Found: ${JSON.stringify($scope.sp_access_areas)}`);
                     $scope.showAccessAreas = true;
                 } else {
-                    console.log(`No access nodes deployed for the SP.`);
+                    // console.log(`No access nodes deployed for the SP.`);
                     $window.alert("You cannot deploy this subscription. The SP has not been deployed in any access areas / nodes. Do that under 'Service Providers'.")
                     $scope.showAccessAreas = false;
                     $scope.access_area_id = null
@@ -357,8 +333,8 @@ function($scope, $http, $window, $route, $location, $q) {
                 };
                 $scope.selectedSP = $scope.inventory.sps.sp[i];
             };
-        };
-        if ($scope.sp_id) {var sp_id = $scope.sp_id} else {var sp_id = ""};
+        }; */
+        if ($scope.sp) {var sp_id = $scope.selectedSP.sp_id} else {var sp_id = ""};
         if ($scope.subscriber_id) {var subscriber_id = $scope.subscriber_id} else {var subscriber_id = 0};
         if ($scope.service_id) {var service_id = $scope.service_id} else {var service_id = ""};
         $scope.name = sp_id+"-Sub"+subscriber_id+"."+$scope.cpe_id+"-"+service_id;
@@ -369,16 +345,22 @@ function($scope, $http, $window, $route, $location, $q) {
         // console.log(`Selected SP in listAccessNodes: ${JSON.stringify($scope.selectedSP)}`);
         for (var i=0; i<$scope.selectedSP.access_deployment.access_area.length; i++) {
             // console.log(`access_area_id: ${$scope.inventory.access_areas.access_area[i].access_area_id}`);
-            if ($scope.access_area_id == $scope.inventory.access_areas.access_area[i].access_area_id) {
+            /* if ($scope.access_area_id == $scope.inventory.access_areas.access_area[i].access_area_id) {
                 $scope.all_access_nodes = $scope.inventory.access_areas.access_area[i].nodes.node;
                 // console.log(`Found: ${JSON.stringify($scope.all_access_nodes)}`);
-            };
+            }; */
             if ($scope.access_area_id == $scope.selectedSP.access_deployment.access_area[i].access_area_id) {
                 $scope.access_nodes = $scope.selectedSP.access_deployment.access_area[i].access_nodes;
-                // console.log(`Found: ${JSON.stringify($scope.access_nodes)}`);
+                // console.log(`Found Access Nodes in the Access Area, deployed by the SP: ${JSON.stringify($scope.access_nodes)}`);
                 $scope.showAccessNodes = true;
                 $scope.access_node_id = null;
                 foundAccessArea = true;
+            };
+        };
+        for (var j=0; j<$scope.inventory.access_areas.access_area.length; j++) {
+            if ($scope.access_area_id == $scope.inventory.access_areas.access_area[j].access_area_id) {
+                $scope.all_access_nodes = $scope.inventory.access_areas.access_area[j].nodes.node;
+                // console.log(`Found All Access Nodes: ${JSON.stringify($scope.all_access_nodes)}`);
             };
         };
         if (!foundAccessArea) {
@@ -391,41 +373,46 @@ function($scope, $http, $window, $route, $location, $q) {
             // console.log(`access_node_id: ${$scope.all_access_nodes[j].access_node_id}`);
             if ($scope.access_node_id == $scope.all_access_nodes[j].access_node_id) {
                 $scope.access_interfaces = $scope.all_access_nodes[j].interfaces.interface;
-                // console.log(`Found: ${JSON.stringify($scope.access_interfaces)}`);
+                // console.log(`Found Access Interfaces: ${JSON.stringify($scope.access_interfaces)}`);
             };
         };
         $scope.showAccessInterface = true;
     };
 
     $scope.makeSubscriptionID = function() {
-        if ($scope.cpe_name) {
-            for (var w=0; w<$scope.inventory.cpes.cpe.length; w++) {
-                // console.log(`Counter w: ${w}`);
-                // console.log(`Looking for cpe: ${$scope.cpe_name}`);
-                if ($scope.inventory.cpes.cpe[w].cpe_name == $scope.cpe_name) {
-                    $scope.cpe_id = $scope.inventory.cpes.cpe[w].cpe_id;
-                    // console.log(`Found cpe_id: ${$scope.inventory.cpes.cpe[w].cpe_id}`);
-                };
-            };
+        // console.log(`Initial cpe_id: ${$scope.cpe_id}`);
+        if ($scope.cpe) {
+            $scope.cpe_p = JSON.parse($scope.cpe);
+            $scope.cpe_id = $scope.cpe_p.cpe_id;
+            // console.log(`Found cpe_id: ${$scope.cpe_id}`);
+        } else {
+            // console.log(`CPE not defined yet`);
+        }
+        if ($scope.sp) {
+            $scope.selectedSP = JSON.parse($scope.sp);
+            var sp_id = $scope.selectedSP.sp_id
+        } else {
+            var sp_id = ""
         };
-        if ($scope.sp_id) {var sp_id = $scope.sp_id} else {var sp_id = ""};
         if ($scope.subscriber_id) {var subscriber_id = $scope.subscriber_id} else {var subscriber_id = 0};
         if ($scope.service_id) {var service_id = $scope.service_id} else {var service_id = ""};
         $scope.name = sp_id+"-Sub"+subscriber_id+"."+$scope.cpe_id+"-"+service_id;
     };
 
     $scope.newEntryToggle = function() {
+        // console.log(`In newEntryToggle`);
         if ($scope.newEntry) {
             $scope.newEntry = false;
             $scope.name = null;
             $scope.subscriber_id = null;
-            $scope.sp_id = null;
+            $scope.sp = null;
             $scope.service_id = null;
-            $scope.access_area_id = null;
-            $scope.access_node_id = null;
+            $scope.access_area = null;
+            $scope.access_node = null;
             $scope.access_if = null;
-            $scope.pe_area_id = null;
-            $scope.poi_area_id = null;
+            $scope.pe_area = null;
+            $scope.poi_area = null;
+            $scope.tunnel_technology_id = null;
 
         } else {
             $scope.newEntry = true;
@@ -438,8 +425,9 @@ function($scope, $http, $window, $route, $location, $q) {
             $scope.editEntry = false;
             $scope.name = null;
             $scope.subscriber_id = null;
-            $scope.cpe_name = null;
-            $scope.sp_id = null;
+            // $scope.cpe_name = null;
+            $scope.cpe = null;
+            $scope.sp = null;
             $scope.service_id = null;
             $scope.access_area_id = null;
             $scope.pe_area_id = null;
@@ -453,8 +441,11 @@ function($scope, $http, $window, $route, $location, $q) {
             $scope.indexOfSubToMove = index;
             $scope.name = $scope.subscriptions[index].name;
             $scope.subscriber_id = parseInt($scope.subscriptions[index].subscriber_id);
-            $scope.cpe_name = $scope.subscriptions[index].cpe_name;
-            $scope.sp_id = $scope.subscriptions[index].sp_id;
+            // $scope.cpe_name = $scope.subscriptions[index].cpe_name;
+            $scope.cpe = matchCPE($scope.subscriptions[index].cpe_name);
+            // console.log(`Found CPE: ${$scope.cpe.cpe_id}`);
+            $scope.sp = matchSP($scope.subscriptions[index].sp_id);
+            // console.log(`Found SP: ${$scope.sp.sp_id}`);
             $scope.service_id = $scope.subscriptions[index].service_id;
             $scope.access_area_id = $scope.subscriptions[index].access_area_id;
             $scope.access_node_id = $scope.subscriptions[index].access_node_id;
@@ -479,11 +470,11 @@ function($scope, $http, $window, $route, $location, $q) {
             // console.log(`Subscription ID: ${$scope.subscriptions[q].name}`);
             if ($scope.subscriptions[q].name == subscription_id) {
                 subscriptionExistsAlready = true;
-                $window.alert("The Subscription ID exists already. Operation interrupted.");
+                $window.alert("Fatal: The Subscription ID exists already. Operation interrupted.");
             };
             if ($scope.subscriptions[q].sp_id == $scope.sp_id && $scope.subscriptions[q].subscriber_id == $scope.subscriber_id) {
                 subscriptionExistsAlready = true;
-                $window.alert("The ISP already has a subscription provisioned for that subscriber.");
+                $window.alert("Warning: The ISP already has a subscription provisioned for that subscriber.");
             }
         };
 
@@ -497,7 +488,6 @@ function($scope, $http, $window, $route, $location, $q) {
             // console.log(`vlan_mappings: ${JSON.stringify(vlan_mappings)}`);
             // console.log(`VLAN Pool now: ${JSON.stringify(vp)}`);
 
-            // var PWResults = allocatePws();
             var PWPool = matchPWPool();
             var PWResults = allocatePWSubInt(PWPool);
             var selectedPWSubInterface = PWResults.selectedPWSubInterface;
@@ -516,28 +506,65 @@ function($scope, $http, $window, $route, $location, $q) {
                 "access_node_id": $scope.access_node_id
             };
 
-            var data_for_nso = {
-                "name": $scope.name,
-                "subscriber_id": $scope.subscriber_id,
-                "moved_subscriber": false,
-                "cpe_name": $scope.cpe_name,
-                "sp_id": $scope.sp_id,
-                "service_id": $scope.service_id,
-                "access_area_id": $scope.access_area_id,
-                "access_node_id": $scope.access_node_id,
-                "access_if": $scope.access_if,
-                "pe_area_id": $scope.pe_area_id,
-                "poi_area_id": $scope.poi_area_id,
-                "pwsubinterface_id": selectedPWSubInterface,
-                "vlan_mappings": vlan_mappings,
-                "original_access": original_access
-            };
-            // console.log(`DATA: ${JSON.stringify(data_for_nso)}`);
+            var pe = JSON.parse($scope.pe_area);
+            // console.log(`PE Area for submit: ${pe.pe_area_id}`);
+            pe.node.pe_sub_if = pe.node.pe_if + "." + ($scope.s_vlan_offset + selectedPWSubInterface).toString();
+            // console.log(`POI: ${JSON.stringify(pe)}`);
+            var poi = JSON.parse($scope.poi_area);
+            // console.log(`POI Area for submit: ${poi.poi_area_id}`);
 
-            var cpe = {
-                "cpe_name": $scope.cpe_name,
-                "cpe_id": matchCPE($scope.cpe_name)
+            access_node = matchAccessNode($scope.access_area_id, $scope.access_node_id);
+            var evpn_vpws = {
+                // "evi": $scope.s_vlan_offset + selectedPWSubInterface,
+                "evi": $scope.s_vlan_offset + access_node.s_vlan_num + 80,
+                "target": $scope.s_vlan_offset + access_node.s_vlan_num,
+                "source": $scope.s_vlan_offset + access_node.s_vlan_num
             };
+
+            // console.log(`Tunnel Technology: ${$scope.tunnel_technology_id}, evpn_vpws: ${JSON.stringify(evpn_vpws)}`);
+            if ($scope.tunnel_technology_id == "EVPN-VPWS") {
+                poi.node.evpn_vpws = evpn_vpws;
+                pe.node.evpn_vpws = evpn_vpws;
+                // console.log(`PE: ${JSON.stringify(pe)}`);
+                // console.log(`POI: ${JSON.stringify(poi)}`);
+                var data_for_nso = {
+                    "name": $scope.name,
+                    "subscriber_id": $scope.subscriber_id,
+                    "tunnel_technology": $scope.tunnel_technology_id,
+                    "moved_subscriber": false,
+                    "cpe_name": $scope.cpe_p.cpe_name,
+                    "sp_id": $scope.sp_id,
+                    "service_id": $scope.service_id,
+                    "access_area_id": $scope.access_area_id,
+                    "access_node_id": $scope.access_node_id,
+                    "access_if": $scope.access_if,
+                    "pe_area_id": pe.pe_area_id,
+                    "poi_area_id": poi.poi_area_id,
+                    "evpn_vpws": evpn_vpws,
+                    "vlan_mappings": vlan_mappings,
+                    "original_access": original_access
+                };
+            } else {
+                poi.node.pw_sub_if = ($scope.s_vlan_offset).toString() + "." + (selectedPWSubInterface).toString();
+                var data_for_nso = {
+                    "name": $scope.name,
+                    "subscriber_id": $scope.subscriber_id,
+                    "tunnel_technology": $scope.tunnel_technology_id,
+                    "moved_subscriber": false,
+                    "cpe_name": $scope.cpe_p.cpe_name,
+                    "sp_id": $scope.sp_id,
+                    "service_id": $scope.service_id,
+                    "access_area_id": $scope.access_area_id,
+                    "access_node_id": $scope.access_node_id,
+                    "access_if": $scope.access_if,
+                    "pe_area_id": pe.pe_area_id,
+                    "poi_area_id": poi.poi_area_id,
+                    "pwsubinterface_id": selectedPWSubInterface,
+                    "vlan_mappings": vlan_mappings,
+                    "original_access": original_access
+                };
+            }
+            // console.log(`DATA: ${JSON.stringify(data_for_nso)}`);
 
             var services_for_db = [];
             for (l=0; l<vlan_mapping.length; l++) {
@@ -548,7 +575,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     "poi_vlan_id": vlan_mapping[l].old_vlan,
                     "cpe_ipaddress": {
                         "octet1": 10,
-                        "octet2": matchCPE($scope.cpe_name) % 255,
+                        "octet2": $scope.cpe_p.cpe_id % 255,
                         "octet3": vlan_mapping[l].outer_vlan % 255,
                         "octet4": 2
                     },
@@ -563,11 +590,6 @@ function($scope, $http, $window, $route, $location, $q) {
                 services_for_db.push(service_for_db);
             };
             // console.log(`services_for_db DATA: ${JSON.stringify(service_for_db)}`);
-
-            var mvr = {
-                "mvr_vlan": 0,
-                "mvr_receiver_vlan": 0
-            };
 
             var summaryStatus = [
                 {
@@ -588,18 +610,19 @@ function($scope, $http, $window, $route, $location, $q) {
                 "subscription_description": "Subscription "+subscription_id+", Subscriber: "+$scope.subscriber_id+", SP: "+$scope.sp_id+".",
                 "subscriber_id": $scope.subscriber_id,
                 "moved_subscriber": moved_subscriber,
+                "tunnel_technology": $scope.tunnel_technology_id,
                 "services": services_for_db,
                 "summaryStatus": summaryStatus,
                 "deploymentStatus": true,
-                "mvr": mvr,
                 "access": access,
-                "pe": matchPE($scope.pe_area_id),
-                "poi": matchPOI($scope.poi_area_id),
-                "cpe": cpe,
+                "pe": pe,
+                "poi": poi,
+                "cpe": $scope.cpe_p,
                 "sp_id": $scope.sp_id,
                 "service_id": $scope.service_id
             };
             // console.log(`db_subscription DATA: ${JSON.stringify(data_for_db_subscription)}`);
+            // console.log(`STOP: ${STOP}`);
             
             $http({
                 method: "POST",
@@ -615,29 +638,15 @@ function($scope, $http, $window, $route, $location, $q) {
             }).then(function(subAccess) {
                 $scope.newSubAccess = JSON.parse(JSON.stringify(subAccess.data).replace("newSubAccess:newSubAccess", "newSubAccess")).newSubAccess;
                 // console.log(`newSubAccess: ${JSON.stringify($scope.newSubAccess)}`);
-                mvr = {
-                    "mvr_vlan": $scope.newSubAccess.mvr_vlan,
-                    "mvr_receiver_vlan": $scope.newSubAccess.mvr_receiver_vlan
+                // console.log(`mvr_vlan: ${$scope.newSubAccess[0].mvr_vlan}`);
+                // console.log(`mvr_receiver_vlan: ${$scope.newSubAccess[0].mvr_receiver_vlan}`);
+                var mvr = {
+                    "mvr_vlan": $scope.newSubAccess[0].mvr_vlan,
+                    "mvr_receiver_vlan": $scope.newSubAccess[0].mvr_receiver_vlan
                 };
+                // console.log(`mvr: ${JSON.stringify(mvr)}`);
                 data_for_db_subscription.mvr = mvr;
-
-                return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubPE/"+subscription_id
-                });
-            }).then(function(subPE) {
-                $scope.newSubPE = JSON.parse(JSON.stringify(subPE.data).replace("newSubPE:newSubPE", "newSubPE")).newSubPE;
-                // console.log(`newSubPE: ${JSON.stringify($scope.newSubPE)}`);
-                data_for_db_subscription.pe.node.pe_if = $scope.newSubPE.pe_interface;
-
-                return $http({
-                    method: 'GET',
-                    url: "/deviceservices/newSubPOI/"+subscription_id
-                });
-            }).then(function(subPOI) {
-                $scope.newSubPOI = JSON.parse(JSON.stringify(subPOI.data).replace("newSubPOI:newSubPOI", "newSubPOI")).newSubPOI;
-                // console.log(`newSubPOI: ${JSON.stringify($scope.newSubPOI)}`);
-                data_for_db_subscription.poi.node.pw_sub_if = $scope.newSubPOI.PWESubInt;
+                // console.log(`db_subscription DATA after mvr: ${JSON.stringify(data_for_db_subscription)}`);
 
                 return $http({
                     method: "PATCH",
@@ -699,10 +708,6 @@ function($scope, $http, $window, $route, $location, $q) {
                 subscriptionExistsAlready = true;
                 $window.alert("The Subscription ID exists already. Operation interrupted.");
             };
-            /* if ($scope.subscriptions[q].sp_id == $scope.sp_id && $scope.subscriptions[q].subscriber_id == $scope.subscriber_id) {
-                subscriptionExistsAlready = true;
-                $window.alert("The ISP already has a subscription provisioned for that subscriber.");
-            }; */
         };
 
         if (!subscriptionExistsAlready) {
@@ -740,7 +745,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 "name": $scope.name,
                 "moved_subscriber": moved_subscriber,
                 "subscriber_id": $scope.subscriber_id,
-                "cpe_name": $scope.cpe_name,
+                "cpe_name": $scope.cpe_p.cpe_name,
                 "sp_id": $scope.sp_id,
                 "service_id": $scope.service_id,
                 "access_area_id": $scope.access_area_id,
@@ -754,10 +759,10 @@ function($scope, $http, $window, $route, $location, $q) {
             };
             // console.log(`DATA: ${JSON.stringify(data_for_nso)}`);
 
-            var cpe = {
+            /* var cpe = {
                 "cpe_name": $scope.cpe_name,
                 "cpe_id": matchCPE($scope.cpe_name)
-            };
+            }; */
 
             var services_for_db = [];
             for (l=0; l<vlan_mapping.length; l++) {
@@ -768,7 +773,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     "poi_vlan_id": vlan_mapping[l].old_vlan,
                     "cpe_ipaddress": {
                         "octet1": 10,
-                        "octet2": matchCPE($scope.cpe_name) % 255,
+                        "octet2": $scope.cpe_p.cpe_id % 255,
                         "octet3": vlan_mapping[l].outer_vlan % 255,
                         "octet4": 2
                     },
@@ -962,7 +967,7 @@ function($scope, $http, $window, $route, $location, $q) {
             url: "/subscriptions/un-deploy/"+subscription.subscription_id
         }).then(function(response) {
             // console.log(`Un-deploy Status: ${response.status}`);
-            return $http({
+            /* return $http({
                 method: "GET",
                 url: "/subscriptions/check-sync/"+subscription.subscription_id
             });
@@ -975,12 +980,15 @@ function($scope, $http, $window, $route, $location, $q) {
                     $scope.subscriptions[i].sync_status = newSyncStatus.sync_output;
                     // console.log(`Sync Status for ${$scope.subscriptions[i].subscription_id}: ${JSON.stringify($scope.subscriptions[i].sync_status)}`);
                 };
-            };
+            }; */
 
             for (var l=0; l<$scope.vlanpools.length; l++) {
-                if (subscription.sp_id == $scope.vlanpools[l].sp_id && subscription.access_area_id == $scope.vlanpools[l].access_area_id && subscription.access_node_id == $scope.vlanpools[l].access_node_id) {
+                if (subscription.sp_id == $scope.vlanpools[l].sp_id 
+                    && subscription.access_area_id == $scope.vlanpools[l].access_area_id 
+                    && subscription.access_node_id == $scope.vlanpools[l].access_node_id
+                    && subscription.tunnel_technology == $scope.vlanpools[l].tunnel_technology) {
                     var vp = $scope.vlanpools[l];
-                    // console.log(`Found VLAN Pool: ${JSON.stringify(vp)}`);
+                    console.log(`Found VLAN Pool: ${JSON.stringify(vp)}`);
                 };
             };
             // var now = new Date();
@@ -1047,7 +1055,7 @@ function($scope, $http, $window, $route, $location, $q) {
             url: "/subscriptions/re-deploy/"+subscription.subscription_id
         }).then(function(response) {
             // console.log(`Re-deploy Status: ${response.status}`);
-            return $http({
+            /* return $http({
                 method: "GET",
                 url: "/subscriptions/check-sync/"+subscription.subscription_id
             });
@@ -1060,10 +1068,13 @@ function($scope, $http, $window, $route, $location, $q) {
                     $scope.subscriptions[i].sync_status = newSyncStatus.sync_output;
                     // console.log(`Sync Status for ${$scope.subscriptions[i].subscription_id}: ${JSON.stringify($scope.subscriptions[i].sync_status)}`);
                 };
-            };
+            }; */
 
             for (var l=0; l<$scope.vlanpools.length; l++) {
-                if (subscription.sp_id == $scope.vlanpools[l].sp_id && subscription.access_area_id == $scope.vlanpools[l].access_area_id && subscription.access_node_id == $scope.vlanpools[l].access_node_id) {
+                if (subscription.sp_id == $scope.vlanpools[l].sp_id 
+                    && subscription.access_area_id == $scope.vlanpools[l].access_area_id 
+                    && subscription.access_node_id == $scope.vlanpools[l].access_node_id
+                    && subscription.tunnel_technology == $scope.vlanpools[l].tunnel_technology) {
                     var vp = $scope.vlanpools[l];
                     // console.log(`Found VLAN Pool: ${JSON.stringify(vp)}`);
                 };
@@ -1106,7 +1117,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 data: pw
             });
         }).then(function(response) {
-            console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
+            // console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
             $scope.subscriptions[sub_index].db_subscription.deploymentStatus = true;
             return $http({
                 method: "PATCH",
@@ -1114,7 +1125,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 data: $scope.subscriptions[sub_index].db_subscription
             });
         }).then(function(response) {
-            console.log(`PATCH db_subscriptions Status: ${response.status}`);
+            // console.log(`PATCH db_subscriptions Status: ${response.status}`);
             $scope.spinnerStatusDelete = false;
         }, function errorCallback(response) {
             console.log(`Status: ${response.status}`);
@@ -1127,12 +1138,18 @@ function($scope, $http, $window, $route, $location, $q) {
         if ($window.confirm('Please confirm that you want to delete the subscription '+subscription.subscription_id)) {
             $scope.spinnerStatusDelete = true;
             var now = new Date();
+            console.log(`deleteSubscription. Subscription: ${JSON.stringify(subscription)}`);
             for (var l=0; l<$scope.vlanpools.length; l++) {
-                if (subscription.sp_id == $scope.vlanpools[l].sp_id && subscription.access_area_id == $scope.vlanpools[l].access_area_id && subscription.access_node_id == $scope.vlanpools[l].access_node_id) {
+                console.log(`deleteSubscription. Looking for VLAN pool, current is: ${$scope.vlanpools[l].vlanpool_id}`);
+                if (subscription.sp_id == $scope.vlanpools[l].sp_id 
+                    && subscription.access_area_id == $scope.vlanpools[l].access_area_id 
+                    && subscription.access_node_id == $scope.vlanpools[l].access_node_id
+                    && subscription.db_subscription.tunnel_technology == $scope.vlanpools[l].tunnel_technology) {
                     var vp = $scope.vlanpools[l];
-                    // console.log(`Found new VLAN Pool: ${JSON.stringify(vp)}`);
+                    console.log(`deleteSubscription. Found new VLAN Pool: ${JSON.stringify(vp)}`);
                 };
             };
+            // console.log(`STOP: ${STOP}`);
             for (var n=0; n<vp.vlans.length; n++) {
                 if (vp.vlans[n].subscription_id == subscription.subscription_id) {
                     vp.vlans[n].status = "Free";
@@ -1144,9 +1161,11 @@ function($scope, $http, $window, $route, $location, $q) {
 
             if (subscription.moved_subscriber) {
                 for (var l=0; l<$scope.vlanpools.length; l++) {
-                    if (subscription.sp_id == $scope.vlanpools[l].sp_id && subscription.original_access.access_area_id == $scope.vlanpools[l].access_area_id && subscription.original_access.access_node_id == $scope.vlanpools[l].access_node_id) {
+                    if (subscription.sp_id == $scope.vlanpools[l].sp_id 
+                        && subscription.original_access.access_area_id == $scope.vlanpools[l].access_area_id 
+                        && subscription.original_access.access_node_id == $scope.vlanpools[l].access_node_id) {
                         var old_vp = $scope.vlanpools[l];
-                        console.log(`Found original VLAN Pool: ${JSON.stringify(old_vp)}`);
+                        // console.log(`Found original VLAN Pool: ${JSON.stringify(old_vp)}`);
                     };
                 };
                 for (var n=0; n<old_vp.vlans.length; n++) {
@@ -1177,7 +1196,7 @@ function($scope, $http, $window, $route, $location, $q) {
                 };
                 if (subscription.moved_subscriber) {
                     if (subscription.db_subscription.moved_subscriber.original_subscription_id == pw.subinterfaces[z].subscription_id) {
-                        console.log(`Found original subinterface_id: ${subscription.pwsubinterface_id}`);
+                        // console.log(`Found original subinterface_id: ${subscription.pwsubinterface_id}`);
                         pw.subinterfaces[z].status = "Free";
                         pw.subinterfaces[z].timestamp = now;
                         pw.subinterfaces[z].subscriber_id = "";
@@ -1192,7 +1211,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     method: "DELETE",
                     url: "/subscriptions/"+subscription.subscription_id
                 }).then(function(response) {
-                    console.log(`DELETE Status: ${response.status}`);
+                    // console.log(`DELETE Status: ${response.status}`);
                 }, function errorCallback(response) {
                     $scope.spinnerStatusDelete = false;
                     $scope.errorMessage = true;
@@ -1216,7 +1235,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     url: "/vlanpools/"+vp._id,
                     data: vp
                 }).then(function(response) {
-                    console.log(`VLAN Pool Status: ${response.status}`);
+                    // console.log(`VLAN Pool Status: ${response.status}`);
                 }, function errorCallback(response) {
                     $scope.spinnerStatusDelete = false;
                     console.log(`ERROR. VLAN Pool DELETE Status: ${response.status}`);
@@ -1228,7 +1247,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     method: "DELETE",
                     url: "/db_subscriptions/"+subscription.db_subscription._id
                 }).then(function(response) {
-                    console.log(`DELETE Status of DB Subscription: ${response.status}`);
+                    // console.log(`DELETE Status of DB Subscription: ${response.status}`);
                 }, function errorCallback(response) {
                     $scope.spinnerStatusDelete = false;
                     console.log(`ERROR. DELETE Status of DB Subscription: ${response.status}`);
@@ -1241,7 +1260,7 @@ function($scope, $http, $window, $route, $location, $q) {
                     url: "/pseudowires/"+pw._id,
                     data: pw
                 }).then(function(response) {
-                    console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
+                    // console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
                     if (subscription.moved_subscriber) {
                         chain = chain.then(function() {
                             return $http({
@@ -1249,7 +1268,7 @@ function($scope, $http, $window, $route, $location, $q) {
                                 url: "/vlanpools/"+old_vp._id,
                                 data: old_vp
                             }).then(function(response) {
-                                console.log(`VLAN Pool Status, Old VLAN Pool: ${response.status}`);
+                                // console.log(`VLAN Pool Status, Old VLAN Pool: ${response.status}`);
                                 $location.path('/oncustomers');
                                 $route.reload();
                             }, function errorCallback(response) {
@@ -1267,103 +1286,23 @@ function($scope, $http, $window, $route, $location, $q) {
                 });
             });
 
-            
-
-            /* $http({
-                method: "DELETE",
-                url: "/subscriptions/"+subscription.subscription_id
-            }).then(function(response) {
-                // console.log(`DELETE Status: ${response.status}`);
-
-                for (var l=0; l<$scope.vlanpools.length; l++) {
-                    if (subscription.sp_id == $scope.vlanpools[l].sp_id && subscription.access_area_id == $scope.vlanpools[l].access_area_id && subscription.access_node_id == $scope.vlanpools[l].access_node_id) {
-                        var vp = $scope.vlanpools[l];
-                        // console.log(`Found VLAN Pool: ${JSON.stringify(vp)}`);
-                    };
-                };
-                for (var n=0; n<vp.vlans.length; n++) {
-                    if (vp.vlans[n].subscription_id == subscription.subscription_id) {
-                        vp.vlans[n].status = "Free";
-                        vp.vlans[n].subscriber_id = "";
-                        vp.vlans[n].subscription_id = "";
-                        vp.vlans[n].timestamp = now;
-                    };
-                };
-    
-                return $http({
-                    method: "PATCH",
-                    url: "/vlanpools/"+vp._id,
-                    data: vp
-                });
-            }).then(function(response) {
-                // console.log(`VLAN Pool Status: ${response.status}`);
-
-                for (var l=0; l<$scope.pseudowires.length; l++) {
-                    if (subscription.sp_id == $scope.pseudowires[l].sp_id && subscription.access_node_id == $scope.pseudowires[l].access_node_id) {
-                        var pw = $scope.pseudowires[l];
-                        // console.log(`Found PW: ${JSON.stringify(pw)}`);
-                    };
-                };
-                // console.log(`PW Subinterfaces length: ${pw.subinterfaces.length}`);
-                for (var z=0; z<pw.subinterfaces.length; z++) {
-                    // console.log(`subinterface_id: ${subscription.pwsubinterface_id}, ${pw.subinterfaces[z].subinterface_id}`);
-                    if (subscription.pwsubinterface_id == pw.subinterfaces[z].subinterface_id) {
-                        // console.log(`Found subinterface_id: ${subscription.pwsubinterface_id}`);
-                        pw.subinterfaces[z].status = "Free";
-                        pw.subinterfaces[z].timestamp = now;
-                        pw.subinterfaces[z].subscriber_id = "";
-                        pw.subinterfaces[z].subscription_id = "";
-                    };
-                };
-
-                return $http({
-                    method: "PATCH",
-                    url: "/pseudowires/"+pw._id,
-                    data: pw
-                });
-            }).then(function(response) {
-                // console.log(`PATCH Status of Pseudowire Set: ${response.status}`);
-                return $http({
-                    method: "DELETE",
-                    url: "/db_subscriptions/"+subscription.db_subscription._id
-                });
-            }).then(function(response) {
-                // console.log(`DELETE Status of DB Subscription: ${response.status}`);
-                $location.path('/oncustomers');
-                $route.reload();
-            }, function errorCallback(response) {
-                $scope.spinnerStatusDelete = false;
-                $scope.errorMessage = true;
-                if (response.status == 500) {$scope.errorDetails = response.status +", Internal Server Error"};
-                if (response.status == 400) {
-                    $scope.errorDetails = response.status +", Bad Request "+JSON.stringify(response.data);
-                };
-                if (response.status == 403) {$scope.errorDetails = response.status +", Forbidden"};
-                if (response.status == 404) {$scope.errorDetails = response.status +", Not Found"};
-                if (response.status == 501) {$scope.errorDetails = response.status +", Not Implemented"};
-                if (response.status == 502) {$scope.errorDetails = response.status +", Bad Gateway"};
-                if (response.status == 503) {$scope.errorDetails = response.status +", Service Unavailable"};
-                console.log(`Status: ${response.status}`);
-                console.log(`Data: ${JSON.stringify(response)}`);
-            }); */
         };
 
     };
 
     function allocateVlans(moved_subscriber) {
-        for (var z=0; z<$scope.inventory.sps.sp.length; z++) {
-            // console.log(`Counter z: ${z}`);
-            // console.log(`Looking for services: ${$scope.inventory.sps.sp[z].sp_id}`);
-            if ($scope.inventory.sps.sp[z].sp_id == $scope.sp_id) {
-                $scope.spServices = $scope.inventory.sps.sp[z].services.service;
-                // console.log(`Found services: ${JSON.stringify($scope.spServices)}`);
-            };
-        };
+        // console.log(`allocateVlans. Tunnel Technology selected: ${$scope.tunnel_technology_id}`);
+        $scope.spServices = $scope.selectedSP.services.service;
 
         for (var l=0; l<$scope.vlanpools.length; l++) {
-            if ($scope.sp_id == $scope.vlanpools[l].sp_id && $scope.access_area_id == $scope.vlanpools[l].access_area_id && $scope.access_node_id == $scope.vlanpools[l].access_node_id) {
+            // console.log(`allocateVlans. Vlanpool: ${JSON.stringify($scope.vlanpools[l])}`);
+            // console.log(`allocateVlans. Tunnel Technology in vlanpool: ${$scope.vlanpools[l].tunnel_technology}`);
+            if ($scope.sp_id == $scope.vlanpools[l].sp_id 
+                && $scope.access_area_id == $scope.vlanpools[l].access_area_id 
+                && $scope.access_node_id == $scope.vlanpools[l].access_node_id
+                && $scope.tunnel_technology_id == $scope.vlanpools[l].tunnel_technology) {
                 var vp = $scope.vlanpools[l];
-                // console.log(`Found VLAN Pool: ${JSON.stringify(vp)}`);
+                // console.log(`In allocateVlans. Found VLAN Pool: ${vp.vlanpool_id}`);
             };
         };
         var vlan_mapping = [];
@@ -1488,6 +1427,26 @@ function($scope, $http, $window, $route, $location, $q) {
         return access_area;
     };
 
+    function matchAccessNode(access_area_id, access_node_id) {
+        var access_area = "none";
+        for (j=0; j<$scope.inventory.access_areas.access_area.length; j++) {
+            // console.log(`Counter j: ${j}`);
+            // console.log(`matchAccessNode. Looking for access_area: ${access_area_id}`);
+            if ($scope.inventory.access_areas.access_area[j].access_area_id == access_area_id) {
+                access_area = $scope.inventory.access_areas.access_area[j];
+                // console.log(`matchAccessNode. Found access_area: ${$scope.inventory.access_areas.access_area[j].access_area_id}`);
+                // console.log(`matchAccessNode. Found access_area: ${JSON.stringify($scope.inventory.access_areas.access_area[j])}`);
+                for (var p=0; p<$scope.inventory.access_areas.access_area[j].nodes.node.length; p++) {
+                    if ($scope.inventory.access_areas.access_area[j].nodes.node[p].access_node_id == access_node_id) {
+                        access_node = $scope.inventory.access_areas.access_area[j].nodes.node[p];
+                        // console.log(`matchAccessNode. Found access_node: ${$scope.inventory.access_areas.access_area[j].nodes.node[p].access_node_id}, ${access_node.access_node_id}`);
+                    };
+                };
+            };
+        };
+        return access_node;
+    };
+
     function matchPE(pe_area_id) {
         var pe_area = "none";
         for (var j=0; j<$scope.inventory.pe_areas.pe_area.length; j++) {
@@ -1515,16 +1474,29 @@ function($scope, $http, $window, $route, $location, $q) {
     };
 
     function matchCPE(cpe_name) {
-        var cpe_id = 0;
+        var cpe = null;
         for (var j=0; j<$scope.inventory.cpes.cpe.length; j++) {
             // console.log(`Counter j: ${j}`);
             // console.log(`Looking for cpe: ${cpe_name}`);
             if ($scope.inventory.cpes.cpe[j].cpe_name == cpe_name) {
-                cpe_id = $scope.inventory.cpes.cpe[j].cpe_id;
-                // console.log(`Found cpe_id: ${$scope.inventory.cpes.cpe[j].cpe_id}`);
+                cpe = $scope.inventory.cpes.cpe[j];
+                // console.log(`Found cpe: ${cpe.cpe_id}`);
             };
         };
-        return cpe_id;
+        return cpe;
+    };
+
+    function matchSP(sp_id) {
+        var sp = null;
+        for (var j=0; j<$scope.inventory.sps.sp.length; j++) {
+            console.log(`Counter j: ${j}`);
+            console.log(`Looking for sp: ${sp_id}`);
+            if ($scope.inventory.sps.sp[j].sp_id == sp_id) {
+                sp = $scope.inventory.sps.sp[j];
+                console.log(`Found sp: ${sp.sp_id}`);
+            };
+        };
+        return sp;
     };
 
 }])

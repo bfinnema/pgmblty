@@ -7,14 +7,15 @@ const router = express.Router();
 var {Vlanpool} = require('../models/vlanpool');
 
 router.post('/', (req, res) => {
-  // console.log(`In VLAN Pool POST: ${req.body.vlanpool_id}`);
+  // console.log(`In VLAN Pool POST: ${req.body.vlanpool_id}, tunnel: ${req.body.tunnel_technology}`);
   var vlanpool = new Vlanpool({
     vlanpool_id: req.body.vlanpool_id,
     vlanpool_description: req.body.vlanpool_description,
     access_area_id: req.body.access_area_id,
     access_node_id: req.body.access_node_id,
     sp_id: req.body.sp_id,
-    vlans: req.body.vlans
+    vlans: req.body.vlans,
+    tunnel_technology: req.body.tunnel_technology
   });
 
   vlanpool.save().then((doc) => {
@@ -45,6 +46,7 @@ router.put('/:id', (req, res) => {
       vlanpool.access_node_id= req.body.access_node_id;
       vlanpool.sp_id= req.body.sp_id;
       vlanpool.vlans= req.body.vlans;
+      vlanpool.tunnel_technology= req.body.tunnel_technology;
   
 			vlanpool.save(callback);
 		}

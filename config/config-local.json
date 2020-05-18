@@ -7,7 +7,7 @@
     "NSO_USER": "admin",
     "NSO_PWD": "admin",
     "PYTHON_PATH": "/usr/local/bin/python",
-    "PYTHON_SCRIPT_PATH": "/Users/bfinnema/Documents/Dev/pgmblty/python"
+    "PYTHON_SCRIPT_PATH": "/Users/bfinnema/Documents/Dev/opennet/pgmblty/python"
   },
   "development": {
     "PORT": 3000,
@@ -17,6 +17,6 @@
     "NSO_USER": "admin",
     "NSO_PWD": "admin",
     "PYTHON_PATH": "/usr/local/bin/python",
-    "PYTHON_SCRIPT_PATH": "/Users/bfinnema/Documents/Dev/pgmblty/python"
+    "PYTHON_SCRIPT_PATH": "/Users/bfinnema/Documents/Dev/opennet/pgmblty/python"
   }
 }

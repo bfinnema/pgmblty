@@ -75,6 +75,9 @@ var SubscriptionSchema = new mongoose.Schema({
             type: String
         }
     },
+    tunnel_technology: {
+        type: String
+    },
     pe: {
         pe_area_id: {
             type: String
@@ -88,6 +91,23 @@ var SubscriptionSchema = new mongoose.Schema({
             },
             pe_if: {
                 type: String
+            },
+            pe_sub_if: {
+                type: String
+            },
+            pe_pwhe_ipaddress: {
+                type: String
+            },
+            evpn_vpws: {
+                evi: {
+                    type: Number
+                },
+                target: {
+                    type: Number
+                },
+                source: {
+                    type: Number
+                }
             }
         }
     },
@@ -102,11 +122,31 @@ var SubscriptionSchema = new mongoose.Schema({
             poi_node_id: {
                 type: String
             },
+            to_pe_if: {
+                type: String
+            },
+            to_sp_if: {
+                type: String
+            },
             poi_if: {
+                type: String
+            },
+            poi_pwhe_ipaddress: {
                 type: String
             },
             pw_sub_if: {
                 type: String
+            },
+            evpn_vpws: {
+                evi: {
+                    type: Number
+                },
+                target: {
+                    type: Number
+                },
+                source: {
+                    type: Number
+                }
             }
         }
     },

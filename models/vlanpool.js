@@ -8,6 +8,9 @@ var VlanpoolSchema = new mongoose.Schema({
     vlanpool_description: {
         type: String
     },
+    tunnel_technology: {
+        type: String
+    },
     vlans: [
         {
             vlan_id: {type: Number},

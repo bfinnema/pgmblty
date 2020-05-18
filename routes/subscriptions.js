@@ -1,51 +1,43 @@
 const _ = require('lodash');
-const bodyParser = require('body-parser');
 const express = require('express');
 const router = express.Router();
 const request = require("request");
+const mo = require('./nso_restconf');
+const opennetPath = "/open-net-access:open-net-access";
+const servicePath = "/open-net-core:open-net-core";
+var fullPath = `${opennetPath}${servicePath}`;
 
 // GET Subscriptions
 router.get('/', (req, res) => {
-//   console.log(`Here we are in the subscriptions router, GET all subscriptions.`);
-  var options = makeOptions('', 'collection', 'GET');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    // console.log(body);
-    res.send(body);
-  });
+  // console.log(`Here we are in the subscriptions router, GET all subscriptions.`);
+  var options = mo.makeOptions(fullPath, 'GET');
+  sendNSORequest(options, res);
 });
 
 // GET One Subscription
 router.get('/:id', (req, res) => {
   // console.log(`Here we are in the subscriptions router, GET one subscription: ${req.params.id}`);
-  var options = makeOptions('/'+req.params.id, 'data', 'GET');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    // console.log(body);
-    res.send(body);
-  });
+  var options = mo.makeOptions(`${fullPath}=${req.params.id}`, 'GET');
+  sendNSORequest(options, res);
 });
 
 // POST check-sync
 router.get('/check-sync/:id', (req, res) => {
   // console.log(`Here we are in the subscriptions router. Check-sync for id: ${req.params.id}`);
-  var options = makeOptions(':open-net-core/'+req.params.id+'/_operations/check-sync', 'data', 'POST');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    // console.log(`Body: ${body}`);
-    res.send(body);
-  });
+  var options = mo.makeOptions(`${fullPath}=${req.params.id}/check-sync`, 'POST');
+  sendNSORequest(options, res);
 });
 
 // POST subscription
 router.post('/', (req, res) => {
-  // console.log(`Here we are in the subscriptions router. POST Subscription`);
-  var picked_body = _.pick(req.body, ['name', 'subscriber_id', 'moved_subscriber', 'cpe_name', 'sp_id', 'service_id', 'access_area_id', 'access_node_id', 'access_if', 'pe_area_id', 'poi_area_id', 'pwsubinterface_id', 'vlan_mappings', 'original_access']);
-  // console.log(`req.body, name: ${req.body.name}, pick body, name: ${picked_body.name}`);
-  // console.log(`Picked body: ${JSON.stringify(picked_body)}`);
+  console.log(`Here we are in the subscriptions router. POST Subscription. Tunnel Technology: ${req.body.tunnel_technology}`);
+  if (req.body.tunnel_technology == "EVPN-VPWS") {
+    var picked_body = _.pick(req.body, ['name', 'subscriber_id', 'tunnel_technology', 'moved_subscriber', 'cpe_name', 'sp_id', 'service_id', 'access_area_id', 'access_node_id', 'access_if', 'pe_area_id', 'poi_area_id', 'evpn_vpws', 'vlan_mappings', 'original_access']);
+  } else {
+    var picked_body = _.pick(req.body, ['name', 'subscriber_id', 'moved_subscriber', 'cpe_name', 'sp_id', 'service_id', 'access_area_id', 'access_node_id', 'access_if', 'pe_area_id', 'poi_area_id', 'pwsubinterface_id', 'vlan_mappings', 'original_access']);
+  }
+  console.log(`req.body, name: ${req.body.name}, pick body, name: ${picked_body.name}`);
+  console.log(`Picked body: ${JSON.stringify(picked_body)}`);
   var object_body = {
     "open-net-core:open-net-core": picked_body
   };
@@ -53,77 +45,35 @@ router.post('/', (req, res) => {
   var sub_body = JSON.stringify(object_body);
   // console.log(`body: ${sub_body}`);
   
-  // console.log(`***************`);
-  // console.log(`User: ${process.env.NSO_USER}, Password: ${process.env.NSO_PWD}`);
-  var auth = new Buffer(process.env.NSO_USER + ':' + process.env.NSO_PWD).toString('base64');
-  // console.log(`Encoded Authentication: ${auth}`);
-
-  var options = {
-    method: 'POST',
-    url: 'http://'+process.env.NSO_ADDRESS+':'+process.env.NSO_PORT+'/api/running/open-net-access',
-    headers: {
-      Authorization: 'Basic '+auth,
-      Accept: 'application/vnd.yang.data+json',
-      'Cache-Control': 'no-cache',
-      'Content-Type': 'application/vnd.yang.data+json'
-    },
-    body: sub_body
-  };
-
+  var options = mo.makeOptions(opennetPath, 'POST', sub_body);
   // console.log(`Options: ${JSON.stringify(options)}`);
 
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    console.log(`Body: ${body}, response: ${JSON.stringify(response)}`);
-    if (response.statusCode < 210) {
-      res.send(body);
-    } else {
-      res.status(response.statusCode).send(body);
-    };
-    // res.send(body);
-  });
-
+  sendNSORequest(options, res);
 });
 
 // POST un-deploy subscription
 router.get('/un-deploy/:id', (req, res) => {
   // console.log(`Here we are in the subscriptions router. Un-deploy id: ${req.params.id}`);
-  var options = makeOptions(':open-net-core/'+req.params.id+'/_operations/un-deploy', 'data', 'POST');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    // console.log(`Body: ${body}`);
-    if (response.statusCode < 210) {
-      res.send(body);
-    } else {
-      res.status(response.statusCode).send(body);
-    };
-    // res.send(body);
-  });
+  var options = mo.makeOptions(`${fullPath}=${req.params.id}/un-deploy`, 'POST');
+  sendNSORequest(options, res);
 });
 
 // POST re-deploy subscription
 router.get('/re-deploy/:id', (req, res) => {
   // console.log(`Here we are in the subscriptions router. Re-deploy id: ${req.params.id}`);
-  var options = makeOptions(':open-net-core/'+req.params.id+'/_operations/re-deploy', 'data', 'POST');
-  
-  request(options, function (error, response, body) {
-    if (error) throw new Error(error);
-    // console.log(`Body: ${body}`);
-    if (response.statusCode < 210) {
-      res.send(body);
-    } else {
-      res.status(response.statusCode).send(body);
-    };
-    // res.send(body);
-  });
+  var options = mo.makeOptions(`${fullPath}=${req.params.id}/re-deploy`, 'POST');
+  sendNSORequest(options, res);
 });
 
 // DELETE subscription
 router.delete('/:id', (req, res) => {
   // console.log(`Here we are in the subscriptions router. Delete: ${req.params.id}`);
-  var options = makeOptions(':open-net-core/'+req.params.id, 'data', 'DELETE');
-  
+  var options = mo.makeOptions(`${fullPath}=${req.params.id}`, 'DELETE');
+  sendNSORequest(options, res);
+});
+
+function sendNSORequest(options, res) {
+
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
     // console.log(`Body: ${body}, response: ${JSON.stringify(response)}`);
@@ -132,28 +82,7 @@ router.delete('/:id', (req, res) => {
     } else {
       res.status(response.statusCode).send(body);
     };
-    // res.send(body);
   });
-});
-
-function makeOptions(pathEnd, collOrData, method) {
-  // console.log(`In the function: User: ${process.env.NSO_USER}, Password: ${process.env.NSO_PWD}`);
-  var auth = new Buffer(process.env.NSO_USER + ':' + process.env.NSO_PWD).toString('base64');
-  // console.log(`Encoded Authentication: ${auth}`);
-
-  var options = { method: method,
-    url: 'http://'+process.env.NSO_ADDRESS+':'+process.env.NSO_PORT+'/api/running/open-net-access/open-net-core'+pathEnd,
-    qs: { deep: '' },
-    headers: {
-      Authorization: 'Basic '+auth,
-      Accept: 'application/vnd.yang.'+collOrData+'+json',
-      'Cache-Control': 'no-cache',
-      'Content-Type': 'application/vnd.yang.data+json'
-    }
-  };
-  // console.log(`Options url: ${options.url}`);
-
-  return options;
 };
 
 module.exports = router;

@@ -11,7 +11,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         method: "GET",
         url: "/inventory/peareas"
     }).then(function(response) {
-        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:pe_area", "pe_area")).collection.pe_area;
+        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:pe_area", "pe_area")).pe_area;
         // console.log(`SP's: ${JSON.stringify($scope.collection)}`);
         // console.log(`SP: ${$scope.collection[0].pe_area_id}`);
         return $http({

@@ -11,7 +11,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         method: "GET",
         url: "/inventory/poiareas"
     }).then(function(response) {
-        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:poi_area", "poi_area")).collection.poi_area;
+        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:poi_area", "poi_area")).poi_area;
         // console.log(`POI Area's: ${JSON.stringify($scope.collection)}`);
         // console.log(`POI Area: ${$scope.collection[0].poi_area_id}`);
         return $http({

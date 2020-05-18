@@ -21,7 +21,7 @@ function($scope, $http, $window, $route, $location) {
         method: "GET",
         url: "/inventory/sps"
     }).then(function(response) {
-        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:sp", "sp")).collection.sp;
+        $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:sp", "sp")).sp;
         // console.log(`SP's: ${JSON.stringify($scope.collection)}`);
         // console.log(`SP: ${$scope.collection[0].sp_id}`);
         

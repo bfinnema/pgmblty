@@ -7,6 +7,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.newEntry = false;
     $scope.newService = false;
     $scope.newAccessNode = false;
+    $scope.numVlanLines = 0;
     $scope.showAccessNodes = false;
     $scope.spinnerStatus = false;
     
@@ -18,6 +19,21 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.vlanBtnShow = [false,true,false,false,false,false,false,false];
     $scope.vlanShow = [true,false,false,false,false,false,false,false];
     var numVlanLines = 0;
+
+    $scope.sp_nodes = [
+        {"sp_node_id": "asr9001"},
+        {"sp_node_id": "IOS-XRv"},
+        {"sp_node_id": "asr907"}
+    ];
+    $scope.sp_interfaces = [
+        {"sp_if_id": "0/0/2/3"},
+        {"sp_if_id": "0/0/0/0"},
+        {"sp_if_id": "1/2/3/4"}
+    ];
+    $scope.sp_termination_types = [
+        {"sp_termination_type_id": "BNG"},
+        {"sp_termination_type_id": "Other"}
+    ]
 
     $http({
         method: "GET",
@@ -93,8 +109,10 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             $scope.access_node_id = null;
             $scope.pe_area_id = null;
             $scope.poi_area_id = null;
-            $scope.vlanpool_start = null;
-            $scope.vlanpool_stop = null;
+            $scope.vlanpool_start_pw = null;
+            $scope.vlanpool_stop_pw = null;
+            $scope.vlanpool_start_ev = null;
+            $scope.vlanpool_stop_ev = null;
         } else {
             $scope.newAccessNode = true;
             $scope.editSP = editSP;
@@ -110,6 +128,11 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                         "sp_id": $scope.sp_id,
                         "s_vlan_offset": $scope.s_vlan_offset,
                         "mvr_vlan": $scope.mvr_vlan,
+                        "node": {
+                            "sp_node_id": $scope.sp_node_id,
+                            "sp_if": $scope.sp_if_id
+                        },
+                        "sp_termination_type": $scope.sp_termination_type_id
                     }
                 ]
             }
@@ -121,7 +144,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             url: "/inventory/sps",
             data: data
         }).then(function(response) {
-            console.log(`Post SP status: ${response.status}`);
+            // console.log(`Post SP status: ${response.status}`);
             $location.path('/onserviceproviders');
             $route.reload();
         }, function errorCallback(response) {
@@ -180,11 +203,12 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
         if (!$scope.vlans[numVlanLines].multicast) {$scope.vlans[numVlanLines].multicast = false};
         var myVlans = [];
+        // console.log(`First VLAN: ${$scope.vlans[0].vlan}`);
         for (var i=0; i<=$scope.numVlanLines; i++) {
             myVlans.push($scope.vlans[i]);
         };
         // console.log(`myVlans: ${JSON.stringify(myVlans)}`);
-        // console.log(`SP to add service ${$scope.editSP.sp_id} ${$scope.editSP}`);
+        // console.log(`SP to add service ${$scope.editSP.sp_id} ${JSON.stringify($scope.editSP)}`);
 
         var data = {
             "sps": {
@@ -242,7 +266,27 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
         $scope.spinnerStatus = true;
 
-        var vlanpool_id = $scope.editSP.sp_id + '_' + $scope.access_node_id + '_' + Math.floor(Math.random() * 1000);
+        // Create data for the accessswitchandsp service
+        var vlanpool_id_pw = $scope.editSP.sp_id + '_' + $scope.access_node_id + '_pw_' + Math.floor(Math.random() * 1000);
+        var vlanpool_id_ev = $scope.editSP.sp_id + '_' + $scope.access_node_id + '_evpnvpws_' + Math.floor(Math.random() * 1000);
+
+        var vlanpool_pw = {
+            "vlanpool_id_pw": vlanpool_id_pw,
+            "vlan_pw_start_id": $scope.vlanpool_start_pw,
+            "vlan_pw_end_id": $scope.vlanpool_stop_pw
+        };
+        
+        var vlanpool_ev = {
+            "vlanpool_id_ev": vlanpool_id_ev,
+            "vlan_ev_start_id": $scope.vlanpool_start_ev,
+            "vlan_ev_end_id": $scope.vlanpool_stop_ev
+        };
+
+        var vlanpools = {
+            "vlanpool_pw": vlanpool_pw,
+            "vlanpool_ev": vlanpool_ev
+        };
+        
         var data = {
             "name": $scope.name,
             "sp_id": $scope.editSP.sp_id,
@@ -250,40 +294,68 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             "pe_area_id": $scope.pe_area_id,
             "access_area_id": $scope.access_area_id,
             "access_node_id": $scope.access_node_id,
-            "vlanpool_id": vlanpool_id
+            "vlanpools": vlanpools
         };
-        // console.log(`DATA: ${JSON.stringify(data)}`);
+        console.log(`DATA: ${JSON.stringify(data)}`);
 
+        // Create a VLAN pool for subscription to use PW as tunnel technology
         var now = new Date();
         var vlans = [];
-        for (var v=$scope.vlanpool_start; v<=$scope.vlanpool_stop; v++) {
+        for (var v=$scope.vlanpool_start_pw; v<=$scope.vlanpool_stop_pw; v++) {
             vlans.push({"vlan_id": v, "status": "Free", "timestamp": now, "subscriber_id": "", "subscription_id": ""})
         };
         // console.log(`VLANS: ${JSON.stringify(vlans)}`);
 
-        var vlanpool = {
-            "vlanpool_id": vlanpool_id,
-            "vlanpool_description": 'VLAN Pool for SP ' + $scope.editSP.sp_id + ', Access Area ' + $scope.access_area_id + ', Node ' + $scope.access_node_id + '.',
+        var vlanpool_pw = {
+            "vlanpool_id": vlanpool_id_pw,
+            "vlanpool_description": `VLAN Pool for SP ${$scope.editSP.sp_id}, Access Area ${$scope.access_area_id}, Node ${$scope.access_node_id}, PW tunnel.`,
+            "tunnel_technology": "PW",
             "sp_id": $scope.editSP.sp_id,
             "access_area_id": $scope.access_area_id,
             "access_node_id": $scope.access_node_id,
             "vlans": vlans
         };
-        // console.log(`DATA: ${JSON.stringify(vlanpool)}`);
+        console.log(`DATA: ${JSON.stringify(vlanpool_pw)}`);
+
+        // Create a VLAN pool for subscription to use PW as tunnel technology
+        var vlans = [];
+        for (var v=$scope.vlanpool_start_ev; v<=$scope.vlanpool_stop_ev; v++) {
+            vlans.push({"vlan_id": v, "status": "Free", "timestamp": now, "subscriber_id": "", "subscription_id": ""})
+        };
+        // console.log(`VLANS: ${JSON.stringify(vlans)}`);
+
+        var vlanpool_ev = {
+            "vlanpool_id": vlanpool_id_ev,
+            "vlanpool_description": `VLAN Pool for SP ${$scope.editSP.sp_id}, Access Area ${$scope.access_area_id}, Node ${$scope.access_node_id}, EVPN-VPWS tunnel.`,
+            "tunnel_technology": "EVPN-VPWS",
+            "sp_id": $scope.editSP.sp_id,
+            "access_area_id": $scope.access_area_id,
+            "access_node_id": $scope.access_node_id,
+            "vlans": vlans
+        };
+        console.log(`DATA: ${JSON.stringify(vlanpool_ev)}`);
+        // console.log(`STOP: ${STOP}`);
 
         $http({
             method: "POST",
             url: "/accessswitchandsp",
             data: data
         }).then(function(response) {
-            // console.log(`accessswitchandsp status: ${response.status}`);
+            console.log(`accessswitchandsp status: ${response.status}`);
             return $http({
                 method: "POST",
                 url: "/vlanpools",
-                data: vlanpool
+                data: vlanpool_pw
             });
         }).then(function(response) {
-            // console.log(`vlanpool status: ${response.status}`);
+            console.log(`vlanpool status: ${response.status}`);
+            return $http({
+                method: "POST",
+                url: "/vlanpools",
+                data: vlanpool_ev
+            });
+        }).then(function(response) {
+            console.log(`vlanpool status: ${response.status}`);
             $location.path('/onserviceproviders');
             $route.reload();
         }, function errorCallback(response) {
@@ -292,8 +364,10 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
     };
 
-    $scope.deleteNode = function(sp_id, access_node_and_sp_service_id, vlanpool_id) {
+    $scope.deleteNode = function(sp_id, access_node_and_sp_service_id, vlanpool_id_pw, vlanpool_id_ev) {
         if ($window.confirm('Please confirm that you want to delete the access node for service provider,  '+sp_id+', service id '+access_node_and_sp_service_id)) {
+            console.log(`${vlanpool_id_pw}, ${vlanpool_id_ev}`);
+            // console.log(`STOP: ${STOP}`);
             $scope.spinnerStatus = true;
             $http({
                 method: "DELETE",
@@ -302,10 +376,16 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                 console.log(`accessswitchandsp status: ${response.status}`);
                 return $http({
                     method: "DELETE",
-                    url: "/vlanpools/by_vlanpool_id/"+vlanpool_id
+                    url: "/vlanpools/by_vlanpool_id/"+vlanpool_id_pw
                 });
             }).then(function(response) {
-                console.log(`vlanpool status: ${response.status}`);
+                console.log(`vlanpool status, PW: ${response.status}`);
+                return $http({
+                    method: "DELETE",
+                    url: "/vlanpools/by_vlanpool_id/"+vlanpool_id_ev
+                });
+            }).then(function(response) {
+                console.log(`vlanpool status, EVPN-VPWS: ${response.status}`);
                 $location.path('/onserviceproviders');
                 $route.reload();
             }, function errorCallback(response) {
