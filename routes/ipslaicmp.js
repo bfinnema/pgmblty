@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
 
 // GET ipsla icmp statistics, one vlan
 router.post('/statistics/:subscription_id', (req, res) => {
-  console.log(`Here we are in the ipsla icmp router, POST for stats.`);
+  // console.log(`Here we are in the ipsla icmp router, POST for stats.`);
   var vlan = req.body.the_vlan;
   console.log(`Subscription ID: ${req.params.subscription_id}, VLAN: ${vlan},    from req: ${req.body.the_vlan}`);
   let python_options = {
@@ -31,7 +31,7 @@ router.post('/statistics/:subscription_id', (req, res) => {
     if (err) throw err;
     // results is an array consisting of messages collected during execution
     console.log('results: %j', results);
-    console.log(`Python Result: ${results}`);
+    // console.log(`Python Result: ${results}`);
     res.send(results[0]);
   });
 

@@ -31,13 +31,13 @@ def demo(host="10.101.0.18", port=830, user="cisco", password="Cisco123", operat
     #os.system('clear') 
     with manager.connect(host=host, port=port, username=user, password=password, unknown_host_cb=default_unknown_host_cb) as m:
         res=m.get(("subtree", filter_snippet))
-        print (xml_.to_xml(res.data_ele, pretty_print=True))
+        #print (xml_.to_xml(res.data_ele, pretty_print=True))
         result = xmltodict.parse(str(res.data_xml))
-        print (result)
+        #print (result)
         success_result = bool(int(result['data']['ipsla']['operation-data']['operations']['operation']['statistics']['latest']['target']['common-stats']['ok-count']))
         rtt = result['data']['ipsla']['operation-data']['operations']['operation']['statistics']['latest']['target']['common-stats']['response-time']
-        print("Success Result=%s" % success_result)
-        print("RTT=%s" % rtt)
+        #print("Success Result=%s" % success_result)
+        #print("RTT=%s" % rtt)
         data = {
             "result": success_result,
             "rtt": rtt,
