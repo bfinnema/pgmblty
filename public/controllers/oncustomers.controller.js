@@ -138,7 +138,7 @@ function($scope, $http, $window, $route, $location, $q) {
         $scope.showSubDetails[sub_index] = true;
 
         for (var j=0; j<$scope.showIpslaSpinner[sub_index].length; j++) {
-            // console.log(`Sub index: ${sub_index}, j: ${j}, ${$scope.showIpslaSpinner[sub_index][j]}`);
+            console.log(`Sub index: ${sub_index}, j: ${j}, ${$scope.showIpslaSpinner[sub_index][j]}`);
             $scope.showIpslaSpinner[sub_index][j] = true;
         };
 
@@ -147,7 +147,7 @@ function($scope, $http, $window, $route, $location, $q) {
         var vlan = [];
         for (var i=0; i<subscription.vlan_mappings.vlan_mapping.length; i++) {
             var vlan_id = subscription.vlan_mappings.vlan_mapping[i].outer_vlan;
-            // console.log(`vlan_id: ${vlan_id}`);
+            console.log(`vlan_id: ${vlan_id}`);
             vlan.push({"vlan_id": vlan_id});
         };
 
@@ -157,7 +157,7 @@ function($scope, $http, $window, $route, $location, $q) {
             "cpe_id": subscription.cpe_id,
             "vlan": vlan
         };
-        // console.log(`DATA: ${JSON.stringify(data)}`);
+        console.log(`DATA: ${JSON.stringify(data)}`);
 
         var stats = [];
         var numGood = 0;
@@ -204,9 +204,9 @@ function($scope, $http, $window, $route, $location, $q) {
                             "RTT": response.data.rtt
                         };
                         $scope.subscriptions[sub_index].db_subscription.services[count].statistics.push(stat);
-                        // console.log(`numGood: ${numGood}, Stats: ${JSON.stringify(stats)}`);
-                        // console.log(`Index: ${index}, Count: ${count}, Length: ${len}`);
-                        // console.log(`Services Statistics: ${JSON.stringify($scope.subscriptions[sub_index].db_subscription.services[count].statistics)}`);
+                        console.log(`numGood: ${numGood}, Stats: ${JSON.stringify(stats)}`);
+                        console.log(`Index: ${index}, Count: ${count}, Length: ${len}`);
+                        console.log(`Services Statistics: ${JSON.stringify($scope.subscriptions[sub_index].db_subscription.services[count].statistics)}`);
                         if (count == len-1) {
                             $scope.subscriptions[sub_index].ipslaMessage = "Deleting IPSLA..";
                         } else {
@@ -225,8 +225,8 @@ function($scope, $http, $window, $route, $location, $q) {
                 method: "DELETE",
                 url: "/ipslaicmp/"+subscription.subscription_id
             }).then(function(response) {
-                // console.log(`ipslaicmp delete Status: ${response.status}`);
-                // console.log(`numGood: ${numGood}, FINAL Stats: ${JSON.stringify(stats)}`);
+                console.log(`ipslaicmp delete Status: ${response.status}`);
+                console.log(`numGood: ${numGood}, FINAL Stats: ${JSON.stringify(stats)}`);
                 if (numGood == vlan.length) {
                     // $scope.subscriptions[sub_index].serviceStatus = {"status": 3, "timestamp": new Date()};
                     $scope.subscriptions[sub_index].serviceStatus.status = 3;
@@ -240,8 +240,8 @@ function($scope, $http, $window, $route, $location, $q) {
                 var summaryStatus = {"status": $scope.subscriptions[sub_index].serviceStatus.status, "timestamp": now};
                 $scope.subscriptions[sub_index].db_subscription.summaryStatus.push(summaryStatus);
                 $scope.subscriptions[sub_index].ipslaMessage = "IPSLA Deleted";
-                // console.log(`showSubDetails: ${$scope.showSubDetails[sub_index]}, showIpslaSpinner: ${$scope.showIpslaSpinner[sub_index]}`);
-                // console.log(`Services Status: ${JSON.stringify($scope.subscriptions[sub_index].serviceStatus.services_status)}`);
+                console.log(`showSubDetails: ${$scope.showSubDetails[sub_index]}, showIpslaSpinner: ${$scope.showIpslaSpinner[sub_index]}`);
+                console.log(`Services Status: ${JSON.stringify($scope.subscriptions[sub_index].serviceStatus.services_status)}`);
                 setTimeout(function(){
                     $scope.subscriptions[sub_index].showIpslaMessage = false;
                 }, 3000);

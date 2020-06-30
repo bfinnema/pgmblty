@@ -1,4 +1,3 @@
-
 import sys, os, warnings, time, xmltodict, json
 from ncclient import manager, operations, xml_
 
@@ -7,6 +6,7 @@ def default_unknown_host_cb(foo, bar):
 
 
 def demo(host="10.101.0.18", port=830, user="cisco", password="Cisco123", operation_id=sys.argv[1]):
+    print("HELLO WORLD, ", operation_id)
     filter_snippet="""
                         <ipsla xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-man-ipsla-oper">
                             <operation-data>

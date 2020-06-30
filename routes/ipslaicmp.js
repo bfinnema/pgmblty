@@ -16,9 +16,9 @@ router.get('/', (req, res) => {
 
 // GET ipsla icmp statistics, one vlan
 router.post('/statistics/:subscription_id', (req, res) => {
-  // console.log(`Here we are in the ipsla icmp router, POST for stats.`);
+  console.log(`Here we are in the ipsla icmp router, POST for stats.`);
   var vlan = req.body.the_vlan;
-  // console.log(`Subscription ID: ${req.params.subscription_id}, VLAN: ${vlan},    from req: ${req.body.the_vlan}`);
+  console.log(`Subscription ID: ${req.params.subscription_id}, VLAN: ${vlan},    from req: ${req.body.the_vlan}`);
   let python_options = {
     mode: 'text',
     pythonPath: process.env.PYTHON_PATH,
@@ -26,12 +26,12 @@ router.post('/statistics/:subscription_id', (req, res) => {
     scriptPath: process.env.PYTHON_SCRIPT_PATH,
     args: [vlan]
   };
-  // console.log(`options: ${JSON.stringify(python_options)}`);
+  console.log(`options: ${JSON.stringify(python_options)}`);
   PythonShell.run('netconf-view-data.py', python_options, function (err, results) {
     if (err) throw err;
     // results is an array consisting of messages collected during execution
-    // console.log('results: %j', results);
-    // console.log(`Python Result: ${results}`);
+    console.log('results: %j', results);
+    console.log(`Python Result: ${results}`);
     res.send(results[0]);
   });
 
