@@ -171,13 +171,13 @@ function($scope, $http, $window, $route, $location, $q) {
                 url: '/ipslaicmp',
                 data: data
             }).then(function(response) {
-                console.log(`ipslaicmp deployment Status: ${response.status}`);
+                // console.log(`ipslaicmp deployment Status: ${response.status}`);
                 $scope.subscriptions[sub_index].ipslaMessage = "IPSLA deployed. Checking each service..";
             });
         });
         // for(var v = 0; v < vlan.length; v++) {
         for(var v = 0; v < $scope.subscriptions[sub_index].db_subscription.services.length; v++) {
-            console.log(`#: ${v}, vlan_id: ${$scope.subscriptions[sub_index].db_subscription.services[v].access_vlan_id}`);
+            // console.log(`#: ${v}, vlan_id: ${$scope.subscriptions[sub_index].db_subscription.services[v].access_vlan_id}`);
             (function(index, count, len) {
                 chain = chain.then(function() {
                     return $http({
@@ -187,8 +187,8 @@ function($scope, $http, $window, $route, $location, $q) {
                             "the_vlan": index
                         }
                     }).then(function(response) {
-                        console.log(`ipslaicmp statistics Status: ${response.status}`);
-                        console.log(`Result: ${JSON.stringify(response.data)}`);
+                        // console.log(`ipslaicmp statistics Status: ${response.status}`);
+                        // console.log(`Result: ${JSON.stringify(response.data)}`);
                         if (response.data.result) {
                             numGood++;
                             $scope.subscriptions[sub_index].serviceStatus.services_status[count].status = 3;
@@ -204,9 +204,9 @@ function($scope, $http, $window, $route, $location, $q) {
                             "RTT": response.data.rtt
                         };
                         $scope.subscriptions[sub_index].db_subscription.services[count].statistics.push(stat);
-                        console.log(`numGood: ${numGood}, Stats: ${JSON.stringify(stats)}`);
-                        console.log(`Index: ${index}, Count: ${count}, Length: ${len}`);
-                        console.log(`Services Statistics: ${JSON.stringify($scope.subscriptions[sub_index].db_subscription.services[count].statistics)}`);
+                        // console.log(`numGood: ${numGood}, Stats: ${JSON.stringify(stats)}`);
+                        // console.log(`Index: ${index}, Count: ${count}, Length: ${len}`);
+                        // console.log(`Services Statistics: ${JSON.stringify($scope.subscriptions[sub_index].db_subscription.services[count].statistics)}`);
                         if (count == len-1) {
                             $scope.subscriptions[sub_index].ipslaMessage = "Deleting IPSLA..";
                         } else {
@@ -225,8 +225,8 @@ function($scope, $http, $window, $route, $location, $q) {
                 method: "DELETE",
                 url: "/ipslaicmp/"+subscription.subscription_id
             }).then(function(response) {
-                console.log(`ipslaicmp delete Status: ${response.status}`);
-                console.log(`numGood: ${numGood}, FINAL Stats: ${JSON.stringify(stats)}`);
+                // console.log(`ipslaicmp delete Status: ${response.status}`);
+                // console.log(`numGood: ${numGood}, FINAL Stats: ${JSON.stringify(stats)}`);
                 if (numGood == vlan.length) {
                     // $scope.subscriptions[sub_index].serviceStatus = {"status": 3, "timestamp": new Date()};
                     $scope.subscriptions[sub_index].serviceStatus.status = 3;
@@ -240,8 +240,8 @@ function($scope, $http, $window, $route, $location, $q) {
                 var summaryStatus = {"status": $scope.subscriptions[sub_index].serviceStatus.status, "timestamp": now};
                 $scope.subscriptions[sub_index].db_subscription.summaryStatus.push(summaryStatus);
                 $scope.subscriptions[sub_index].ipslaMessage = "IPSLA Deleted";
-                console.log(`showSubDetails: ${$scope.showSubDetails[sub_index]}, showIpslaSpinner: ${$scope.showIpslaSpinner[sub_index]}`);
-                console.log(`Services Status: ${JSON.stringify($scope.subscriptions[sub_index].serviceStatus.services_status)}`);
+                // console.log(`showSubDetails: ${$scope.showSubDetails[sub_index]}, showIpslaSpinner: ${$scope.showIpslaSpinner[sub_index]}`);
+                // console.log(`Services Status: ${JSON.stringify($scope.subscriptions[sub_index].serviceStatus.services_status)}`);
                 setTimeout(function(){
                     $scope.subscriptions[sub_index].showIpslaMessage = false;
                 }, 3000);

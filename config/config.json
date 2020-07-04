@@ -16,7 +16,47 @@
     "NSO_PORT": 8080,
     "NSO_USER": "admin",
     "NSO_PWD": "admin",
+    "PYTHON_PATH": "/usr/local/bin/python",
+    "PYTHON_SCRIPT_PATH": "/Users/bfinnema/Documents/Dev/opennet/pgmblty/python"
+  },
+  "nso_remote_app_local": {
+    "PORT": 3000,
+    "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
+    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_PORT": 8080,
+    "NSO_USER": "admin",
+    "NSO_PWD": "admin",
+    "PYTHON_PATH": "/usr/local/bin/python",
+    "PYTHON_SCRIPT_PATH": "/Users/bfinnema/Documents/Dev/opennet/pgmblty/python"
+  },
+  "local": {
+    "PORT": 3000,
+    "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
+    "NSO_ADDRESS": "127.0.0.1",
+    "NSO_PORT": 8080,
+    "NSO_USER": "admin",
+    "NSO_PWD": "admin",
+    "PYTHON_PATH": "/usr/local/bin/python",
+    "PYTHON_SCRIPT_PATH": "/Users/bfinnema/Documents/Dev/opennet/pgmblty/python"
+  },
+  "centos": {
+    "PORT": 3000,
+    "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
+    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_PORT": 8080,
+    "NSO_USER": "admin",
+    "NSO_PWD": "admin",
     "PYTHON_PATH": "/opt/rh/rh-python36/root/usr/bin/python",
     "PYTHON_SCRIPT_PATH": "/var/www/opennet/pgmblty/python"
+  },
+  "docker": {
+    "PORT": 3010,
+    "MONGODB_URI": "mongodb://mongo:27017/OpenNET",
+    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_PORT": 8080,
+    "NSO_USER": "admin",
+    "NSO_PWD": "admin",
+    "PYTHON_PATH": "/usr/local/bin/python",
+    "PYTHON_SCRIPT_PATH": "/var/www/opennet/python"
   }
 }

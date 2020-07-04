@@ -296,7 +296,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             "access_node_id": $scope.access_node_id,
             "vlanpools": vlanpools
         };
-        console.log(`DATA: ${JSON.stringify(data)}`);
+        // console.log(`DATA: ${JSON.stringify(data)}`);
 
         // Create a VLAN pool for subscription to use PW as tunnel technology
         var now = new Date();
@@ -315,7 +315,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             "access_node_id": $scope.access_node_id,
             "vlans": vlans
         };
-        console.log(`DATA: ${JSON.stringify(vlanpool_pw)}`);
+        // console.log(`DATA: ${JSON.stringify(vlanpool_pw)}`);
 
         // Create a VLAN pool for subscription to use PW as tunnel technology
         var vlans = [];
@@ -333,7 +333,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
             "access_node_id": $scope.access_node_id,
             "vlans": vlans
         };
-        console.log(`DATA: ${JSON.stringify(vlanpool_ev)}`);
+        // console.log(`DATA: ${JSON.stringify(vlanpool_ev)}`);
         // console.log(`STOP: ${STOP}`);
 
         $http({
@@ -373,19 +373,19 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                 method: "DELETE",
                 url: "/accessswitchandsp/"+access_node_and_sp_service_id
             }).then(function(response) {
-                console.log(`accessswitchandsp status: ${response.status}`);
+                // console.log(`accessswitchandsp status: ${response.status}`);
                 return $http({
                     method: "DELETE",
                     url: "/vlanpools/by_vlanpool_id/"+vlanpool_id_pw
                 });
             }).then(function(response) {
-                console.log(`vlanpool status, PW: ${response.status}`);
+                // console.log(`vlanpool status, PW: ${response.status}`);
                 return $http({
                     method: "DELETE",
                     url: "/vlanpools/by_vlanpool_id/"+vlanpool_id_ev
                 });
             }).then(function(response) {
-                console.log(`vlanpool status, EVPN-VPWS: ${response.status}`);
+                // console.log(`vlanpool status, EVPN-VPWS: ${response.status}`);
                 $location.path('/onserviceproviders');
                 $route.reload();
             }, function errorCallback(response) {
