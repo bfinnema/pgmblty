@@ -23,7 +23,8 @@ function($scope, $http, $window, $route, $location, NSOServer) {
     $scope.sp_nodes = [
         {"sp_node_id": "asr9001"},
         {"sp_node_id": "IOS-XRv"},
-        {"sp_node_id": "asr907"}
+        {"sp_node_id": "asr907"},
+        {"sp_node_id": "PE1"}
     ];
     $scope.sp_interfaces = [
         {"sp_if_id": "0/0/2/3"},
@@ -137,14 +138,14 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                 ]
             }
         };
-        // console.log(`DATA: ${JSON.stringify(data)}`);
+        console.log(`DATA: ${JSON.stringify(data)}`);
 
         $http({
             method: "POST",
             url: "/inventory/sps",
             data: data
         }).then(function(response) {
-            // console.log(`Post SP status: ${response.status}`);
+            console.log(`Post SP status: ${response.status}`);
             $location.path('/onserviceproviders');
             $route.reload();
         }, function errorCallback(response) {

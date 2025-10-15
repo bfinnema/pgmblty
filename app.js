@@ -18,6 +18,7 @@ var deviceservices = require('./routes/deviceservices');
 var ipslaicmp = require('./routes/ipslaicmp');
 var db_subscriptions = require('./routes/db_subscriptions');
 var accessswitchandsp = require('./routes/accessswitchandsp');
+var businesssvcs = require('./routes/businesssvcs');
 
 var app = express();
 
@@ -44,6 +45,7 @@ app.use('/deviceservices', deviceservices);
 app.use('/ipslaicmp', ipslaicmp);
 app.use('/db_subscriptions', db_subscriptions);
 app.use('/accessswitchandsp', accessswitchandsp);
+app.use('/businesssvcs', businesssvcs);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -2,7 +2,7 @@ angular.module('pgmblty')
 
 .controller('pseudowireCtrl', ['$scope', '$http', '$window', '$route', '$location', 'NSOServer', 
 function($scope, $http, $window, $route, $location, NSOServer) {
-    // console.log(`You are in Pseudowire Set Resource Management Screen.`);
+    console.log(`You are in Pseudowire Set Resource Management Screen.`);
 
     $scope.newEntry = false;
     $scope.editEntry = false;
@@ -14,14 +14,14 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         url: "/inventory"
     }).then(function(inventory) {
         $scope.inventory = JSON.parse(JSON.stringify(inventory.data).replace("open-net-access:inventory", "inventory")).inventory;
-        // console.log(`INVENTORY: ${JSON.stringify($scope.inventory)}`);
-        // console.log(`SP: ${JSON.stringify($scope.inventory.sps.sp[0].sp_id)}`);
+        console.log(`INVENTORY: ${JSON.stringify($scope.inventory)}`);
+        console.log(`SP: ${JSON.stringify($scope.inventory.sps.sp[0].sp_id)}`);
         return $http({
             method: 'GET',
             url: '/pseudowires',
         });
     }).then(function(response) {
-        // console.log(`Pseudowire Set Status: ${response.status}`);
+        console.log(`Pseudowire Set Status: ${response.status}`);
         $scope.pseudowires = response.data;
 
     }, function errorCallback(response) {

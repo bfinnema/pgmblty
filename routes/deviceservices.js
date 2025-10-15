@@ -6,7 +6,7 @@ const mo = require('./nso_restconf');
 
 // GET Devices
 router.get('/devices', (req, res) => {
-  // console.log(`Here we are in the device services router, GET all devices`);
+  console.log(`Here we are in the device services router, GET all devices`);
   var options = mo.makeOptions('/tailf-ncs:devices?depth=2', 'GET');
   sendNSORequest(options, res);
 });

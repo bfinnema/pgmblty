@@ -7,14 +7,14 @@ const servicePath = "/open-net-access:open-net-access/inventory";
 
 // GET complete inventory
 router.get('/', (req, res) => {
-  // console.log(`Here we are in the inventory router.`);
+  console.log(`Here we are in the inventory router.`);
   var options = mo.makeOptions(servicePath, 'GET');
   sendNSORequest(options, res);
 });
 
 // GET Service Providers
 router.get('/sps', (req, res) => {
-  // console.log(`Here w1$1e are in the inventory router, sps.`);
+  console.log(`Here we are in the inventory router, sps.`);
   var options = mo.makeOptions(`${servicePath}/sps/sp`, 'GET');
   sendNSORequest(options, res);
 });
@@ -65,9 +65,9 @@ router.delete('/poiareas/:id', (req, res) => {
 
 // POST PE Area
 router.post('/peareas', (req, res) => {
-  // console.log(`Here we are in the inventory-pearea router. POST PE Area`);
-  // console.log(`Stringified body: ${JSON.stringify(req.body)}`);
-  // console.log(`pe_area_id: ${req.body.pe_areas.pe_area[0].pe_area_id}`);
+  console.log(`Here we are in the inventory-pearea router. POST PE Area`);
+  console.log(`Stringified body: ${JSON.stringify(req.body)}`);
+  console.log(`pe_area_id: ${req.body.pe_areas.pe_area[0].pe_area_id}`);
   
   var object_body = {
     "open-net-access:inventory": req.body
@@ -89,9 +89,9 @@ router.delete('/peareas/:id', (req, res) => {
 
 // POST Service Provider
 router.post('/sps', (req, res) => {
-  // console.log(`Here we are in the service provider router. POST SP`);
-  // console.log(`Stringified body: ${JSON.stringify(req.body)}`);
-  // console.log(`sp_id: ${req.body.sps.sp[0].sp_id}`);
+  console.log(`Here we are in the service provider router. POST SP`);
+  console.log(`Stringified body: ${JSON.stringify(req.body)}`);
+  console.log(`sp_id: ${req.body.sps.sp[0].sp_id}`);
   
   var object_body = {
     "open-net-access:inventory": req.body

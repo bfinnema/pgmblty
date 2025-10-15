@@ -81,7 +81,7 @@ router.delete('/:id', (req, res) => {
     return res.status(404).send();
   }
 
-  Subscription.findOneAndRemove({
+  Subscription.findOneAndDelete({
     _id: id
   }).then((subscription) => {
     if (!subscription) {

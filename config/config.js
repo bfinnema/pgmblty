@@ -4,6 +4,7 @@ console.log(`NODE_ENV: ${env}`);
 if (env === 'development' || env === 'test' || env === 'nso_remote_app_local' || env === 'local' || env === 'centos' || env === 'docker') {
   var config = require('./config.json');
   var envConfig = config[env];
+  console.log(`NSO: ${envConfig["NSO_ADDRESS"]}`);
 
   Object.keys(envConfig).forEach((key) => {
     process.env[key] = envConfig[key];

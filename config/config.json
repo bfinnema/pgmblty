@@ -12,11 +12,11 @@
   "development": {
     "PORT": 3000,
     "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
-    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_ADDRESS": "10.101.180.38",
     "NSO_PORT": 8080,
     "NSO_USER": "admin",
     "NSO_PWD": "admin",
-    "PYTHON_PATH": "/usr/local/bin/python",
+    "PYTHON_PATH": "/opt/homebrew/bin/python3",
     "PYTHON_SCRIPT_PATH": "/Users/bfinnema/Documents/Dev/opennet/pgmblty/python"
   },
   "nso_remote_app_local": {
@@ -42,7 +42,7 @@
   "centos": {
     "PORT": 3000,
     "MONGODB_URI": "mongodb://localhost:27017/OpenNET",
-    "NSO_ADDRESS": "10.101.1.102",
+    "NSO_ADDRESS": "10.101.180.38",
     "NSO_PORT": 8080,
     "NSO_USER": "admin",
     "NSO_PWD": "admin",

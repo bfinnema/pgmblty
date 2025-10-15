@@ -84,7 +84,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
                 ]
             }
         }
-        // console.log(`DATA: ${JSON.stringify(data)}`);
+        console.log(`DATA: ${JSON.stringify(data)}`);
 
         $http({
             method: "POST",

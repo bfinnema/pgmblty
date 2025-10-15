@@ -1,12 +1,11 @@
 <div ng-include="'nav-opennet.html'"></div>
 
-<h1>Subscriptions ({{ subscriptions.length }})</h1>
+<h1>Services ({{ subscriptions.length }})</h1>
 <div ng-show="!newEntry && !editEntry">
     <table class="table table-striped">
         <thead>
             <tr>
-                <th width="20%">Subscription</th>
-                <th width="14%">Access</th>
+                <th width="20%">Service</th>
                 <th width="12%">PE </th>
                 <th width="12%">POI</th>
                 <th width="6%">Deployment Status</th>
@@ -18,52 +17,29 @@
             <tr ng-repeat="subscription in subscriptions">
                 <td>
                     <a class="btn btn-default" ng-mouseover="hoverIn(subscription.index)" ng-mouseleave="hoverOut(subscription.index)">
-                        {{ subscription.subscription_id }}
+                        {{ subscription.serialnumber }}
                     </a>
                     <span ng-show="showSubDetails[subscription.index]">
                         <hr>
                         <p>SP: {{subscription.sp_id}}</p>
                         <p>Subscriber: {{subscription.subscriber_id}}</p>
-                        <p>CPE: {{subscription.cpe_name}}</p>
+                        <p>CPE: {{subscription.cpe_cont.cpe_device}}</p>
                         <p>Service: {{subscription.service_id}}</p>
-                        <p>Tunnel: {{subscription.db_subscription.tunnel_technology}}</p>
                     </span>
                 </td>
                 <td>
-                    {{ subscription.access_area_id }}
+                    {{ subscription.pe_cont.pe_device }}
                     <span ng-show="showSubDetails[subscription.index]">
                         <hr>
-                        <p>Node: {{subscription.access_node_id}}</p>
-                        <p>Interface: {{subscription.db_subscription.access.access_if}}</p>
-                        <!-- <p>MVR: {{subscription.newSubAccess.mvr_vlan}} / {{subscription.newSubAccess.mvr_receiver_vlan}}</p> -->
-                        <p>MVR: {{subscription.db_subscription.mvr.mvr_vlan}} / {{subscription.db_subscription.mvr.mvr_receiver_vlan}}</p>
-                        <!-- <p>VLAN mappings: <span ng-repeat="vlan_mapping in subscription.vlan_mappings.vlan_mapping">{{vlan_mapping.inner_vlan}}/{{vlan_mapping.outer_vlan}}, </span></p> -->
-                        <p>VLAN mappings: <span ng-repeat="service in subscription.db_subscription.services">{{service.inner_vlan_id}}/{{service.access_vlan_id}}, </span></p>
+                        <p>Interface: {{subscription.pe_cont.cpe_onb_port}}.{{subscription.pe_cont.cpe_prod_subint}}</p>
+                        <p>EVI: {{subscription.pe_cont.evi}}</p>
                     </span>
                 </td>
                 <td>
-                    {{ subscription.pe_area_id }}
+                    {{ subscription.poi_cont.poi_device }}
                     <span ng-show="showSubDetails[subscription.index]">
                         <hr>
-                        <p>Node: {{subscription.pe_area.node.pe_node_id}}</p>
-                        <!-- <p>Interface: {{subscription.newSubPE.pe_interface}}</p> -->
-                        <p>Interface: {{subscription.db_subscription.pe.node.pe_sub_if}}</p>
-                        <p ng-show="subscription.tunnel_technology == 'EVPN-VPWS'">
-                            EVI: {{subscription.evpn_vpws.evi}},
-                            TARGET: {{subscription.evpn_vpws.target}},
-                            SOURCE: {{subscription.evpn_vpws.source}}
-                        </p>
-                        <!-- <p>VLAN's: <span ng-repeat="vlan in subscription.newSubPE.vlans.vlan">{{vlan.vlan_id}}, </span></p> -->
-                        <p>VLAN's: <span ng-repeat="service in subscription.db_subscription.services">{{service.pe_vlan_id}}, </span></p>
-                    </span>
-                </td>
-                <td>
-                    {{ subscription.poi_area_id }}
-                    <span ng-show="showSubDetails[subscription.index]">
-                        <hr>
-                        <p>Node: {{subscription.poi_area.node.poi_node_id}}</p>
-                        <!-- <p>Interface: {{subscription.newSubPOI.PWESubInt}}</p> -->
-                        <p>SP Interface: {{subscription.db_subscription.poi.node.to_sp_if}}</p>
+                        <p>SP Interface: {{subscription.poi_cont.to_sp_if}}</p>
                         <p ng-show="!subscription.tunnel_technology">PW subint.: {{subscription.db_subscription.poi.node.pw_sub_if}}</p>
                         <p ng-show="subscription.tunnel_technology == 'EVPN-VPWS'">
                             EVI: {{subscription.evpn_vpws.evi}},
@@ -75,13 +51,11 @@
                     </span>
                 </td>
                 <td>
-                    <span ng-show="subscription.db_subscription.deploymentStatus">Deployed</span>
-                    <span ng-show="!subscription.db_subscription.deploymentStatus">Un-deployed</span>
-                    <!-- {{subscription.sync_status.in_sync}}
-                    {{subscription.db_subscription.deploymentStatus}} -->
+                    <span ng-show="subscription.stage == 'ENABLE'">Deployed</span>
+                    <span ng-show="subscription.stage == 'INITIAL'">Un-deployed</span>
                 </td>
                 <td>
-                    <a ng-show="subscription.serviceStatus.status == 0" class="btn btn-primary" ng-click="ipslaIcmp(subscription.index)">
+                    <!-- <a ng-show="subscription.serviceStatus.status == 0" class="btn btn-primary" ng-click="ipslaIcmp(subscription.index)">
                         Unknown
                     </a>
                     <a ng-show="subscription.serviceStatus.status == 1" class="btn btn-danger" ng-click="ipslaIcmp(subscription.index)">
@@ -107,12 +81,12 @@
                             {{service_status.access_vlan_id}}: {{service_status.timestamp | date:'dd/MM HH:mm:ss' : 'CET'}}, RTT: {{ service_status.RTT }}
                         </button>
                     </div>
-                    <p ng-show="subscription.showIpslaMessage">{{ subscription.ipslaMessage }}</p>
+                    <p ng-show="subscription.showIpslaMessage">{{ subscription.ipslaMessage }}</p> -->
                 </td>
                 <td>
-                    <a class="btn btn-primary" ng-click="editToggle(subscription.index)">
+                    <!-- <a class="btn btn-primary" ng-click="editToggle(subscription.index)">
                         <i class="glyphicon glyphicon-edit"></i>
-                    </a>
+                    </a> -->
                     <a class="btn btn-primary" ng-click="deleteSubscription(subscription)">
                         <i class="glyphicon glyphicon-trash"></i>
                     </a>
@@ -132,11 +106,9 @@
 </div>
 <div class="row" ng-show="!newEntry && !editEntry && subscriptions[0]">
     <p><strong> Operations:   </strong>
-        <span class="glyphicon glyphicon-edit"> </span> Move the subscriber/subscription to another access node.
         <span class="glyphicon glyphicon-trash"> </span> Rollback / delete the subscription.
         <span class="glyphicon glyphicon-stop"> </span> Un-deploy. 
         <span class="glyphicon glyphicon-play"> </span> Re-deploy. 
-        <!-- <span class="glyphicon glyphicon-zoom-in"> </span> Details. -->
     </p>
 </div>
 <hr>
@@ -144,7 +116,7 @@
     <form name="formSubscription" ng-submit="generateSubscription()" novalidate>
         <div class="row">
             <div class="form-group col-md-6">
-                <h2 class="form-signin-heading">New Subscription Form</h2>
+                <h2 class="form-signin-heading">New Business Service Form</h2>
             </div>
         </div>
         <div class="row">

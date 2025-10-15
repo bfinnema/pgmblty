@@ -12,17 +12,17 @@ function($scope, $http, $window, $route, $location, NSOServer) {
         url: "/inventory/peareas"
     }).then(function(response) {
         $scope.collection = JSON.parse(JSON.stringify(response.data).replace("open-net-access:pe_area", "pe_area")).pe_area;
-        // console.log(`SP's: ${JSON.stringify($scope.collection)}`);
-        // console.log(`SP: ${$scope.collection[0].pe_area_id}`);
+        console.log(`PE Areas's: ${JSON.stringify($scope.collection)}`);
+        console.log(`PE Area: ${$scope.collection[0].pe_area_id}. Getting devices.....`);
         return $http({
             method: "GET",
             url: "/deviceservices/devices"
         });
     }).then(function(response) {
-        // console.log(JSON.stringify(response.data));
+        console.log(JSON.stringify(response.data));
         devicedetails = JSON.parse(JSON.stringify(response.data).replace("tailf-ncs:devices", "devices")).devices.device;
-        // console.log(`Devicedetails: ${JSON.stringify($scope.devicedetails)}`);
-        // console.log(`Devices Status: ${response.status}`);
+        console.log(`Devicedetails: ${JSON.stringify($scope.devicedetails)}`);
+        console.log(`Devices Status: ${response.status}`);
         var devices = [];
         for (var i=0; i<devicedetails.length; i++) {
             devices.push({"device_id": devicedetails[i].name});
@@ -91,7 +91,7 @@ function($scope, $http, $window, $route, $location, NSOServer) {
 
     $scope.deleteItem = function(item) {
 
-        if ($window.confirm('Please confirm that you want to delete the subscription '+item.pe_area_id)) {
+        if ($window.confirm('Please confirm that you want to delete the PE Area '+item.pe_area_id)) {
 
             $http({
                 method: "DELETE",
